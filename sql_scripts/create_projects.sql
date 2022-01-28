@@ -16,7 +16,7 @@ CREATE TABLE projects (
 						ON UPDATE CASCADE
 						ON DELETE SET DEFAULT,
     created          TEXT    DEFAULT (datetime('now', 'utc')),
-    updated          TEXT    DEFAULT (datetime('now', 'utc')),
+    modified          TEXT    DEFAULT (datetime('now', 'utc')),
     deferred         TEXT,
     due              TEXT
 );
@@ -28,7 +28,7 @@ CREATE TRIGGER project_modified
     AFTER UPDATE ON projects
 BEGIN
     UPDATE projects
-        SET updated = datetime('now','utc')
+        SET modified = datetime('now','utc')
         WHERE name = NEW.name;
 END;
 

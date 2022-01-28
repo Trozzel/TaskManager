@@ -21,7 +21,7 @@
         #string name
         #int parentId
         #datetime created
-        #datetime updated
+        #datetime modified
         +getUniqueId()
         +getName()
         +getParentId()

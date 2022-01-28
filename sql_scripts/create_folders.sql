@@ -10,7 +10,7 @@ CREATE TABLE folders (
 						ON UPDATE CASCADE
 						ON DELETE SET DEFAULT,
     created          TEXT    DEFAULT (datetime('now', 'utc')),
-    updated          TEXT    DEFAULT (datetime('now', 'utc'))
+    modified          TEXT    DEFAULT (datetime('now', 'utc'))
 );
 
 /******************************************************************************
@@ -20,7 +20,7 @@ CREATE TRIGGER folder_modified
     AFTER UPDATE ON folders
 BEGIN
     UPDATE folders
-        SET updated = datetime('now','utc')
+        SET modified = datetime('now','utc')
         WHERE name = NEW.name;
 END;
 

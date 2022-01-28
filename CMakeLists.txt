@@ -11,8 +11,6 @@ IF( EXISTS "${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json" )
 ENDIF()
 
 set(CMAKE_BUILD_TYPE DEBUG)
-#set(CMAKE_BUILD_TYPE RELEASE)
-
 set(CMAKE_CXX_STANDARD 17)
 
 include_directories(
@@ -20,8 +18,14 @@ include_directories(
 		/usr/local/include
 )
 
-file(GLOB SOURCES "src/*.cpp")
+link_directories ( /usr/local/lib )
 
 add_executable( gtd
-	${SOURCES}
-	)
+	    src/Context.cpp
+        src/Folder.cpp
+        src/Project.cpp
+        src/main.cpp
+        )
+
+target_link_libraries( gtd
+	dt )

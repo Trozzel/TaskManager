@@ -1,35 +1,9 @@
 <component name="ProjectCodeStyleConfiguration">
   <code_scheme name="Project" version="173">
+    <option name="AUTODETECT_INDENTS" value="false" />
     <option name="SOFT_MARGINS" value="80" />
     <Objective-C>
       <option name="INDENT_NAMESPACE_MEMBERS" value="0" />
-      <option name="INDENT_DIRECTIVE_AS_CODE" value="true" />
-      <option name="SPACE_BEFORE_POINTER_IN_DECLARATION" value="false" />
-      <option name="SPACE_AFTER_POINTER_IN_DECLARATION" value="true" />
-      <option name="SPACE_BEFORE_REFERENCE_IN_DECLARATION" value="false" />
-      <option name="SPACE_AFTER_REFERENCE_IN_DECLARATION" value="true" />
-      <option name="ADD_BRIEF_TAG" value="true" />
-      <option name="TAG_PREFIX_OF_LINE_COMMENT" value="AT" />
     </Objective-C>
-    <Objective-C-extensions>
-      <option name="TAG_PREFIX_OF_LINE_COMMENT" value="AT" />
-      <extensions>
-        <pair source="cpp" header="hpp" fileNamingConvention="NONE" />
-        <pair source="c" header="h" fileNamingConvention="NONE" />
-        <pair source="cu" header="cuh" fileNamingConvention="NONE" />
-      </extensions>
-    </Objective-C-extensions>
-    <clangFormatSettings>
-      <option name="ENABLED" value="true" />
-    </clangFormatSettings>
-    <codeStyleSettings language="ObjectiveC">
-      <option name="KEEP_BLANK_LINES_IN_DECLARATIONS" value="4" />
-      <option name="KEEP_BLANK_LINES_IN_CODE" value="4" />
-      <option name="INDENT_CASE_FROM_SWITCH" value="false" />
-      <option name="SPACE_BEFORE_FOR_PARENTHESES" value="false" />
-      <indentOptions>
-        <option name="CONTINUATION_INDENT_SIZE" value="4" />
-      </indentOptions>
-    </codeStyleSettings>
   </code_scheme>
 </component>

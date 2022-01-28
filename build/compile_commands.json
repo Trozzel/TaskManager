@@ -1,0 +1,12 @@
+[
+{
+  "directory": "/Users/jorge/Cpp/gtd_app/build",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++   -I/Users/jorge/Cpp/gtd_app/include -I/usr/local/include  -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk   -std=gnu++17 -o CMakeFiles/gtd.dir/src/Context.cpp.o -c /Users/jorge/Cpp/gtd_app/src/Context.cpp",
+  "file": "/Users/jorge/Cpp/gtd_app/src/Context.cpp"
+},
+{
+  "directory": "/Users/jorge/Cpp/gtd_app/build",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++   -I/Users/jorge/Cpp/gtd_app/include -I/usr/local/include  -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk   -std=gnu++17 -o CMakeFiles/gtd.dir/src/main.cpp.o -c /Users/jorge/Cpp/gtd_app/src/main.cpp",
+  "file": "/Users/jorge/Cpp/gtd_app/src/main.cpp"
+}
+]

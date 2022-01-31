@@ -6,3 +6,9 @@
 
 #IncludeRegexTransform: 
 
+/home/george/Documents/Cpp/gtd_app/src/main.cpp
+iostream
+-
+datetime/datetime.hpp
+/home/george/Documents/Cpp/gtd_app/src/datetime/datetime.hpp
+

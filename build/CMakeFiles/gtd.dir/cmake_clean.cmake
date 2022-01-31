@@ -1,5 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/gtd.dir/src/Context.cpp.o"
+  "CMakeFiles/gtd.dir/src/Folder.cpp.o"
+  "CMakeFiles/gtd.dir/src/Project.cpp.o"
   "CMakeFiles/gtd.dir/src/main.cpp.o"
   "gtd"
   "gtd.pdb"

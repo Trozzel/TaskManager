@@ -18,10 +18,11 @@ include_directories(
 		/usr/local/include
 )
 
+# NECESSARY ON MAC
 link_directories ( /usr/local/lib )
 
 add_executable( gtd
-	    src/Context.cpp
+	src/Context.cpp
         src/Folder.cpp
         src/Project.cpp
         src/main.cpp

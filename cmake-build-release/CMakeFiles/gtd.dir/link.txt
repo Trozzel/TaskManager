@@ -1,0 +1,1 @@
+/usr/bin/c++ -g CMakeFiles/gtd.dir/src/Context.cpp.o CMakeFiles/gtd.dir/src/Folder.cpp.o CMakeFiles/gtd.dir/src/Project.cpp.o CMakeFiles/gtd.dir/src/main.cpp.o -o gtd   -L/usr/local/lib  -Wl,-rpath,/usr/local/lib -ldt 

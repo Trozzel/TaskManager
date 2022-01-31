@@ -1,3 +1,0 @@
-/home/george/Documents/Cpp/gtd_app/build/CMakeFiles/edit_cache.dir
-/home/george/Documents/Cpp/gtd_app/build/CMakeFiles/rebuild_cache.dir
-/home/george/Documents/Cpp/gtd_app/build/CMakeFiles/gtd.dir

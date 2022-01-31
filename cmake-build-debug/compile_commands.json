@@ -1,22 +1,22 @@
 [
 {
-  "directory": "/home/george/Documents/Cpp/gtd_app/cmake-build-debug",
-  "command": "/usr/bin/c++  -I/home/george/Documents/Cpp/gtd_app/include -g -std=gnu++17 -o CMakeFiles/gtd.dir/src/Context.cpp.o -c /home/george/Documents/Cpp/gtd_app/src/Context.cpp",
-  "file": "/home/george/Documents/Cpp/gtd_app/src/Context.cpp"
+  "directory": "/Users/jorge/Cpp/gtd_app/cmake-build-debug",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++ -I/Users/jorge/Cpp/gtd_app/include -I/usr/local/include -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk -std=gnu++17 -o CMakeFiles/gtd.dir/src/Context.cpp.o -c /Users/jorge/Cpp/gtd_app/src/Context.cpp",
+  "file": "/Users/jorge/Cpp/gtd_app/src/Context.cpp"
 },
 {
-  "directory": "/home/george/Documents/Cpp/gtd_app/cmake-build-debug",
-  "command": "/usr/bin/c++  -I/home/george/Documents/Cpp/gtd_app/include -g -std=gnu++17 -o CMakeFiles/gtd.dir/src/Folder.cpp.o -c /home/george/Documents/Cpp/gtd_app/src/Folder.cpp",
-  "file": "/home/george/Documents/Cpp/gtd_app/src/Folder.cpp"
+  "directory": "/Users/jorge/Cpp/gtd_app/cmake-build-debug",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++ -I/Users/jorge/Cpp/gtd_app/include -I/usr/local/include -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk -std=gnu++17 -o CMakeFiles/gtd.dir/src/Folder.cpp.o -c /Users/jorge/Cpp/gtd_app/src/Folder.cpp",
+  "file": "/Users/jorge/Cpp/gtd_app/src/Folder.cpp"
 },
 {
-  "directory": "/home/george/Documents/Cpp/gtd_app/cmake-build-debug",
-  "command": "/usr/bin/c++  -I/home/george/Documents/Cpp/gtd_app/include -g -std=gnu++17 -o CMakeFiles/gtd.dir/src/Project.cpp.o -c /home/george/Documents/Cpp/gtd_app/src/Project.cpp",
-  "file": "/home/george/Documents/Cpp/gtd_app/src/Project.cpp"
+  "directory": "/Users/jorge/Cpp/gtd_app/cmake-build-debug",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++ -I/Users/jorge/Cpp/gtd_app/include -I/usr/local/include -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk -std=gnu++17 -o CMakeFiles/gtd.dir/src/Project.cpp.o -c /Users/jorge/Cpp/gtd_app/src/Project.cpp",
+  "file": "/Users/jorge/Cpp/gtd_app/src/Project.cpp"
 },
 {
-  "directory": "/home/george/Documents/Cpp/gtd_app/cmake-build-debug",
-  "command": "/usr/bin/c++  -I/home/george/Documents/Cpp/gtd_app/include -g -std=gnu++17 -o CMakeFiles/gtd.dir/src/main.cpp.o -c /home/george/Documents/Cpp/gtd_app/src/main.cpp",
-  "file": "/home/george/Documents/Cpp/gtd_app/src/main.cpp"
+  "directory": "/Users/jorge/Cpp/gtd_app/cmake-build-debug",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++ -I/Users/jorge/Cpp/gtd_app/include -I/usr/local/include -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk -std=gnu++17 -o CMakeFiles/gtd.dir/src/main.cpp.o -c /Users/jorge/Cpp/gtd_app/src/main.cpp",
+  "file": "/Users/jorge/Cpp/gtd_app/src/main.cpp"
 }
 ]

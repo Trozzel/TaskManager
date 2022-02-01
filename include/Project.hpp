@@ -57,8 +57,8 @@ public:
      * @param deferred
      * @param due
      */
-	Project(std::string projectName            = "New Project",
-			std::string note                   = "",
+	explicit Project(std::string projectName   = "New Project",
+			std::string notes                  = "",
 			Status      status                 = Status::Active,
 			ProjectType projectType            = ProjectType::Parallel,
 			std::list<const Context*> contexts = {},
@@ -66,19 +66,19 @@ public:
 			dt::RepeatingCTime* due            = nullptr
 		   );
 
-	/**
-	 * Class with initilizer_list of Contexts for instantiation.
-	 * Made explicit to force to not be the default CTOR
-	 * @param projectName
-	 * @param note
-	 * @param status
-	 * @param projectType
-	 * @param contexts
-	 * @param deferred
-	 * @param due
-	 */
+    /**
+     * Class with initilizer_list of Contexts for instantiation.
+     * Made explicit to force to not be the default CTOR
+     * @param projectName
+     * @param note
+     * @param status
+     * @param projectType
+     * @param contexts
+     * @param deferred
+     * @param due
+     */
 	explicit Project(std::string projectName   = "New Project",
-			std::string note                   = "",
+			std::string notes                  = "",
 			Status      status                 = Status::Active,
 			ProjectType projectType            = ProjectType::Parallel,
 			std::initializer_list<const Context*> contexts = {},
@@ -102,16 +102,21 @@ public:
      */
 	inline const Status status() const { return _status; };
 
-    /**
+     /**
      * @return String representing the Status
      */
-     const std::string statusString() const;
+     std::string statusString() const;
+
+     /**
+      * @return ProjectType
+      */
+     inline const ProjectType projectType() const { return _projectType; }
 
      /**
       *
       * @return String representing the project type
       */
-     const std::string projectTypeString() const;
+     std::string projectTypeString() const;
 
      /**
       * @return Complete Project when last task completed status
@@ -121,71 +126,144 @@ public:
      /**
       * @return List of contexts associated with project
       */
-     const std::list<const Context*> const contexts();
+     std::list<const Context *> contexts();
 
      /**
       * @return Created datetime object
       */
-     inline const dt::CTime created() const { return _created; }
+     inline const dt::CTime created() const { return *_created; }
 
      /**
       * @return Modified datetime object
       */
-     inline const dt::CTime modified() const { return _modified; }
+     inline const dt::CTime modified() const { return *_modified; }
 
      /**
       * @return Completed datetime object
       */
-    inline const dt::CTime completed() const { return _completed; }
+    inline const dt::CTime completed() const { return *_completed; }
 
     /**
      * @return Dropped datetime object
      */
-    inline const dt::CTime dropped() const { return _dropped; }
+    inline const dt::CTime dropped() const { return *_dropped; }
 
     /**
      * @return Deferred repeating CTime object
      */
-    inline std::unique_ptr<dt::RepeatingCTime> deferred() const {
-        return _deferred;
+    inline const dt::RepeatingCTime* deferred() const {
+        return _deferred.get();
     }
 
     /**
      * @return Due repeating CTime object
      */
-    inline std::unique_ptr<dt::RepeatingCTime> due() const {
-        return _due;
+    inline dt::RepeatingCTime* due() const {
+        return _due.get();
     }
 
     /********************************* SETTERS ********************************/
-    void setProjectName(const std::string& projectName);
-    void setNotes(const std::string& notes);
-    inline void setStatus(Status status) { _status = status; }
+    /**
+     * Set project name
+     * @param projectName
+     */
+    inline void setProjectName(const std::string& projectName) {
+        _projectName = projectName;
+        updateModified();
+    }
+
+    /**
+     * Set notes string
+     * @param notes
+     */
+    inline void setNotes(const std::string& notes) {
+        _notes = notes;
+        updateModified();
+    }
+
+    /**
+     * Set Status
+     * @param status
+     */
+    inline void setStatus(Status status) {
+        _status = status;
+        updateModified();
+    }
+
+    /**
+     * Set project type
+     * @param projectType
+     */
     inline void setProjectType(ProjectType projectType) {
         _projectType = projectType;
-    }
-    inline void setCompleteWithLast(bool completeWithLast) {
-        _completeWithLast = completeWithLast;
+        updateModified();
     }
 
-    /********************************* SETTERS ********************************/
-     void setProjectName(const std::string& projectName);
-     void setNotes(const std::string& notes);
-     inline void setStatus(Status status) { _status = status; }
-     inline void setProjectType(ProjectType projectType) {
-         _projectType = projectType;
+    /**
+     * Set complete with last
+     * @param completeWithLast
+     */
+    inline void setCompleteWithLast(bool completeWithLast) {
+        _completeWithLast = completeWithLast;
+        updateModified();
+    }
+
+    /**
+     * Set contexts with an initializer_list
+     * @param contexts
+     */
+    void setContexts(const std::initializer_list<const Context*>& contexts);
+
+    /**
+     * Set contexts with list of contexts
+     * @param contexts
+     */
+    void setContexts(const std::list<const Context *> &contexts);
+
+    /**
+     * Add a context to the context list
+     * @param context
+     */
+    inline void addContext(const Context* context) {
+        _contexts.push_back(context);
+        updateModified();
+    }
+
+    /**
+     * Remove a context from the context list
+     * @param context
+     * @return raw pointer to a Context*
+     */
+    const Context* removeContext(const Context* context);
+
+    /**
+     * Set the updated member to current time.
+     */
+    inline void updateModified() { _modified = std::make_unique<dt::CTime>(); }
+
+    /**
+     * Set the status of the project to Status::Complete and update completed
+     * CTime member
+     */
+    void markAsComplete();
+
+    /**
+     * Set the deferred member
+     * @param deferred
+     */
+    void setDeferred(dt::RepeatingCTime* deferred) {
+         _deferred = std::unique_ptr<dt::RepeatingCTime>(deferred);
+         updateModified();
      }
-     inline void setCompleteWithLast(bool completeWithLast) {
-         _completeWithLast = completeWithLast;
-     }
-     void setContexts(std::initializer_list<const Context*> contexts);
-     void setContexts(std::list<const Context*> contexts);
-     inline void addContext(const Context* context) {
-         _contexts.push_back(context);
-     }
-     const Context* removeContext(const Context* context);
-     inline void updateModified() {  _modified = dt::CTime{}; }
-     void markAsComplete(); // CHANGE STATUS AND COMPLETED DATE
+
+     /**
+      * Set the due RepeatingCTime member
+      * @param due
+      */
+    void setDue(dt::RepeatingCTime* due) {
+        _due = std::unique_ptr<dt::RepeatingCTime>(due);
+        updateModified();
+    }
 };
 
 } // namespace gtd

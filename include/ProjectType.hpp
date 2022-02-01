@@ -7,6 +7,8 @@
 
 #include <string>
 
+namespace gtd {
+
 /**
  * @brief enum class describing various types of Projects
  */
@@ -15,19 +17,20 @@ enum class ProjectType {
 };
 
 std::string projectTypeString(ProjectType projectType) {
-    std::string projTypeStr {};
+    std::string projTypeStr{};
     switch (projectType) {
         case ProjectType::Parallel:
             projTypeStr = "Parallel";
             break;
         case ProjectType::Sequential:
             projTypeStr = "Sequential":
-                    break;
+            break;
         case ProjectType::SingleActions:
             projTypeStr = "SingleActions";
             break;
     }
     return projTypeStr;
+}
 }
 
 #endif //GTD_PROJECTTYPE_HPP

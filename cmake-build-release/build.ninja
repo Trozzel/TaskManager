@@ -39,13 +39,13 @@ include CMakeFiles/rules.ninja
 #############################################
 # Logical path to working directory; prefix for absolute paths.
 
-cmake_ninja_workdir = /Users/jorge/Cpp/gtd_app/cmake-build-debug/
+cmake_ninja_workdir = /Users/jorge/Cpp/gtd_app/cmake-build-release/
 
 #############################################
 # Utility command for rebuild_cache
 
 build CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
-  COMMAND = cd /Users/jorge/Cpp/gtd_app/cmake-build-debug && /Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake --regenerate-during-build -S/Users/jorge/Cpp/gtd_app -B/Users/jorge/Cpp/gtd_app/cmake-build-debug
+  COMMAND = cd /Users/jorge/Cpp/gtd_app/cmake-build-release && /Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake --regenerate-during-build -S/Users/jorge/Cpp/gtd_app -B/Users/jorge/Cpp/gtd_app/cmake-build-release
   DESC = Running CMake to regenerate build system...
   pool = console
   restat = 1
@@ -57,7 +57,7 @@ build rebuild_cache: phony CMakeFiles/rebuild_cache.util
 # Utility command for edit_cache
 
 build CMakeFiles/edit_cache.util: CUSTOM_COMMAND
-  COMMAND = cd /Users/jorge/Cpp/gtd_app/cmake-build-debug && /Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
+  COMMAND = cd /Users/jorge/Cpp/gtd_app/cmake-build-release && /Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E echo No\ interactive\ CMake\ dialog\ available.
   DESC = No interactive CMake dialog available...
   restat = 1
 
@@ -72,30 +72,51 @@ build edit_cache: phony CMakeFiles/edit_cache.util
 
 build cmake_object_order_depends_target_gtd: phony || CMakeFiles/gtd.dir
 
+build CMakeFiles/gtd.dir/src/Status.cpp.o: CXX_COMPILER__gtd_DEBUG /Users/jorge/Cpp/gtd_app/src/Status.cpp || cmake_object_order_depends_target_gtd
+  DEP_FILE = CMakeFiles/gtd.dir/src/Status.cpp.o.d
+  FLAGS = -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX12.1.sdk -std=gnu++17
+  INCLUDES = -I/Users/jorge/Cpp/gtd_app/include -I/usr/local/include
+  OBJECT_DIR = CMakeFiles/gtd.dir
+  OBJECT_FILE_DIR = CMakeFiles/gtd.dir/src
+
 build CMakeFiles/gtd.dir/src/Context.cpp.o: CXX_COMPILER__gtd_DEBUG /Users/jorge/Cpp/gtd_app/src/Context.cpp || cmake_object_order_depends_target_gtd
   DEP_FILE = CMakeFiles/gtd.dir/src/Context.cpp.o.d
-  FLAGS = -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk -std=gnu++17
+  FLAGS = -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX12.1.sdk -std=gnu++17
   INCLUDES = -I/Users/jorge/Cpp/gtd_app/include -I/usr/local/include
   OBJECT_DIR = CMakeFiles/gtd.dir
   OBJECT_FILE_DIR = CMakeFiles/gtd.dir/src
 
 build CMakeFiles/gtd.dir/src/Folder.cpp.o: CXX_COMPILER__gtd_DEBUG /Users/jorge/Cpp/gtd_app/src/Folder.cpp || cmake_object_order_depends_target_gtd
   DEP_FILE = CMakeFiles/gtd.dir/src/Folder.cpp.o.d
-  FLAGS = -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk -std=gnu++17
+  FLAGS = -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX12.1.sdk -std=gnu++17
   INCLUDES = -I/Users/jorge/Cpp/gtd_app/include -I/usr/local/include
   OBJECT_DIR = CMakeFiles/gtd.dir
   OBJECT_FILE_DIR = CMakeFiles/gtd.dir/src
 
 build CMakeFiles/gtd.dir/src/Project.cpp.o: CXX_COMPILER__gtd_DEBUG /Users/jorge/Cpp/gtd_app/src/Project.cpp || cmake_object_order_depends_target_gtd
   DEP_FILE = CMakeFiles/gtd.dir/src/Project.cpp.o.d
-  FLAGS = -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk -std=gnu++17
+  FLAGS = -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX12.1.sdk -std=gnu++17
+  INCLUDES = -I/Users/jorge/Cpp/gtd_app/include -I/usr/local/include
+  OBJECT_DIR = CMakeFiles/gtd.dir
+  OBJECT_FILE_DIR = CMakeFiles/gtd.dir/src
+
+build CMakeFiles/gtd.dir/src/ProjectType.cpp.o: CXX_COMPILER__gtd_DEBUG /Users/jorge/Cpp/gtd_app/src/ProjectType.cpp || cmake_object_order_depends_target_gtd
+  DEP_FILE = CMakeFiles/gtd.dir/src/ProjectType.cpp.o.d
+  FLAGS = -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX12.1.sdk -std=gnu++17
+  INCLUDES = -I/Users/jorge/Cpp/gtd_app/include -I/usr/local/include
+  OBJECT_DIR = CMakeFiles/gtd.dir
+  OBJECT_FILE_DIR = CMakeFiles/gtd.dir/src
+
+build CMakeFiles/gtd.dir/src/Task.cpp.o: CXX_COMPILER__gtd_DEBUG /Users/jorge/Cpp/gtd_app/src/Task.cpp || cmake_object_order_depends_target_gtd
+  DEP_FILE = CMakeFiles/gtd.dir/src/Task.cpp.o.d
+  FLAGS = -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX12.1.sdk -std=gnu++17
   INCLUDES = -I/Users/jorge/Cpp/gtd_app/include -I/usr/local/include
   OBJECT_DIR = CMakeFiles/gtd.dir
   OBJECT_FILE_DIR = CMakeFiles/gtd.dir/src
 
 build CMakeFiles/gtd.dir/src/main.cpp.o: CXX_COMPILER__gtd_DEBUG /Users/jorge/Cpp/gtd_app/src/main.cpp || cmake_object_order_depends_target_gtd
   DEP_FILE = CMakeFiles/gtd.dir/src/main.cpp.o.d
-  FLAGS = -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk -std=gnu++17
+  FLAGS = -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX12.1.sdk -std=gnu++17
   INCLUDES = -I/Users/jorge/Cpp/gtd_app/include -I/usr/local/include
   OBJECT_DIR = CMakeFiles/gtd.dir
   OBJECT_FILE_DIR = CMakeFiles/gtd.dir/src
@@ -108,8 +129,8 @@ build CMakeFiles/gtd.dir/src/main.cpp.o: CXX_COMPILER__gtd_DEBUG /Users/jorge/Cp
 #############################################
 # Link the executable gtd
 
-build gtd: CXX_EXECUTABLE_LINKER__gtd_DEBUG CMakeFiles/gtd.dir/src/Context.cpp.o CMakeFiles/gtd.dir/src/Folder.cpp.o CMakeFiles/gtd.dir/src/Project.cpp.o CMakeFiles/gtd.dir/src/main.cpp.o
-  FLAGS = -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX10.15.sdk
+build gtd: CXX_EXECUTABLE_LINKER__gtd_DEBUG CMakeFiles/gtd.dir/src/Status.cpp.o CMakeFiles/gtd.dir/src/Context.cpp.o CMakeFiles/gtd.dir/src/Folder.cpp.o CMakeFiles/gtd.dir/src/Project.cpp.o CMakeFiles/gtd.dir/src/ProjectType.cpp.o CMakeFiles/gtd.dir/src/Task.cpp.o CMakeFiles/gtd.dir/src/main.cpp.o
+  FLAGS = -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX12.1.sdk
   LINK_LIBRARIES = -Wl,-rpath,/usr/local/lib  -ldt
   LINK_PATH = -L/usr/local/lib
   OBJECT_DIR = CMakeFiles/gtd.dir
@@ -127,7 +148,7 @@ build gtd: CXX_EXECUTABLE_LINKER__gtd_DEBUG CMakeFiles/gtd.dir/src/Context.cpp.o
 # =============================================================================
 
 #############################################
-# Folder: /Users/jorge/Cpp/gtd_app/cmake-build-debug
+# Folder: /Users/jorge/Cpp/gtd_app/cmake-build-release
 
 build all: phony gtd
 

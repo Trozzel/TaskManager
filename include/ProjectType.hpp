@@ -16,21 +16,7 @@ enum class ProjectType {
     Parallel, Sequential, SingleActions
 };
 
-std::string projectTypeString(ProjectType projectType) {
-    std::string projTypeStr{};
-    switch (projectType) {
-        case ProjectType::Parallel:
-            projTypeStr = "Parallel";
-            break;
-        case ProjectType::Sequential:
-            projTypeStr = "Sequential":
-            break;
-        case ProjectType::SingleActions:
-            projTypeStr = "SingleActions";
-            break;
-    }
-    return projTypeStr;
-}
+std::string projectTypeString(ProjectType projectType);
 }
 
 #endif //GTD_PROJECTTYPE_HPP

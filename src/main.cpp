@@ -1,7 +1,14 @@
 #include <iostream>
-#include "datetime/datetime.hpp"
+
+#include "Project.hpp"
+
+using namespace std;
 
 int main() {
-  std::cout << "Hello, World!" << std::endl;
-  return 0;
+    gtd::Project project;
+    project.setProjectName("Stuff to do");
+
+    cout << project.projectName() << endl;
+//    project.set
+    return 0;
 }

@@ -14,6 +14,10 @@
 #include "ProjectType.hpp"
 #include "Status.hpp"
 #include "Context.hpp"
+#include "Folder.hpp"
+
+// Forward declation of Task to avoid header recursion
+class Task;
 
 namespace gtd {
 
@@ -27,12 +31,20 @@ class Project {
 private:
     std::string _projectName{};
     std::string _notes{};
+    const Folder* _folder         { nullptr };
     Status      _status           { Status::Active        };
     ProjectType _projectType      { ProjectType::Parallel };
     bool        _completeWithLast { false };
 
-    // LIST OF CONTEXTS (TAGS)
-    std::list<const Context*> _contexts;
+    /**
+     * List of Contexts
+     */
+    std::list<const Context*> _contexts{};
+
+    /**
+     * List of Tasks
+     */
+    std::list<const Task*> _tasks{};
 
     // DATES
     std::unique_ptr<dt::CTime> _created   { nullptr };
@@ -57,50 +69,46 @@ public:
      * @param deferred
      * @param due
      */
-	explicit Project(std::string projectName   = "New Project",
-			std::string notes                  = "",
-			Status      status                 = Status::Active,
-			ProjectType projectType            = ProjectType::Parallel,
+	Project(std::string projectName = "New Project",
+			std::string notes = "",
+            const Folder* folder = nullptr,
+			Status status = Status::Active,
+			ProjectType projectType = ProjectType::Parallel,
 			std::list<const Context*> contexts = {},
-			dt::RepeatingCTime* deferred       = nullptr,
-			dt::RepeatingCTime* due            = nullptr
-		   );
-
-    /**
-     * Class with initilizer_list of Contexts for instantiation.
-     * Made explicit to force to not be the default CTOR
-     * @param projectName
-     * @param note
-     * @param status
-     * @param projectType
-     * @param contexts
-     * @param deferred
-     * @param due
-     */
-	explicit Project(std::string projectName   = "New Project",
-			std::string notes                  = "",
-			Status      status                 = Status::Active,
-			ProjectType projectType            = ProjectType::Parallel,
-			std::initializer_list<const Context*> contexts = {},
-			dt::RepeatingCTime* deferred       = nullptr,
-			dt::RepeatingCTime* due            = nullptr
+			std::list<const Task*> tasks = {},
+			dt::RepeatingCTime*  = nullptr,
+			dt::RepeatingCTime* due = nullptr
 		   );
 
     /********************************* GETTERS ********************************/
     /**
      * @return string containing project name
      */
-	inline const std::string projectName() const { return _projectName; };
+    inline std::string projectName() const {
+        return _projectName;
+    }
 
     /**
      * @return string containing project notes
      */
-	inline const std::string notes() const { return _notes; };
+    inline const std::string notes() const { return _notes; }
+
+    /**
+     * @return Folder* to the containing folder
+     */
+    inline const Folder* folder() const { return _folder; }
+
+    /**
+    * @return string containing folder name
+    */
+    inline std::string folderName() const {
+        return _folder->folderName();
+    }
 
     /**
      * @return status of project
      */
-	inline const Status status() const { return _status; };
+    inline const Status status() const { return _status; }
 
      /**
      * @return String representing the Status
@@ -129,6 +137,11 @@ public:
      std::list<const Context *> contexts();
 
      /**
+      * @return List of contexts associated with project
+      */
+     std::list<const Task *> tasks();
+
+     /**
       * @return Created datetime object
       */
      inline const dt::CTime created() const { return *_created; }
@@ -141,26 +154,26 @@ public:
      /**
       * @return Completed datetime object
       */
-    inline const dt::CTime completed() const { return *_completed; }
-
-    /**
-     * @return Dropped datetime object
-     */
-    inline const dt::CTime dropped() const { return *_dropped; }
-
-    /**
-     * @return Deferred repeating CTime object
-     */
-    inline const dt::RepeatingCTime* deferred() const {
-        return _deferred.get();
-    }
-
-    /**
-     * @return Due repeating CTime object
-     */
-    inline dt::RepeatingCTime* due() const {
-        return _due.get();
-    }
+     inline const dt::CTime completed() const { return *_completed; }
+     
+     /**
+      * @return Dropped datetime object
+      */
+     inline const dt::CTime dropped() const { return *_dropped; }
+     
+     /**
+      * @return Deferred repeating CTime object
+      */
+     inline const dt::RepeatingCTime* deferred() const {
+         return _deferred.get();
+     }
+     
+     /**
+      * @return Due repeating CTime object
+      */
+     inline dt::RepeatingCTime* due() const {
+         return _due.get();
+     }
 
     /********************************* SETTERS ********************************/
     /**
@@ -180,6 +193,12 @@ public:
         _notes = notes;
         updateModified();
     }
+
+    /**
+     * Set Folder
+     * @param Folder* folder
+     */
+     inline void setFolder(const Folder* folder) { _folder = folder; }
 
     /**
      * Set Status
@@ -235,6 +254,30 @@ public:
      * @return raw pointer to a Context*
      */
     const Context* removeContext(const Context* context);
+
+	/**
+	 * Set tasks with an initializer_list
+	 * @param tasks
+	 */
+   	void setTasks(const std::initializer_list<const Task*>& tasks);
+
+	/**
+	 * Set Tasks with a list
+	 */
+   	void setTasks(const std::list<const Task*> tasks);	
+
+	/**
+	 * Add one task to the list of tasks
+	 */
+   	void addTask(const Task* task) {
+		_tasks.push_back(task);
+		updateModified();
+	}
+
+	/**
+	 * Remove a task from the list of tasks
+	 */ 
+	const Task* removeTask(const Task* task);
 
     /**
      * Set the updated member to current time.

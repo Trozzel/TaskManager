@@ -22,11 +22,17 @@ include_directories(
 link_directories ( /usr/local/lib )
 
 add_executable( gtd
-	src/Context.cpp
+        src/Status.cpp
+        src/Context.cpp
         src/Folder.cpp
         src/Project.cpp
+        src/ProjectType.cpp
+        src/Task.cpp
         src/main.cpp
         )
 
+
+
 target_link_libraries( gtd
-	dt )
+        dt
+        )

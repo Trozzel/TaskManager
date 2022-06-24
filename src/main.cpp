@@ -1,14 +1,40 @@
+#include <string>
 #include <iostream>
 
-#include "Project.hpp"
+#include <sqlite3.h>
 
 using namespace std;
 
-int main() {
-    gtd::Project project;
-    project.setProjectName("Stuff to do");
+string valString(char* val) {
+	return ((val)? val : "NULL");
+}
 
-    cout << project.projectName() << endl;
-//    project.set
-    return 0;
+static int callback (void* data, int numCols, char** values, char** colNames) {
+	int status = 0;
+
+	cout << "In callback function" << endl;
+	for(int i = 0; i < numCols; ++i) {
+		cout << colNames[i] << ": " << valString(values[i]) << endl;
+	}
+	cout << endl;
+	return status;
+}
+
+int main(int argc, char* argv[]) 
+{
+	const char dbPath[] = "../sql_scripts/temp.db";
+	sqlite3* db;
+	int rc = sqlite3_open(dbPath, &db);
+
+	if(rc) {
+		cout << "Could not open the database" << endl;
+		sqlite3_close(db);
+		return 1;
+	}
+
+	char* errMsg;
+	char sql[] = "SELECT * FROM contexts";
+	sqlite3_exec(db, sql, callback, NULL, &errMsg);
+
+	sqlite3_close(db);
 }

@@ -1,11 +1,10 @@
 # ninja log v5
-0	467	1644004495869071257	CMakeFiles/gtd.dir/src/Status.cpp.o	21030c476600c3bc
-1	477	1644004495880122981	CMakeFiles/gtd.dir/src/Folder.cpp.o	e80d5fadf5610458
-1	749	1644004496148973755	CMakeFiles/gtd.dir/src/Context.cpp.o	d51f499013c8e9f1
+2	550	1656010877178382612	CMakeFiles/sqlplay.dir/src/Status.cpp.o	a4d69af8db192be3
+3	894	1655768114426237798	CMakeFiles/gtd.dir/src/Folder.cpp.o	454086d15c065b70
 0	5	0	clean	3c8e6cc385ee00ba
-4	1066	1644941403131598932	CMakeFiles/gtd.dir/src/main.cpp.o	f77926c78230854f
-1	1076	1644941403145184380	CMakeFiles/gtd.dir/src/Project.cpp.o	176c556f30f1e4e5
-2	424	1644073325402219599	CMakeFiles/gtd.dir/src/ProjectType.cpp.o	8fbc19f137dbab15
-1076	1190	1644941403261888343	gtd	d9cba28759ec8810
-7	796	1644942621043831396	CMakeFiles/gtd.dir/src/main.cpp.o	f77926c78230854f
-5	822	1644942621069538615	CMakeFiles/gtd.dir/src/Project.cpp.o	176c556f30f1e4e5
+1	99	1656028592261510519	build.ninja	2f76ab2a2ff3f934
+1299	1358	1656018947146652534	sqlplay	f4f53bb3897f3f7d
+1188	1238	1655653963309755746	gtd	2177efddd73ed591
+3	1693	1656017958134740262	CMakeFiles/sqlplay.dir/src/Context.cpp.o	90e29bf2522769dd
+3	1299	1656018947085950358	CMakeFiles/sqlplay.dir/src/sql_play.cpp.o	554267936b7b36bc
+4	906	1655768114440813898	CMakeFiles/gtd.dir/src/ProjectType.cpp.o	1eb55a4b2d151298

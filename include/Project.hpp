@@ -10,13 +10,12 @@
 #include <string>
 #include <list>
 
-#include "datetime/datetime.hpp"
 #include "ProjectType.hpp"
 #include "Status.hpp"
 #include "Context.hpp"
 #include "Folder.hpp"
 
-// Forward declation of Task to avoid header recursion
+// Forward declaration of Task to avoid header recursion
 class Task;
 
 namespace gtd {
@@ -31,10 +30,10 @@ class Project {
 private:
     std::string _projectName{};
     std::string _notes{};
-    const Folder* _folder         { nullptr };
-    Status      _status           { Status::Active        };
-    ProjectType _projectType      { ProjectType::Parallel };
-    bool        _completeWithLast { false };
+    const Folder* _folder { nullptr };
+    Status _status { Status::Active        };
+    ProjectType _projectType { ProjectType::Parallel };
+    bool _completeWithLast { false };
 
     /**
      * List of Contexts
@@ -198,7 +197,7 @@ public:
      * Set Folder
      * @param Folder* folder
      */
-     inline void setFolder(const Folder* folder) { _folder = folder; }
+    inline void setFolder(const Folder* folder) { _folder = folder; }
 
     /**
      * Set Status
@@ -273,6 +272,13 @@ public:
 		_tasks.push_back(task);
 		updateModified();
 	}
+
+    /**
+     * Reorder list of tasks
+     * @param task Task to move
+     * @param location location to place the task in list. Starts at 0
+     */
+    void reorderTask(const Task* task, int location);
 
 	/**
 	 * Remove a task from the list of tasks

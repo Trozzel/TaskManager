@@ -7,40 +7,32 @@
 
 #include <string>
 
+#include "GtdBase.hpp"
+
 namespace gtd {
 
-class Folder {
-private:
-    std::string _folderName{};
+class Folder : public GtdBase {
 
-    const Folder *_parent{nullptr};
+private:
 
 public:
-    explicit Folder(std::string folder = "New Folder", Folder* parent= nullptr);
+    // CTORS
+    /**************************************************************************/
+    // DEFAULT
+    Folder() = default;
 
-    // GETTERS
-    inline const Folder *getParent() const {
-        return _parent;
-    }
+    // FROM SQLITE
+    Folder(std::string uniqueId,
+            std::string name,
+            std::string statusStr,
+            std::string createdStr,
+            std::string modifiedStr,
+            std::string parentIdStr);
 
-    inline std::string folderName() const {
-        return _folderName;
-    }
+    ~Folder() override = default;
 
-    inline std::string parentName() const {
-        return _parent->_folderName;
-    }
-
-    // SETTERS
-    inline void setParent(const Folder *parent = nullptr) {
-        _parent = parent;
-    }
-
-    inline void setName(const std::string &folder) {
-        _folderName = folder;
-    }
+    friend std::ostream& operator<<(std::ostream& out, const Folder& folder);
 };
 
 } // namespace gtd
-
-#endif//GTD_FOLDER_HPP
+#endif //GTD_FOLDER_HPP

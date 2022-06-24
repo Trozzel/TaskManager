@@ -10,29 +10,30 @@ IF( EXISTS "${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json" )
   )
 ENDIF()
 
-set(CMAKE_BUILD_TYPE DEBUG)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
+
+find_package(SQLite3)
 
 include_directories(
 		${CMAKE_CURRENT_SOURCE_DIR}/include
 		/usr/local/include
+		${SQLite3_INCLUDE_DIRS}
 )
-
 # NECESSARY ON MAC
 link_directories ( /usr/local/lib )
 
-add_executable( gtd
-        src/Status.cpp
-        src/Context.cpp
-        src/Folder.cpp
-        src/Project.cpp
-        src/ProjectType.cpp
-        src/Task.cpp
-        src/main.cpp
-        )
+find_package(fmt)
 
-
-
-target_link_libraries( gtd
-        dt
-        )
+add_executable ( sqlplay
+	src/sql_play.cpp
+	src/Context.cpp
+	src/Folder.cpp
+	src/Status.cpp
+	)
+	
+target_link_libraries ( sqlplay
+	${SQLite3_LIBRARIES}
+	fmt::fmt
+	)

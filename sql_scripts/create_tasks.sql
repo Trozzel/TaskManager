@@ -15,16 +15,17 @@ CREATE TABLE tasks (
     projectId        INTEGER DEFAULT NULL REFERENCES projects(uniqueId)
 						ON UPDATE CASCADE
 						ON DELETE SET DEFAULT,
+	status			 TEXT    NOT NULL DEFAULT "Active",
     created          TEXT    DEFAULT (datetime('now', 'utc')),
-    modified          TEXT    DEFAULT (datetime('now', 'utc')),
-    deferred         TEXT, 
+    modified         TEXT    DEFAULT (datetime('now', 'utc')),
+    deferred         TEXT,
     due              TEXT
 );
 
 /******************************************************************************
  * NAME CHANGE TRIGGER
  ******************************************************************************/
-CREATE TRIGGER  task_modified
+CREATE TRIGGER task_modified
     AFTER UPDATE ON tasks
 BEGIN
     UPDATE tasks

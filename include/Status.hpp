@@ -1,28 +1,20 @@
-//
-// Created by George Ford on 1/28/22.
-//
+#ifndef __STATUS_HPP__
+#define __STATUS_HPP__
 
-#ifndef GTD_APP_STATUS_HPP
-#define GTD_APP_STATUS_HPP
-
+#include <algorithm>
+#include <cctype>
+#include <cwctype>
 #include <string>
 
 namespace gtd {
 
-/**
- * @brief gtd::Status enum.
- * @details Describes status of task or project
- */
-enum class Status {
-    Active, Hold, Completed, Dropped
-};
+typedef enum {
+	Active, OnHold, Dropped, Completed, Undefined
+} Status;
 
-/**
- * @brief Get String of enum class Status
- * @param status is status from enum Status
- * @return string describing the status of project or task
- */
-[[maybe_unused]] std::string statusString(Status status);
+Status strToStatus(const std::string& statusStr);
+std::string statusToStr(Status status);
 
 } // namespace gtd
-#endif//GTD_APP_STATUS_HPP
+
+#endif // __STATUSBASE_HPP__

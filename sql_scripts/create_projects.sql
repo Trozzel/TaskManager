@@ -15,8 +15,9 @@ CREATE TABLE projects (
     folderId         INTEGER DEFAULT NULL REFERENCES folders(uniqueId)
 						ON UPDATE CASCADE
 						ON DELETE SET DEFAULT,
+	status			 TEXT    NOT NULL DEFAULT "Active",
     created          TEXT    DEFAULT (datetime('now', 'utc')),
-    modified          TEXT    DEFAULT (datetime('now', 'utc')),
+    modified         TEXT    DEFAULT (datetime('now', 'utc')),
     deferred         TEXT,
     due              TEXT
 );

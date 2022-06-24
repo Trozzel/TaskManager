@@ -4,11 +4,34 @@
 
 #include "Folder.hpp"
 
-namespace gtd {
+using namespace std;
 
-Folder::Folder(std::string folder, Folder* parent):
-    _folderName(std::move(folder)), _parent(parent)
+namespace gtd {
+// CTORS
+/****************************************************************************/
+Folder::Folder(string uniqueIdStr,
+                 string name,
+                 string statusStr,
+                 string created,
+                 string modified,
+                 string parentIdStr) :
+        GtdBase(std::move(uniqueIdStr),
+                std::move(name),
+                std::move(statusStr),
+                std::move(created),
+                std::move(modified),
+                std::move(parentIdStr))
 {
 }
 
-} // namespace std
+ostream& operator<<(ostream& out, const Folder& folder) {
+    out << folder._uniqueId << " " << folder._name << " "
+        << statusToStr(folder._status) << " "
+        << fmt::format("{} ", folder._created)
+        << fmt::format("{} ", folder._modified)
+        << folder._parentId;
+
+    return out;
+}
+
+}

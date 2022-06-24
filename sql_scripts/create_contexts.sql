@@ -9,8 +9,9 @@ CREATE TABLE contexts (
     parentId         INTEGER DEFAULT NULL REFERENCES contexts(uniqueId)
 						 ON	UPDATE CASCADE
 						 ON	DELETE SET DEFAULT,
+	status			 TEXT    NOT NULL DEFAULT "Active",
     created          TEXT    DEFAULT (datetime('now', 'utc')),
-    modified          TEXT    DEFAULT (datetime('now', 'utc'))
+    modified         TEXT    DEFAULT (datetime('now', 'utc'))
 );
 
 /******************************************************************************
@@ -48,7 +49,7 @@ INSERT INTO contexts (name)
 
 INSERT INTO contexts (name, parentId)
 VALUES
-    ('Bridgett', 1),
+    ('George Isaac', 1),
     ('Jim',      1),
     ('Michael',  1);
 

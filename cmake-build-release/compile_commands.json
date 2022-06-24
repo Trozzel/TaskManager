@@ -1,37 +1,22 @@
 [
 {
   "directory": "/Users/jorge/Cpp/gtd_app/cmake-build-release",
-  "command": "/Library/Developer/CommandLineTools/usr/bin/c++ -I/Users/jorge/Cpp/gtd_app/include -I/usr/local/include -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX12.1.sdk -std=gnu++17 -o CMakeFiles/gtd.dir/src/Status.cpp.o -c /Users/jorge/Cpp/gtd_app/src/Status.cpp",
-  "file": "/Users/jorge/Cpp/gtd_app/src/Status.cpp"
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ -DFMT_LOCALE -DFMT_SHARED -I/Users/jorge/Cpp/gtd_app/include -I/Library/Frameworks/Mono.framework/Headers -isystem /usr/local/include  -std=c++20 -O3 -DNDEBUG -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.3.sdk -std=gnu++2a -o CMakeFiles/sqlplay.dir/src/sql_play.cpp.o -c /Users/jorge/Cpp/gtd_app/src/sql_play.cpp",
+  "file": "/Users/jorge/Cpp/gtd_app/src/sql_play.cpp"
 },
 {
   "directory": "/Users/jorge/Cpp/gtd_app/cmake-build-release",
-  "command": "/Library/Developer/CommandLineTools/usr/bin/c++ -I/Users/jorge/Cpp/gtd_app/include -I/usr/local/include -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX12.1.sdk -std=gnu++17 -o CMakeFiles/gtd.dir/src/Context.cpp.o -c /Users/jorge/Cpp/gtd_app/src/Context.cpp",
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ -DFMT_LOCALE -DFMT_SHARED -I/Users/jorge/Cpp/gtd_app/include -I/Library/Frameworks/Mono.framework/Headers -isystem /usr/local/include  -std=c++20 -O3 -DNDEBUG -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.3.sdk -std=gnu++2a -o CMakeFiles/sqlplay.dir/src/Context.cpp.o -c /Users/jorge/Cpp/gtd_app/src/Context.cpp",
   "file": "/Users/jorge/Cpp/gtd_app/src/Context.cpp"
 },
 {
   "directory": "/Users/jorge/Cpp/gtd_app/cmake-build-release",
-  "command": "/Library/Developer/CommandLineTools/usr/bin/c++ -I/Users/jorge/Cpp/gtd_app/include -I/usr/local/include -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX12.1.sdk -std=gnu++17 -o CMakeFiles/gtd.dir/src/Folder.cpp.o -c /Users/jorge/Cpp/gtd_app/src/Folder.cpp",
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ -DFMT_LOCALE -DFMT_SHARED -I/Users/jorge/Cpp/gtd_app/include -I/Library/Frameworks/Mono.framework/Headers -isystem /usr/local/include  -std=c++20 -O3 -DNDEBUG -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.3.sdk -std=gnu++2a -o CMakeFiles/sqlplay.dir/src/Folder.cpp.o -c /Users/jorge/Cpp/gtd_app/src/Folder.cpp",
   "file": "/Users/jorge/Cpp/gtd_app/src/Folder.cpp"
 },
 {
   "directory": "/Users/jorge/Cpp/gtd_app/cmake-build-release",
-  "command": "/Library/Developer/CommandLineTools/usr/bin/c++ -I/Users/jorge/Cpp/gtd_app/include -I/usr/local/include -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX12.1.sdk -std=gnu++17 -o CMakeFiles/gtd.dir/src/Project.cpp.o -c /Users/jorge/Cpp/gtd_app/src/Project.cpp",
-  "file": "/Users/jorge/Cpp/gtd_app/src/Project.cpp"
-},
-{
-  "directory": "/Users/jorge/Cpp/gtd_app/cmake-build-release",
-  "command": "/Library/Developer/CommandLineTools/usr/bin/c++ -I/Users/jorge/Cpp/gtd_app/include -I/usr/local/include -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX12.1.sdk -std=gnu++17 -o CMakeFiles/gtd.dir/src/ProjectType.cpp.o -c /Users/jorge/Cpp/gtd_app/src/ProjectType.cpp",
-  "file": "/Users/jorge/Cpp/gtd_app/src/ProjectType.cpp"
-},
-{
-  "directory": "/Users/jorge/Cpp/gtd_app/cmake-build-release",
-  "command": "/Library/Developer/CommandLineTools/usr/bin/c++ -I/Users/jorge/Cpp/gtd_app/include -I/usr/local/include -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX12.1.sdk -std=gnu++17 -o CMakeFiles/gtd.dir/src/Task.cpp.o -c /Users/jorge/Cpp/gtd_app/src/Task.cpp",
-  "file": "/Users/jorge/Cpp/gtd_app/src/Task.cpp"
-},
-{
-  "directory": "/Users/jorge/Cpp/gtd_app/cmake-build-release",
-  "command": "/Library/Developer/CommandLineTools/usr/bin/c++ -I/Users/jorge/Cpp/gtd_app/include -I/usr/local/include -g -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX12.1.sdk -std=gnu++17 -o CMakeFiles/gtd.dir/src/main.cpp.o -c /Users/jorge/Cpp/gtd_app/src/main.cpp",
-  "file": "/Users/jorge/Cpp/gtd_app/src/main.cpp"
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ -DFMT_LOCALE -DFMT_SHARED -I/Users/jorge/Cpp/gtd_app/include -I/Library/Frameworks/Mono.framework/Headers -isystem /usr/local/include  -std=c++20 -O3 -DNDEBUG -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.3.sdk -std=gnu++2a -o CMakeFiles/sqlplay.dir/src/Status.cpp.o -c /Users/jorge/Cpp/gtd_app/src/Status.cpp",
+  "file": "/Users/jorge/Cpp/gtd_app/src/Status.cpp"
 }
 ]

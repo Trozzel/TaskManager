@@ -1,224 +1,99 @@
 //
-// Created by George Ford on 2/15/22.
+// Created by George Ford on 1/28/22.
 //
 
 #ifndef GTD_TASK_HPP
 #define GTD_TASK_HPP
 
-#include <initializer_list>
-#include <memory>
+#include <iostream>
 #include <string>
-#include <list>
+#include <filesystem>
 
-#include "datetime/CTime.hpp"
-#include "datetime/RepeatingCTime.hpp"
-#include "datetime/datetime.hpp"
-#include "Project.hpp"
-#include "Status.hpp"
-#include "Context.hpp"
-#include "Folder.hpp"
+#include "GtdBase.hpp"
+#include "GtdHelper.hpp"
+
+namespace fs = std::__fs::filesystem;
 
 namespace gtd {
 
-class Task {
+class Task : public GtdBase {
+
 private:
-    std::string _taskName{};
-    std::string _notes{};
-    const Project* _project {nullptr};
-    const Task* _parent {nullptr};
-    Status _status {Status::Active};
+    ULL                  _contextId=0;
+    ULL                  _projectId=0;
+    std::string          _notes;
+    time_point_t         _deferred = std::chrono::system_clock::now();
+    time_point_t         _due = std::chrono::system_clock::now();
+    TaskType             _taskType = TaskType::Parallel;
+    bool                 _isRepeating = false;
+    RepeatFrom           _repeatFrom = RepeatFrom::Due;
+    fs::directory_entry  _repeatFromPath;
 
-    // LIST OF CONTEXTS (TAGS)
-    std::list<const Context*> _contexts;
-
-    // DATES
-    std::unique_ptr<dt::CTime> _created   { nullptr };
-    std::unique_ptr<dt::CTime> _modified  { nullptr };
-    std::unique_ptr<dt::CTime> _completed { nullptr };
-    std::unique_ptr<dt::CTime> _dropped   { nullptr };
-
-    // DEFERRED AND DUE DATES
-    std::unique_ptr<dt::RepeatingCTime> _deferred { nullptr };
-    std::unique_ptr<dt::RepeatingCTime> _due      { nullptr };
-
-// PRIVATE METHODS
-private:
-	/**
-	 * Update the _modified member to current time
-	 */ 
-	void updateModified() {
-		_modified = std::make_unique<dt::CTime>(dt::CTime::currentCTime());
-	}
+    // PRIVATE FUNCTIONS
+    static TaskType strToTaskType(const std::string& taskTypeStr);
 
 public:
-	/**
-	 * CTOR
-     * Class providing functionality for manipulating tasks from SQLite
-     * database.
-     * @param std::string taskName
-     * @param std::string note
-	 * @param const Project* project
-     * @param const Task* parent
-     * @param Status status
-     * @param std::list<const Context*> contexts
-     * @param unique_ptr<dt::RepeatingCTime> deferred
-     * @param unique_ptr<dt::RepeatingCTime> due
-	 */ 
-	Task(
-			std::string taskName = "New Task",
-			std::string notes = "",
-			const Project* project = nullptr,
-			const Task* parent = nullptr,
-			Status status = Status::Active,
-			std::list<const Context*> contexts = {},
-			std::unique_ptr<dt::RepeatingCTime> deferred = nullptr,
-			std::unique_ptr<dt::RepeatingCTime> due = nullptr
-		);
+    // CTORS
+    explicit Task(const std::string & name = "");
 
-	/****************************** GETTERS ***********************************/
-	/**
-	 * Get task name
-	 */ 
-	inline std::string taskName() const { return _taskName; }
+    ~Task() override = default;
 
-	/**
-	 * Get notes
-	 */
-    inline std::string notes() { return _notes; }
+    // GETTERS
+	inline ULL contextId() const;
 
-	/**
-	 * Return the owning project
-	 */
-	inline const Project* project() const { return _project; }	
+	inline ULL projectId() const;
+    
+	[[nodiscard]] const std::string & notes() const;
 
-	/**
-	 * Return the Task parent
-	 */
-   	inline const Task* parent() const { return _parent; }	
+    [[nodiscard]] const time_point_t & deferred() const;
 
-	/**
-	 * Return copy of the status
-	 */
-   	inline Status status() const { return _status; }
+    [[nodiscard]] const time_point_t & due() const;
 
-	/**
-	 * Return a copy of the contexts
-	 */ 
-	inline std::list<const Context*> contexts() const { return _contexts; }
-	
-	/**
-	 * Return dt::CTime, time of creation
-	 */
-   	inline dt::CTime created() const { return *_created; }	
+    [[nodiscard]] TaskType taskType() const;
 
-	/**
-	 * Return dt::CTime, time of creation
-	 */
-   	inline dt::CTime modified() const { return *_modified; }	
+    [[nodiscard]] bool isIsRepeating() const;
 
-	/**
-	 * Return dt::CTime, time of creation
-	 */
-   	inline dt::CTime completed() const { return *_completed; }	
+    [[nodiscard]] RepeatFrom repeatFrom() const;
 
-	/**
-	 * Return dt::CTime, time of creation
-	 */
-   	inline dt::CTime dropped() const { return *_dropped; }	
+    [[nodiscard]] const fs::directory_entry &repeatFromPath() const;
 
-	/**
-	 * Return the dt::RepeatingCTime, deferred
-	 */
-   	inline dt::RepeatingCTime deferred() const { return *_deferred; }	
+    [[nodiscard]] const time_point_t &getDeferred() const;
 
-	/**
-	 * Return the dt::RepeatingCTime, due
-	 */
-   	inline dt::RepeatingCTime due() const { return *_due; }	
+    [[nodiscard]] bool isCompleteWithLast() const;
 
-	/******************************** SETTERS *********************************/
-	/**
-	 * Set the task name
-	 */ 
-	void setTaskName(const std::string& taskName) {
-		if (_taskName != taskName) {
-			_taskName = taskName;
-			updateModified();
-		}
-	}
-	/**
-	 * Set the notes
-	 */
-   	void setNotes(const std::string& notes) {
-		if (_notes != notes) {
-			_notes = notes;
-			updateModified();
-		}
-	}	
+    [[nodiscard]] const fs::directory_entry &getRepeatFromPath() const;
 
-	/**
-	 * Set the Project
-	 */
-   	void setProject(const Project* project);	
+    // SETTERS
+	inline void setProjectId(ULL projectId);
+	void setProjectId(const std::string & projectIdStr);
 
-	/**
-	 * Set parent task
-	 */ 
-	void setParent(const Task* task);
+    void setContextId(ULL contextId);
+    void setContextId(const std::string & contextIdStr);
 
-	/**
-	 * Remove Parent
-	 */
-   	void removeParent() { 
-		setParent(nullptr); 
-		updateModified();
-	}
+    void setNotes(const std::string &notes);
 
-	/**
-	 * Set Status
-	 */
-   	void setStatus(Status status) {
-		_status = status;
-		updateModified();
-	}	
+    void setDeferred(const time_point_t &deferred);
+    void setDeferred(const std::string & deferredStr);
 
-	/**
-	 * Set contexts - std::list
-	 */
-   	void setContexts(const std::list<const Context*> contexts) {
-		_contexts = contexts;
-		updateModified();
-	}	
+    void setDue(const time_point_t &due);
+    void setDue(const std::string & dueStr);
 
-	/**
-	 * Set contexts - std::initializer_list
-	 */
-   	void setContexts(const std::initializer_list<const Context*> contexts) {
-		_contexts = contexts;
-		updateModified();
-	}	
+    void setTaskType(TaskType taskType);
+    void setTaskType(const std::string & taskType);
 
-	/**
-	 * Add a context to the context list
-	 */
-	void addContext(const Context* context); 
+    void setIsRepeating(bool isRepeating);
+    void setIsRepeating(const std::string& isRepeating);
 
-	/**
-	 * Remove a context from the Context list
-	 */
-   	const Context* removeContext(const Context* context);	
+    void setRepeatFrom(RepeatFrom repeatFrom);
+    void setRepeatFrom(const std::string & repeatFromStr);
 
-	/**
-	 * Set completed. NOTE: it is set to NOW automatically
-	 */
-	void setAsCompleted() {
-		_status = Status::Completed;
-		*_completed = dt::CTime::currentCTime();
-		updateModified();
-	}
+    void setRepeatFromPath(const fs::directory_entry& dir);
+    void setRepeatFromPath(const std::string& dir);
 
+    friend std::ostream& operator<<(std::ostream& out, const Task& task);
 };
 
 } // namespace gtd
+
 
 #endif //GTD_TASK_HPP

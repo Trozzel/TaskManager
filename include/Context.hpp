@@ -10,7 +10,6 @@
 #include <sqlite3.h>
 
 #include "GtdBase.hpp"
-#include "Status.hpp"
 
 namespace gtd {
 
@@ -33,8 +32,6 @@ public:
 			std::string parentIdStr);
 
 	~Context() override = default;
-
-	friend std::ostream& operator<<(std::ostream& out, const Context& context);
 };
 
 } // namespace gtd

@@ -22,12 +22,12 @@ public:
     Folder() = default;
 
     // FROM SQLITE
-    Folder(std::string uniqueId,
-            std::string name,
-            std::string statusStr,
-            std::string createdStr,
-            std::string modifiedStr,
-            std::string parentIdStr);
+    Folder(const std::string &uniqueIdStr,
+           const std::string &name,
+           const std::string &statusStr,
+           const std::string &created,
+           const std::string &modified,
+           const std::string &parentIdStr);
 
     ~Folder() override = default;
 

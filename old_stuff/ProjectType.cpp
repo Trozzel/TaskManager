@@ -4,9 +4,11 @@
 
 #include "ProjectType.hpp"
 
+using namespace std;
+
 namespace gtd {
 
-std::string projectTypeString(ProjectType projectType) {
+string projectTypeString(ProjectType projectType) {
     std::string projTypeStr{};
     switch (projectType) {
         case ProjectType::Parallel:
@@ -20,5 +22,21 @@ std::string projectTypeString(ProjectType projectType) {
             break;
     }
     return projTypeStr;
+}
+
+string projectTypeString(ProjectType projectType) {
+    string ptStr;
+    switch (projectType) {
+    case ProjectType::Parallel:
+        ptStr = "Parallel";
+        break;
+    case ProjectType::Sequential:
+        ptStr = "Sequential";
+        break;
+    case ProjectType::SingleActions:
+        ptStr = "Single Actions";
+        break;
+    }
+    return ptStr;
 }
 } // namespace gtd

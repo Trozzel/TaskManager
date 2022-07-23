@@ -9,18 +9,18 @@ using namespace std;
 namespace gtd {
 // CTORS
 /****************************************************************************/
-Folder::Folder(string uniqueIdStr,
-                 string name,
-                 string statusStr,
-                 string created,
-                 string modified,
-                 string parentIdStr) :
-        GtdBase(std::move(uniqueIdStr),
-                std::move(name),
-                std::move(statusStr),
-                std::move(created),
-                std::move(modified),
-                std::move(parentIdStr))
+Folder::Folder(const string & uniqueIdStr,
+               const string & name,
+               const string & statusStr,
+               const string & created,
+               const string & modified,
+               const string & parentIdStr) :
+        GtdBase(uniqueIdStr,
+                name,
+                statusStr,
+                created,
+                modified,
+                parentIdStr)
 {
 }
 

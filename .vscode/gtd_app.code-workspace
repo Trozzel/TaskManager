@@ -1,0 +1,15 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"list": "cpp",
+			"iosfwd": "cpp",
+			"filesystem": "cpp",
+			"iomanip": "cpp"
+		}
+	}
+}

@@ -11,12 +11,17 @@
 },
 {
   "directory": "/Users/jorge/Cpp/gtd_app/cmake-build-debug",
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ -DFMT_LOCALE -DFMT_SHARED -I/Users/jorge/Cpp/gtd_app/include -I/Library/Frameworks/Mono.framework/Headers -isystem /usr/local/include  -std=c++20 -g -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.3.sdk -std=gnu++2a -o CMakeFiles/sqlplay.dir/src/Task.cpp.o -c /Users/jorge/Cpp/gtd_app/src/Task.cpp",
+  "file": "/Users/jorge/Cpp/gtd_app/src/Task.cpp"
+},
+{
+  "directory": "/Users/jorge/Cpp/gtd_app/cmake-build-debug",
   "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ -DFMT_LOCALE -DFMT_SHARED -I/Users/jorge/Cpp/gtd_app/include -I/Library/Frameworks/Mono.framework/Headers -isystem /usr/local/include  -std=c++20 -g -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.3.sdk -std=gnu++2a -o CMakeFiles/sqlplay.dir/src/Folder.cpp.o -c /Users/jorge/Cpp/gtd_app/src/Folder.cpp",
   "file": "/Users/jorge/Cpp/gtd_app/src/Folder.cpp"
 },
 {
   "directory": "/Users/jorge/Cpp/gtd_app/cmake-build-debug",
-  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ -DFMT_LOCALE -DFMT_SHARED -I/Users/jorge/Cpp/gtd_app/include -I/Library/Frameworks/Mono.framework/Headers -isystem /usr/local/include  -std=c++20 -g -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.3.sdk -std=gnu++2a -o CMakeFiles/sqlplay.dir/src/Status.cpp.o -c /Users/jorge/Cpp/gtd_app/src/Status.cpp",
-  "file": "/Users/jorge/Cpp/gtd_app/src/Status.cpp"
+  "command": "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ -DFMT_LOCALE -DFMT_SHARED -I/Users/jorge/Cpp/gtd_app/include -I/Library/Frameworks/Mono.framework/Headers -isystem /usr/local/include  -std=c++20 -g -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.3.sdk -std=gnu++2a -o CMakeFiles/sqlplay.dir/src/GtdHelper.cpp.o -c /Users/jorge/Cpp/gtd_app/src/GtdHelper.cpp",
+  "file": "/Users/jorge/Cpp/gtd_app/src/GtdHelper.cpp"
 }
 ]

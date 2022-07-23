@@ -12,14 +12,17 @@ CREATE TABLE projects (
     contextId        INTEGER DEFAULT NULL REFERENCES contexts(uniqueId)
 						ON UPDATE CASCADE
 						ON DELETE SET DEFAULT,
-    folderId         INTEGER DEFAULT NULL REFERENCES folders(uniqueId)
-						ON UPDATE CASCADE
-						ON DELETE SET DEFAULT,
 	status			 TEXT    NOT NULL DEFAULT "Active",
-    created          TEXT    DEFAULT (datetime('now', 'utc')),
-    modified         TEXT    DEFAULT (datetime('now', 'utc')),
     deferred         TEXT,
-    due              TEXT
+    due              TEXT,
+	notes			 TEXT,
+	type			 TEXT 	 NOT NULL DEFAULT "Parallel",
+	completeWithLast INTEGER NOT NULL DEFAULT 0,
+	repeating        INTEGER DEFAULT 0, /* 0 == False; >0 == True */
+	repeatFrom       TEXT    DEFAULT "due",
+	repeatEveryFile  TEXT,   /* Contains a path to a JSON file containing repeat parameters */
+    created          TEXT    DEFAULT (datetime('sys_clk_now', 'utc')),
+    modified         TEXT    DEFAULT (datetime('sys_clk_now', 'utc'))
 );
 
 /******************************************************************************
@@ -29,7 +32,7 @@ CREATE TRIGGER project_modified
     AFTER UPDATE ON projects
 BEGIN
     UPDATE projects
-        SET modified = datetime('now','utc')
+        SET modified = datetime('sys_clk_now','utc')
         WHERE name = NEW.name;
 END;
 
@@ -37,10 +40,10 @@ END;
 /******************************************************************************/
 /******************************************************************************/
 
-INSERT INTO projects(name, folderId)
+INSERT INTO projects(name)
 VALUES
-    ('Get truck fixed', 1),
-    ('Go on date',      1),
-    ('George Birthday', 1),
-    ('Clean AC',        1),
-    ('Serve in CC',     2);
+    ('Get truck fixed'),
+    ('Go on date'),
+    ('George Birthday'),
+    ('Clean AC'),
+    ('Serve in CC');

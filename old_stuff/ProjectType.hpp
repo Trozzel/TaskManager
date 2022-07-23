@@ -9,13 +9,12 @@
 
 namespace gtd {
 
-/**
- * @brief enum class describing various types of Projects
- */
+/// \brief enum class describing various types of Projects
 enum class ProjectType {
     Parallel, Sequential, SingleActions
 };
 
+/// Return string of project type
 std::string projectTypeString(ProjectType projectType);
 }
 

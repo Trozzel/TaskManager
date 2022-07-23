@@ -1,321 +1,125 @@
-//
-// Created by George Ford on 1/28/22.
-//
+#ifndef PROJECTS_HPP
+#define PROJECTS_HPP
 
-#ifndef GTD_PROJECT_HPP
-#define GTD_PROJECT_HPP
-
-#include <initializer_list>
-#include <memory>
 #include <string>
 #include <list>
+#include <initializer_list>
 
-#include "ProjectType.hpp"
-#include "Status.hpp"
-#include "Context.hpp"
-#include "Folder.hpp"
+#include <fmt/format.h>
 
-// Forward declaration of Task to avoid header recursion
-class Task;
+#include "Task.hpp"
+#include "GtdBase.hpp"
+#include "GtdHelper.hpp"
 
 namespace gtd {
 
-/**
- * @brief Represents a Project in GTD program
- * @author George Ford
- *
- * Represents the Projects from SQLite database in memory
- */
-class Project {
-private:
-    std::string _projectName{};
-    std::string _notes{};
-    const Folder* _folder { nullptr };
-    Status _status { Status::Active        };
-    ProjectType _projectType { ProjectType::Parallel };
-    bool _completeWithLast { false };
+class Project : public GtdBase {
 
-    /**
-     * List of Contexts
-     */
-    std::list<const Context*> _contexts{};
+protected:
+    ULL                  _contextId {};
+    std::list<ULL>       _taskIds {};
+    std::string          _notes {};
+    time_point_t         _deferred {std::chrono::system_clock::now()};
+    time_point_t         _due = std::chrono::system_clock::now();
+    ProjectType          _projectType = ProjectType::Parallel;
+    bool                 _completeWithLast=true;
+    bool                 _isRepeating = false;
+    RepeatFrom           _repeatFrom = RepeatFrom::Due;
+    fs::directory_entry  _repeatFromPath {};
 
-    /**
-     * List of Tasks
-     */
-    std::list<const Task*> _tasks{};
-
-    // DATES
-    std::unique_ptr<dt::CTime> _created   { nullptr };
-    std::unique_ptr<dt::CTime> _modified  { nullptr };
-    std::unique_ptr<dt::CTime> _completed { nullptr };
-    std::unique_ptr<dt::CTime> _dropped   { nullptr };
-    
-	// DEFERRED AND DUE DATES
-	std::unique_ptr<dt::RepeatingCTime> _deferred { nullptr };
-	std::unique_ptr<dt::RepeatingCTime> _due      { nullptr };
+    // PRIVATE FUNCTIONS
+    static ProjectType strToProjectType(const std::string& taskProjectStr);
 
 public:
-    /**
-     * Class providing functionality for manipulating projects from SQLite
-     * database.
-     * This is called for default instantiation
-     * @param projectName
-     * @param note
-     * @param status
-     * @param projectType
-     * @param contexts
-     * @param deferred
-     * @param due
-     */
-	Project(std::string projectName = "New Project",
-			std::string notes = "",
-            const Folder* folder = nullptr,
-			Status status = Status::Active,
-			ProjectType projectType = ProjectType::Parallel,
-			std::list<const Context*> contexts = {},
-			std::list<const Task*> tasks = {},
-			dt::RepeatingCTime*  = nullptr,
-			dt::RepeatingCTime* due = nullptr
-		   );
+    // CTORS
+    /**************************************************************************/
+    // DEFAULT
+    explicit Project(const std::string & name = "");
 
-    /********************************* GETTERS ********************************/
-    /**
-     * @return string containing project name
-     */
-    inline std::string projectName() const {
-        return _projectName;
-    }
+    ~Project() override = default;
 
-    /**
-     * @return string containing project notes
-     */
-    inline const std::string notes() const { return _notes; }
+    // GETTERS
+	inline ULL contextId() const;
 
-    /**
-     * @return Folder* to the containing folder
-     */
-    inline const Folder* folder() const { return _folder; }
+	[[nodiscard]] const std::string & notes() const;
 
-    /**
-    * @return string containing folder name
-    */
-    inline std::string folderName() const {
-        return _folder->folderName();
-    }
+    [[nodiscard]] const time_point_t & deferred() const;
 
-    /**
-     * @return status of project
-     */
-    inline const Status status() const { return _status; }
+    [[nodiscard]] const time_point_t & due() const;
 
-     /**
-     * @return String representing the Status
-     */
-     std::string statusString() const;
+    [[nodiscard]] ProjectType projectType() const;
 
-     /**
-      * @return ProjectType
-      */
-     inline const ProjectType projectType() const { return _projectType; }
+    [[nodiscard]] bool isRepeating() const;
 
-     /**
-      *
-      * @return String representing the project type
-      */
-     std::string projectTypeString() const;
+    [[nodiscard]] RepeatFrom repeatFrom() const;
 
-     /**
-      * @return Complete Project when last task completed status
-      */
-     inline const bool completeWithLast() const { return _completeWithLast; }
+    [[nodiscard]] const fs::directory_entry &repeatFromPath() const;
 
-     /**
-      * @return List of contexts associated with project
-      */
-     std::list<const Context *> contexts();
+    [[nodiscard]] const time_point_t &getDeferred() const;
 
-     /**
-      * @return List of contexts associated with project
-      */
-     std::list<const Task *> tasks();
+    [[nodiscard]] bool isCompleteWithLast() const;
 
-     /**
-      * @return Created datetime object
-      */
-     inline const dt::CTime created() const { return *_created; }
+    [[nodiscard]] const fs::directory_entry &getRepeatFromPath() const;
 
-     /**
-      * @return Modified datetime object
-      */
-     inline const dt::CTime modified() const { return *_modified; }
+    // SETTERS
+	void setTaskIds(const std::initializer_list<ULL> & taskIds);
+	void setTaskIds(const std::list<ULL> & taskIds);
+    template<typename Iter, typename T=ULL>
+    void setTaskIds(Iter begin, Iter end);
 
-     /**
-      * @return Completed datetime object
-      */
-     inline const dt::CTime completed() const { return *_completed; }
-     
-     /**
-      * @return Dropped datetime object
-      */
-     inline const dt::CTime dropped() const { return *_dropped; }
-     
-     /**
-      * @return Deferred repeating CTime object
-      */
-     inline const dt::RepeatingCTime* deferred() const {
-         return _deferred.get();
-     }
-     
-     /**
-      * @return Due repeating CTime object
-      */
-     inline dt::RepeatingCTime* due() const {
-         return _due.get();
-     }
+    void appendTaskIds(const std::initializer_list<ULL> & taskIds);
+	void appendTaskIds(const std::list<ULL> & taskIds);
+    template<typename Iter, typename T=ULL>
+    void appendTaskIds(Iter begin, Iter end);
 
-    /********************************* SETTERS ********************************/
-    /**
-     * Set project name
-     * @param projectName
-     */
-    inline void setProjectName(const std::string& projectName) {
-        _projectName = projectName;
-        updateModified();
-    }
+    void appendTaskId(const std::string & taskIdStr);
+    void appendTaskId(ULL taskId);
 
-    /**
-     * Set notes string
-     * @param notes
-     */
-    inline void setNotes(const std::string& notes) {
-        _notes = notes;
-        updateModified();
-    }
+    void setContextId(ULL contextId);
+    void setContextId(const std::string & contextIdStr);
 
-    /**
-     * Set Folder
-     * @param Folder* folder
-     */
-    inline void setFolder(const Folder* folder) { _folder = folder; }
+    void setNotes(const std::string &notes);
 
-    /**
-     * Set Status
-     * @param status
-     */
-    inline void setStatus(Status status) {
-        _status = status;
-        updateModified();
-    }
+    void setDeferred(const time_point_t &deferred);
+    void setDeferred(const std::string & deferredStr);
 
-    /**
-     * Set project type
-     * @param projectType
-     */
-    inline void setProjectType(ProjectType projectType) {
-        _projectType = projectType;
-        updateModified();
-    }
+    void setDue(const time_point_t &due);
+    void setDue(const std::string & dueStr);
 
-    /**
-     * Set complete with last
-     * @param completeWithLast
-     */
-    inline void setCompleteWithLast(bool completeWithLast) {
-        _completeWithLast = completeWithLast;
-        updateModified();
-    }
+    void setProjectType(ProjectType projectType);
+    void setProjectType(const std::string & projectType);
 
-    /**
-     * Set contexts with an initializer_list
-     * @param contexts
-     */
-    void setContexts(const std::initializer_list<const Context*>& contexts);
+    void setCompleteWithLast(bool completeWithLast);
+    void setCompleteWithLast(const std::string & completeWithLastStr);
 
-    /**
-     * Set contexts with list of contexts
-     * @param contexts
-     */
-    void setContexts(const std::list<const Context *> &contexts);
+    void setIsRepeating(bool isRepeating);
+    void setIsRepeating(const std::string& isRepeating);
 
-    /**
-     * Add a context to the context list
-     * @param context
-     */
-    inline void addContext(const Context* context) {
-        _contexts.push_back(context);
-        updateModified();
-    }
+    void setRepeatFrom(RepeatFrom repeatFrom);
+    void setRepeatFrom(const std::string & repeatFromStr);
 
-    /**
-     * Remove a context from the context list
-     * @param context
-     * @return raw pointer to a Context*
-     */
-    const Context* removeContext(const Context* context);
+    void setRepeatFromPath(const fs::directory_entry& dir);
+    void setRepeatFromPath(const std::string& dir);
 
-	/**
-	 * Set tasks with an initializer_list
-	 * @param tasks
-	 */
-   	void setTasks(const std::initializer_list<const Task*>& tasks);
-
-	/**
-	 * Set Tasks with a list
-	 */
-   	void setTasks(const std::list<const Task*> tasks);	
-
-	/**
-	 * Add one task to the list of tasks
-	 */
-   	void addTask(const Task* task) {
-		_tasks.push_back(task);
-		updateModified();
-	}
-
-    /**
-     * Reorder list of tasks
-     * @param task Task to move
-     * @param location location to place the task in list. Starts at 0
-     */
-    void reorderTask(const Task* task, int location);
-
-	/**
-	 * Remove a task from the list of tasks
-	 */ 
-	const Task* removeTask(const Task* task);
-
-    /**
-     * Set the updated member to current time.
-     */
-    inline void updateModified() { _modified = std::make_unique<dt::CTime>(); }
-
-    /**
-     * Set the status of the project to Status::Complete and update completed
-     * CTime member
-     */
-    void markAsComplete();
-
-    /**
-     * Set the deferred member
-     * @param deferred
-     */
-    void setDeferred(dt::RepeatingCTime* deferred) {
-         _deferred = std::unique_ptr<dt::RepeatingCTime>(deferred);
-         updateModified();
-     }
-
-     /**
-      * Set the due RepeatingCTime member
-      * @param due
-      */
-    void setDue(dt::RepeatingCTime* due) {
-        _due = std::unique_ptr<dt::RepeatingCTime>(due);
-        updateModified();
-    }
+    friend std::ostream& operator<<(std::ostream& out, const Project& task);
 };
+
+template<typename Iter, typename T>
+inline void Project::setTaskIds(Iter begin, Iter end) {
+    _taskIds.clear();
+    for(; begin != end; ++begin) {
+        _taskIds.push_back(*begin);
+    }
+}
+
+template<typename Iter, typename T>
+inline void Project::appendTaskIds(Iter begin, Iter end) {
+    for(; begin != end; ++begin) {
+        _taskIds.push_back(*begin);
+    }
+}
+
 
 } // namespace gtd
 
-
-#endif //GTD_PROJECT_HPP
+#endif // PROJECTS_HPP

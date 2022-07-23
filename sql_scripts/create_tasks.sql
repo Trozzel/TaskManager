@@ -16,8 +16,8 @@ CREATE TABLE tasks (
 						ON UPDATE CASCADE
 						ON DELETE SET DEFAULT,
 	status			 TEXT    NOT NULL DEFAULT "Active",
-    created          TEXT    DEFAULT (datetime('now', 'utc')),
-    modified         TEXT    DEFAULT (datetime('now', 'utc')),
+    created          TEXT    DEFAULT (datetime('sys_clk_now', 'utc')),
+    modified         TEXT    DEFAULT (datetime('sys_clk_now', 'utc')),
     deferred         TEXT,
     due              TEXT
 );
@@ -29,7 +29,7 @@ CREATE TRIGGER task_modified
     AFTER UPDATE ON tasks
 BEGIN
     UPDATE tasks
-        SET modified = datetime('now','utc')
+        SET modified = datetime('sys_clk_now','utc')
         WHERE name = NEW.name;
 END;
 

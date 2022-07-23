@@ -1,92 +1,172 @@
-//
-// Created by George Ford on 1/28/22.
-//
-#include <algorithm>
-
 #include "Project.hpp"
-
-#include <utility>
 
 using namespace std;
 
 namespace gtd {
 
-Project::Project(string projectName,
-                 string notes,
-                 const Folder* folder,
-                 Status status, ProjectType projectType,
-                 list<const Context*> contexts,
-				 list<const Task*> tasks,
-                 dt::RepeatingCTime *deferred,
-                 dt::RepeatingCTime *due) :
-        _projectName(move(projectName)), _notes(move(notes)),
-        _folder(folder), _status(status), _projectType(projectType),
-        _contexts(move(contexts)), _tasks(move(tasks)), _deferred(deferred),
-        _due(due)
+
+ProjectType Project::strToProjectType(const std::string& projectTypeStr) {
+    return strToProjectType(projectTypeStr);
+}
+
+Project::Project(const std::string & name)
+    : GtdBase(name)
 {
-    _created = make_unique<dt::CTime>();
-    updateModified();
 }
 
-std::string Project::statusString() const {
-    return gtd::statusString(_status);
+inline ULL Project::contextId() const {
+    return _contextId;
 }
 
-std::string Project::projectTypeString() const {
-    return gtd::projectTypeString(_projectType);
+const std::string & Project::notes() const {
+    return _notes;
 }
 
-std::list<const Context*> Project::contexts() {
-    return _contexts;
+const time_point_t & Project::deferred() const {
+    return _deferred;
 }
 
-std::list<const Task*> Project::tasks() {
-	return _tasks;
+const time_point_t & Project::due() const {
+    return _due;
 }
 
-void Project::setContexts(const initializer_list<const Context *>& contexts) {
-    _contexts = contexts;
-    updateModified();
+ProjectType Project::projectType() const {
+    return _projectType;
 }
 
-void Project::setContexts(const list<const Context *> &contexts) {
-    _contexts = contexts;
-    updateModified();
+bool Project::isRepeating() const {
+    return _isRepeating;
 }
 
-const Context *Project::removeContext(const Context *context) {
-    auto itContext = std::find(_contexts.begin(),
-                               _contexts.end(),
-                               context);
-    _contexts.remove(context);
-    updateModified();
-    return *itContext;
+RepeatFrom Project::repeatFrom() const {
+    return _repeatFrom;
 }
 
-void Project::setTasks(const std::initializer_list<const Task*>& tasks)
-{
-	_tasks = tasks;
-	updateModified();
+const fs::directory_entry &Project::repeatFromPath() const {
+    return _repeatFromPath;
 }
 
-void Project::setTasks(const std::list<const Task*> tasks)
-{
-	_tasks = tasks;
-	updateModified();
+const time_point_t &Project::getDeferred() const {
+    return _deferred;
 }
 
-const Task* Project::removeTask(const Task* task)
-{
-	auto itTask = std::find(_tasks.begin(), _tasks.end(), task);
-	_tasks.remove(task);
-	return *itTask;
+bool Project::isCompleteWithLast() const {
+    return _completeWithLast;
+}
+
+const fs::directory_entry &Project::getRepeatFromPath() const {
+    return _repeatFromPath;
+}
+
+void Project::setTaskIds(const std::initializer_list<ULL> & taskIds) {
+    _taskIds = taskIds;
+}
+
+void Project::setTaskIds(const std::list<ULL> &taskIds) {
+    _taskIds = taskIds;
+}
+
+void Project::appendTaskIds(const std::initializer_list<ULL> & taskIds) {
+    for(auto it=taskIds.begin(); it != taskIds.end(); ++it) {
+        _taskIds.push_back(*it);
+    }
+}
+
+void Project::appendTaskId(ULL taskId) {
+    _taskIds.push_back(taskId);
+}
+
+void Project::setContextId(ULL contextId) {
+    _contextId = contextId;
+}
+
+void Project::setContextId(const std::string &contextIdStr) {
+    _contextId = stoll(contextIdStr);
+}
+
+void Project::setNotes(const std::string &notes) {
+    _notes = notes;
+}
+
+void Project::setDeferred(const time_point_t &deferred) {
+    _deferred = deferred;
+}
+
+void Project::setDeferred(const std::string &deferredStr) {
+    _deferred = strToTimePoint(deferredStr);
+}
+
+void Project::setIsRepeating(const std::string& isRepeating) {
+    _isRepeating = static_cast<bool>(stoll(isRepeating));
+}
+
+void Project::setIsRepeating(bool isRepeating) {
+    _isRepeating = isRepeating;
+}
+
+void Project::setRepeatFromPath(const std::string& dir) {
+    _repeatFromPath.replace_filename(dir);
+}
+
+void Project::setRepeatFromPath(const fs::directory_entry& dir) {
+    _repeatFromPath = dir;
+}
+
+void Project::setRepeatFrom(const std::string & repeatFromStr) {
+    _repeatFrom = strToRepeatFrom(repeatFromStr);
+}
+
+void Project::setRepeatFrom(RepeatFrom repeatFrom) {
+    _repeatFrom = repeatFrom;
+}
+
+void Project::setProjectType(const std::string & projectType) {
+    _projectType = strToProjectType(projectType);
+}
+
+void Project::setProjectType(ProjectType projectType) {
+    _projectType = projectType;
+}
+
+void Project::setCompleteWithLast(bool completeWithLast) {
+    _completeWithLast = completeWithLast;
+}
+
+void Project::setCompleteWithLast(const std::string & completeWithLastStr) {
+    _completeWithLast = static_cast<bool>(stoll(completeWithLastStr));
+}
+
+void Project::appendTaskIds(const std::list<ULL> &taskIds) {
+    _taskIds.insert(_taskIds.end(), taskIds.begin(), taskIds.end());
+}
+
+void Project::appendTaskId(const std::string &taskIdStr) {
+    _taskIds.push_back(stoll(taskIdStr));
 }
 
 
+void Project::setDue(const std::string &dueStr) {
+    _due = strToTimePoint(dueStr);
+}
 
-void Project::markAsComplete() {
-    setStatus(Status::Completed);
-    _completed = make_unique<dt::CTime>();
+void Project::setDue(const time_point_t &due) {
+    _due = due;
+}
+
+std::ostream& operator<<(std::ostream& out, const Project& project) {
+    // SEND BASE TO STREAM
+    const auto* pBase = static_cast<const GtdBase*>(&project);
+    out << *pBase;
+
+    // SEND REMAINED TO STREAM
+    out << project._notes << " " << fmt::format("{} ", project._deferred)
+        << fmt::format("{} ", project._due)
+        << projectTypeStr(project._projectType) << " "
+        << ios::boolalpha << project._isRepeating << " "
+        << repeatFromToStr(project._repeatFrom) << " "
+        << project._repeatFromPath.path();
+
+    return out;
 }
 
 } // namespace gtd

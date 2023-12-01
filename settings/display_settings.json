@@ -1,0 +1,30 @@
+{
+	"task":
+	{
+		"nameWidth": 
+		{
+			"min": 10,
+			"max": 50
+		},
+		"parentNameWidth": 
+		{
+			"min": 10,
+			"max": 50
+		},
+		"contextNameWidth": 
+		{
+			"min": 10,
+			"max": 50
+		},
+		"projectNameWidth": 
+		{
+			"min": 10,
+			"max": 50
+		}
+	},
+	"dates":
+	{
+		"minWidth": 10,
+		"maxWidth": 19
+	}
+}

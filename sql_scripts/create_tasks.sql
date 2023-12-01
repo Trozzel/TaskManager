@@ -4,7 +4,7 @@ PRAGMA foreign_keys = ON;
  * CREATE tasks TABLE
  ******************************************************************************/
 CREATE TABLE tasks (
-    uniqueId         INTEGER PRIMARY KEY,
+    uniqueId         INTEGER PRIMARY KEY AUTOINCREMENT,
     name             TEXT    NOT NULL DEFAULT "Task",
     parentId         INTEGER DEFAULT NULL REFERENCES tasks(uniqueId)
 						ON UPDATE CASCADE
@@ -16,10 +16,11 @@ CREATE TABLE tasks (
 						ON UPDATE CASCADE
 						ON DELETE SET DEFAULT,
 	status			 TEXT    NOT NULL DEFAULT "Active",
+	deferred         TEXT,
+    due              TEXT,
+    notes			 TEXT,
     created          TEXT    DEFAULT (datetime('sys_clk_now', 'utc')),
-    modified         TEXT    DEFAULT (datetime('sys_clk_now', 'utc')),
-    deferred         TEXT,
-    due              TEXT
+    modified         TEXT    DEFAULT (datetime('sys_clk_now', 'utc'))
 );
 
 /******************************************************************************
@@ -27,6 +28,14 @@ CREATE TABLE tasks (
  ******************************************************************************/
 CREATE TRIGGER task_modified
     AFTER UPDATE ON tasks
+        WHEN old.name <> new.name
+    	OR old.parentId <> new.parentId
+    	OR old.contextId <> new.contextId
+    	OR old.projectId <> new.projectId
+    	OR old.status <> new.status
+    	OR old.deferred <> new.deferred
+    	OR old.due <> new.due
+    	OR old.notes <> new.notes
 BEGIN
     UPDATE tasks
         SET modified = datetime('sys_clk_now','utc')
@@ -46,4 +55,13 @@ VALUES
     ('Do laundry',     9),
     ('Call Mami',      5),
     ('Comb hair',      9);
+    
+INSERT INTO tasks(name, contextId, parentId)
+VALUES
+	('Weed eat', 9, 4)
+
+
+
+
+
 

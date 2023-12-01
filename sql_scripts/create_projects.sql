@@ -4,7 +4,7 @@ PRAGMA foreign_keys = ON;
  * CREATE projects TABLE
  ******************************************************************************/
 CREATE TABLE projects (
-    uniqueId         INTEGER PRIMARY KEY,
+    uniqueId         INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     name             TEXT    NOT NULL,
     parentId         INTEGER DEFAULT NULL REFERENCES projects(uniqueId)
 						ON UPDATE CASCADE
@@ -18,11 +18,11 @@ CREATE TABLE projects (
 	notes			 TEXT,
 	type			 TEXT 	 NOT NULL DEFAULT "Parallel",
 	completeWithLast INTEGER NOT NULL DEFAULT 0,
-	repeating        INTEGER DEFAULT 0, /* 0 == False; >0 == True */
-	repeatFrom       TEXT    DEFAULT "due",
+	repeating        INTEGER NOT NULL DEFAULT 0, /* 0 == False; >0 == True */
+	repeatFrom       TEXT    NOT NULL DEFAULT "due",
 	repeatEveryFile  TEXT,   /* Contains a path to a JSON file containing repeat parameters */
-    created          TEXT    DEFAULT (datetime('sys_clk_now', 'utc')),
-    modified         TEXT    DEFAULT (datetime('sys_clk_now', 'utc'))
+    created          TEXT    NOT NULL DEFAULT (datetime('sys_clk_now', 'utc')),
+    modified         TEXT    NOT NULL DEFAULT (datetime('sys_clk_now', 'utc'))
 );
 
 /******************************************************************************
@@ -30,6 +30,16 @@ CREATE TABLE projects (
  ******************************************************************************/
 CREATE TRIGGER project_modified
     AFTER UPDATE ON projects
+    WHEN old.name <> new.name
+    	OR old.parentId <> new.parentId
+    	OR old.status <> new.status
+    	OR old.deferred <> new.deferred
+    	OR old.due <> new.due
+    	OR old.notes <> new.notes
+    	OR old.type <> new.type
+    	OR old.completeWithLast <> new.completeWithLast
+    	OR old.repeating <> new.repeating
+    	OR old.repeatEveryFile <> new.repeatEveryFile
 BEGIN
     UPDATE projects
         SET modified = datetime('sys_clk_now','utc')

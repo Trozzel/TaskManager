@@ -3,5 +3,6 @@
   <component name="SqlDialectMappings">
     <file url="file://$PROJECT_DIR$/sql_scripts/create_projects.sql" dialect="SQLite" />
     <file url="file://$PROJECT_DIR$/sql_scripts/create_tasks.sql" dialect="SQLite" />
+    <file url="PROJECT" dialect="SQLite" />
   </component>
 </project>

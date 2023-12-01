@@ -19,7 +19,8 @@ public:
     // CTORS
     /**************************************************************************/
     // DEFAULT
-    Folder() = default;
+	Folder() = default;
+    Folder(std::string_view name);
 
     // FROM SQLITE
     Folder(const std::string &uniqueIdStr,

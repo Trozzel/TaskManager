@@ -3,12 +3,16 @@
 //
 
 #include "Folder.hpp"
+#include "GtdBase.hpp"
 
 using namespace std;
 
 namespace gtd {
 // CTORS
 /****************************************************************************/
+Folder::Folder(std::string_view name) : 
+	GtdBase(name) {}
+
 Folder::Folder(const string & uniqueIdStr,
                const string & name,
                const string & statusStr,

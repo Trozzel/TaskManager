@@ -9,7 +9,7 @@ string valString(char* val) {
 	return ((val)? val : "NULL");
 }
 
-static int callback (void* data, int numCols, char** values, char** colNames) {
+static int callback (void*, int numCols, char** values, char** colNames) {
 	int status = 0;
 
 	cout << "In callback function" << endl;
@@ -20,7 +20,7 @@ static int callback (void* data, int numCols, char** values, char** colNames) {
 	return status;
 }
 
-int main(int argc, char* argv[]) 
+int main()
 {
 	const char dbPath[] = "../sql_scripts/temp.db";
 	sqlite3* db;

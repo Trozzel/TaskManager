@@ -7,8 +7,6 @@
 
 #include <string>
 
-#include <sqlite3.h>
-
 #include "GtdBase.hpp"
 
 namespace gtd {
@@ -16,7 +14,14 @@ namespace gtd {
 class Context : public GtdBase {
 
 private:
-
+// The following are inherited from gtd::GtdBase
+//protected:
+//    LL_t         _uniqueId{-1};
+//    std::string  _name;
+//    Status       _status{Status::Active};
+//    time_point_t _created;
+//    time_point_t _modified;
+//    LL_t         _parentId{-1};    // _parentId == -1 --> no parent
 public:
 	// CTORS
 	/**************************************************************************/
@@ -24,12 +29,12 @@ public:
 	Context() = default;
 
 	// FROM SQLITE
-	Context(std::string uniqueId,
-			std::string name,
-			std::string statusStr,
-			std::string createdStr,
-		    std::string modifiedStr,
-			std::string parentIdStr);
+	Context(const std::string& uniqueId,
+			std::string_view name,
+			const std::string& statusStr,
+			const std::string& createdStr,
+		    const std::string& modifiedStr,
+			const std::string& parentIdStr);
 
 	~Context() override = default;
 };

@@ -4,14 +4,14 @@ PRAGMA foreign_keys = ON;
  * CREATE contexts TABLE
  ******************************************************************************/
 CREATE TABLE contexts (
-    uniqueId         INTEGER PRIMARY KEY,
+    uniqueId         INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
     name             TEXT    NOT NULL,
     parentId         INTEGER DEFAULT NULL REFERENCES contexts(uniqueId)
 						 ON	UPDATE CASCADE
 						 ON	DELETE SET DEFAULT,
 	status			 TEXT    NOT NULL DEFAULT "Active",
-    created          TEXT    DEFAULT (datetime('sys_clk_now', 'utc')),
-    modified         TEXT    DEFAULT (datetime('sys_clk_now', 'utc'))
+    created          TEXT    NOT NULL DEFAULT (datetime('sys_clk_now', 'utc')),
+    modified         TEXT    NOT NULL DEFAULT (datetime('sys_clk_now', 'utc'))
 );
 
 /******************************************************************************
@@ -19,6 +19,9 @@ CREATE TABLE contexts (
  ******************************************************************************/
 CREATE TRIGGER context_modified
     AFTER UPDATE ON contexts
+        WHEN old.name <> new.name
+    	OR old.parentId <> new.parentId
+    	OR old.status <> new.status
 BEGIN
     UPDATE contexts
         SET modified = datetime('sys_clk_now','utc')

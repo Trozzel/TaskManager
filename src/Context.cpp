@@ -6,23 +6,21 @@
 
 #include "Context.hpp"
 
-using namespace std;
-
 namespace gtd {
 // CTORS
 /****************************************************************************/
-Context::Context(string uniqueIdStr,
-		string name,
-		string statusStr,
-		string created,
-		string modified,
-		string parentIdStr) :
-	GtdBase(std::move(uniqueIdStr),
-          std::move(name),
-          std::move(statusStr),
-          std::move(created),
-          std::move(modified),
-          std::move(parentIdStr))
+Context::Context(const std::string& uniqueIdStr,
+		std::string_view name,
+		const std::string& statusStr,
+		const std::string& created,
+		const std::string& modified,
+		const std::string& parentIdStr) :
+	GtdBase(uniqueIdStr,
+          name,
+          statusStr,
+          created,
+          modified,
+          parentIdStr)
 {
 }
 

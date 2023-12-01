@@ -8,92 +8,83 @@
 #include <iostream>
 #include <string>
 #include <filesystem>
+#include <string_view>
+#include <type_traits>
 
-#include "GtdBase.hpp"
+#include "CompletableBase.hpp"
 #include "GtdHelper.hpp"
-
-namespace fs = std::__fs::filesystem;
 
 namespace gtd {
 
-class Task : public GtdBase {
-
+/// \brief gtd::Task mirrors the table, tasks, as an in-memoy storage of a
+/// given task
+/// \param _contextId - uniqueId of the context to which task is assigned
+/// \param _projectId - uniqueId of the project to which the task belongs
+/// \param _notes - notes
+/// \param _deferred - deferred start date 
+/// \param _due - due date 
+/// \param _taskType of enum class TaskType. Either Sequential or Parallel 
+/// \param _isRepeating - if this is a recurring task
+/// \param _flagged - is flagged or not
+/// \param _repeatSchedule - crontab format repeat schedule
+class Task final : public CompletableBase {
 private:
-    ULL                  _contextId=0;
-    ULL                  _projectId=0;
-    std::string          _notes;
-    time_point_t         _deferred = std::chrono::system_clock::now();
-    time_point_t         _due = std::chrono::system_clock::now();
-    TaskType             _taskType = TaskType::Parallel;
-    bool                 _isRepeating = false;
-    RepeatFrom           _repeatFrom = RepeatFrom::Due;
-    fs::directory_entry  _repeatFromPath;
-
-    // PRIVATE FUNCTIONS
-    static TaskType strToTaskType(const std::string& taskTypeStr);
+	// hide from Project since Project has a ProjectType
+    TaskType            _taskType {TaskType::Parallel};
+    LL_t                _projectId {-1};
 
 public:
+    // STATIC FUNCTIONS
+    static constexpr
+    TaskType strToTaskType(std::string_view taskTypeStr) noexcept; 
+
     // CTORS
-    explicit Task(const std::string & name = "");
+    Task(std::string_view name = "") :
+            CompletableBase(name) {
+    }
 
-    ~Task() override = default;
+    ~Task() final = default;
 
-    // GETTERS
-	inline ULL contextId() const;
+    [[nodiscard]] [[maybe_unused]]
+	constexpr LL_t 
+    projectId() const noexcept {
+        return _projectId;
+    }
 
-	inline ULL projectId() const;
-    
-	[[nodiscard]] const std::string & notes() const;
-
-    [[nodiscard]] const time_point_t & deferred() const;
-
-    [[nodiscard]] const time_point_t & due() const;
-
-    [[nodiscard]] TaskType taskType() const;
-
-    [[nodiscard]] bool isIsRepeating() const;
-
-    [[nodiscard]] RepeatFrom repeatFrom() const;
-
-    [[nodiscard]] const fs::directory_entry &repeatFromPath() const;
-
-    [[nodiscard]] const time_point_t &getDeferred() const;
-
-    [[nodiscard]] bool isCompleteWithLast() const;
-
-    [[nodiscard]] const fs::directory_entry &getRepeatFromPath() const;
+    [[nodiscard]] [[maybe_unused]]
+	constexpr TaskType 
+    taskType() const noexcept {
+        return _taskType;
+    }
 
     // SETTERS
-	inline void setProjectId(ULL projectId);
-	void setProjectId(const std::string & projectIdStr);
+    /*************************************************************************/
+    [[maybe_unused]]
+	constexpr void 
+    setProjectId(LL_t projectId) noexcept {
+        _projectId = projectId;
+    }
 
-    void setContextId(ULL contextId);
-    void setContextId(const std::string & contextIdStr);
+	void 
+    setProjectIdFromStr(const std::string& projectIdStr) {
+        _projectId = (projectIdStr.empty()) ? -1 : std::stoll(projectIdStr);
+    }
 
-    void setNotes(const std::string &notes);
+	[[maybe_unused]]
+	constexpr void 
+    setTaskType(TaskType taskType) noexcept {
+		_taskType = taskType;
+	}
 
-    void setDeferred(const time_point_t &deferred);
-    void setDeferred(const std::string & deferredStr);
+	[[maybe_unused]]
+	void 
+    setTaskType(const std::string &taskType);
 
-    void setDue(const time_point_t &due);
-    void setDue(const std::string & dueStr);
-
-    void setTaskType(TaskType taskType);
-    void setTaskType(const std::string & taskType);
-
-    void setIsRepeating(bool isRepeating);
-    void setIsRepeating(const std::string& isRepeating);
-
-    void setRepeatFrom(RepeatFrom repeatFrom);
-    void setRepeatFrom(const std::string & repeatFromStr);
-
-    void setRepeatFromPath(const fs::directory_entry& dir);
-    void setRepeatFromPath(const std::string& dir);
-
-    friend std::ostream& operator<<(std::ostream& out, const Task& task);
 };
 
 } // namespace gtd
 
+std::ostream&
+operator<<(std::ostream &out, const gtd::Task &task);
 
 #endif //GTD_TASK_HPP

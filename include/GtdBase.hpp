@@ -7,64 +7,62 @@
 #include <iomanip>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <chrono>
 #include <cctype>
+#include <utility>
 
 #include <fmt/chrono.h>
 
 #include "GtdHelper.hpp"
 
-using ULL = unsigned long long;
+using LL_t = long long;
 
 namespace gtd {
 
 class GtdBase {
 
 protected:
-    ULL          _uniqueId;
+    LL_t         _uniqueId{-1};
     std::string  _name;
-    Status       _status;
+    Status       _status{Status::Active};
     time_point_t _created;
     time_point_t _modified;
-    ULL          _parentId;    // _parentId == 0 --> no parent
-
-    /// Convert an ASCII time string to chrono::system_clock::time_point
-    /// \param tpStr ASCII string with format: yyyy-mm-dd hh:mm:ss
-    static time_point_t strToTimePoint(const std::string &tpStr) {
-        std::tm           tm = {};
-        std::stringstream ss(tpStr);
-        ss >> std::get_time(&tm, "%Y-%m-%d %H:%M:%S");
-        return std::chrono::system_clock::from_time_t(std::mktime(&tm));
-    }
+    LL_t         _parentId{-1};    // _parentId == -1 --> no parent
 
 public:
     // CTORS
     /**************************************************************************/
     GtdBase() = default;
 
-    explicit GtdBase(std::string name) :
-            _name(std::move(name)) {
-    }
+    GtdBase(std::string_view name) :
+            _uniqueId(-1),
+            _name(name),
+            _status(Status::Active),
+            _created(std::chrono::system_clock::now()),  // trivially_copyable
+            _modified(std::chrono::system_clock::now()), // trivially_copyable
+            _parentId(-1) {}
 
     // BY READING IN DATA AS STRINGS
     GtdBase(const std::string &uniqueIdStr,
-            const std::string &name,
+            std::string_view name,
             const std::string &statusStr,
-            const std::string &createdStr,
-            const std::string &modifiedStr,
+            const std::string &createdStr = "",
+            const std::string &modifiedStr = "",
             const std::string &parentIdStr = "") :
             _uniqueId(stoll(uniqueIdStr)),
             _name(name),
             _status(strToStatus(statusStr)),
-            _parentId(stoll(parentIdStr)) {
-        // IF CREATED STRING IS EMPTY
+            _parentId(stoll(parentIdStr))
+	{
+        // IF CREATED STRING IS EMPTY -> ::now()
         if (createdStr.empty()) {
             _created = std::chrono::system_clock::now();
         }
-            // MAKE _created == NOW
         else {
             _created = strToTimePoint(createdStr);
         }
+        // IF MODIFIED STRING IS EMPTY -> ::now()
         if (modifiedStr.empty()) {
             _modified = std::chrono::system_clock::now();
         }
@@ -73,86 +71,142 @@ public:
         }
     }
 
-    virtual ~GtdBase() = default;
+	/// \brief declared as a virtual destructor. But since children will call
+	/// this destructor, it is 
+    virtual ~GtdBase() = 0; // pure virtual destructor
 
     // GETTERS
     /**************************************************************************/
-    inline ULL uniqueId() const { return _uniqueId; }
+    [[nodiscard]]
+    constexpr LL_t 
+	uniqueId() const noexcept { return _uniqueId; }
 
-    inline std::string name() { return _name; }
+    constexpr std::string_view 
+	name() const noexcept { return _name;} const // implicit conversion to std::string_view
 
-    inline Status status() { return _status; }
+    constexpr Status 
+	status() const noexcept { return _status; }
 
-    std::string statusStr() { return statusToStr(_status); }
+    constexpr std::string_view 
+	statusStr() const noexcept { return statusToStr(_status); }
 
-    inline time_point_t
-    created() { return _created; }
+    constexpr time_point_t 
+	created() const noexcept { return _created; }
 
-    std::string createdStr() { return fmt::format("{}", _created); }
+    std::string createdStr() 
+	const { return fmt::format("{}", _created); }
 
-    inline time_point_t
-    modified() { return _modified; }
+    constexpr time_point_t 
+	modified() const noexcept { return _modified; }
 
-    std::string modifiedStr() { return fmt::format("{}", _modified); }
+    std::string 
+	modifiedStr() const { return fmt::format("{}", _modified); }
 
-    virtual inline ULL parentId() const { return _parentId; }
+    constexpr LL_t parentId() const noexcept { return _parentId; } const
 
     // SETTERS
-    void setUniqueId(const std::string &uniqueIdStr) {
-        _uniqueId = stoll(uniqueIdStr);
+    /**************************************************************************/
+    void 
+	setUniqueIdFromStr(const std::string &uniqueIdStr) {
+        _uniqueId = (uniqueIdStr.empty()) ? -1 : stoll(uniqueIdStr);
     }
 
-    void setUniqueId(ULL id) {
+    [[maybe_unused]]
+    void 
+	setUniqueId(LL_t id) noexcept {
         _uniqueId = id;
     }
 
-    void setName(const std::string &name) {
+    void 
+	setName(std::string_view name) noexcept {
         _name = name;
     }
 
-    void setStatus(const std::string &statusStr) {
+    void 
+	setStatus(std::string_view statusStr) {
         _status = strToStatus(statusStr);
     }
 
-    void setStatus(Status status) {
+    [[maybe_unused]]
+    constexpr void 
+	setStatus(Status status) noexcept {
         _status = status;
     }
 
-    void setCreated(const std::string &created) {
+    void 
+	setCreated(std::string_view created) {
         _created = strToTimePoint(created);
     }
 
-    void setCreated(const time_point_t &tp) {
+    [[maybe_unused]]
+    constexpr void 
+	setCreated(time_point_t tp) noexcept {
         _created = tp;
     }
 
-    void setModified(const std::string &modified) {
+    void 
+	setModified(std::string_view modified) {
         _modified = strToTimePoint(modified);
     }
 
-    void setModified(const time_point_t &tp) {
+    [[maybe_unused]]
+    constexpr void 
+	setModified(time_point_t tp) noexcept {
         _modified = tp;
     }
 
-    virtual void setParentId(const std::string &parentIdStr) {
-        _parentId = stoll(parentIdStr);
+    virtual void 
+	setParentIdFromStr(const std::string &parentIdStr) {
+        _parentId = (parentIdStr.empty()) ? -1 : stoll(parentIdStr);
     }
 
-    virtual void setParentId(ULL id) {
+    [[maybe_unused]]
+    constexpr virtual void 
+	setParentId(LL_t id) {
         _parentId = id;
     }
 
-    friend std::ostream &operator<<(std::ostream &out, const GtdBase &base) {
+    friend std::ostream&
+	operator<<(std::ostream &out, const GtdBase &base) {
         out << base._uniqueId << " " << base._name << " "
             << statusToStr(base._status) << " "
-            << fmt::format("{} ", base._created)
-            << fmt::format("{} ", base._modified)
+            << timePointToStr(base._created) << " "
+            << timePointToStr(base._modified) << " "
             << base._parentId;
 
         return out;
     };
 
 };
+//								HELPER FUNCTIONS
+/*****************************************************************************/
+
+/// \brief Get parent from task
+/// \note Must check for it == gtdItems.end() on call
+template<typename Gtd, typename VectorGtd>
+const auto
+getParent_it(Gtd& child, VectorGtd& gtdItems) {
+    static_assert(std::is_base_of_v<gtd::GtdBase, Gtd>);
+	static_assert(std::is_base_of_v<gtd::GtdBase, typename VectorGtd::value_type>);
+    auto parentId = child.parentId();
+    auto it = std::find_if(gtdItems.begin(), gtdItems.end(), 
+			[parentId](const Gtd& item) { 
+			return item.uniqueId() == parentId;
+    });
+    return it;
+}
+
+/// Find element by uniqueId
+template<typename Gtd>
+std::string_view 
+getNameById(const std::vector<const Gtd>& gtdItems, LL_t id) {
+	static_assert(std::is_base_of_v<gtd::GtdBase, Gtd>);
+	auto it = std::find_if(gtdItems.begin(), gtdItems.end(),
+                            [&gtdItems, id](const Gtd& task) {
+                                return task.uniqueId() == id;
+                            });
+    return (it != gtdItems.end()) ? it->name() : "NA";
+}
 
 } // namespace gtd
 

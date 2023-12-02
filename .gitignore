@@ -1,5 +1,15 @@
 *.cache
 *.swp
+.clangd
+.idea
+.vscode
 build/
 *.cbp
+*.DS_Store
+temp*
 
+cmake-build-*
+old_stuff
+sql_scripts/create_*
+sql_scripts/temp.db
+src/SQLiteCpp

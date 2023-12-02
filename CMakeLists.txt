@@ -47,11 +47,14 @@ target_link_libraries ( sqlplay
     dl)
 
 add_executable ( temp
+        src/GtdHelper.cpp
 		src/GtdBase.cpp
 		src/CompletableBase.cpp
+		src/ImplHelpers.cpp
+		src/Context.cpp
         src/Task.cpp
-        src/GtdHelper.cpp
 		src/Project.cpp
+		src/Folder.cpp
         temp.cpp)
 
 target_link_libraries ( temp

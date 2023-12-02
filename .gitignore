@@ -3,10 +3,12 @@
 .clangd
 .idea
 .vscode
+*.dSYM
 build/
 *.cbp
 *.DS_Store
-temp*
+temp2*
+
 
 cmake-build-*
 old_stuff

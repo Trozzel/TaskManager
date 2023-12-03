@@ -1,0 +1,2 @@
+[database]
+dev_db='../sql_scripts/gtd_db_dev.db'

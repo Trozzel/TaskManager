@@ -10,7 +10,15 @@
 #include <string>
 #include <string_view>
 #include <sstream>
+
 #include "fmt/core.h"
+#include "toml.hpp"
+
+// Check for compile time RUNMODE
+#ifndef RUNMODE
+#warning "RUNMODE not set"
+#define RUNMODE "dev"
+#endif
 
 using time_point_t = std::chrono::time_point<std::chrono::system_clock>;
 
@@ -43,20 +51,37 @@ enum class ProjectType {
 /// \note: string_view copy ctor is noexcept, thus enabling noexcept for
 ///        string_view returns
 // Status strings
-static std::string_view s_strActive{"Active"};
-static std::string_view s_strOnHold{"OnHold"};
-static std::string_view s_strDropped{"Dropped"};
-static std::string_view s_strCompleted{"Completed"};
+static constexpr std::string_view s_strActive{"Active"};
+static constexpr std::string_view s_strOnHold{"OnHold"};
+static constexpr std::string_view s_strDropped{"Dropped"};
+static constexpr std::string_view s_strCompleted{"Completed"};
 
 // Repeat task strings
-static std::string_view s_strDeferred{"Deferred"};
-static std::string_view s_strDue{"Due"};
+static constexpr std::string_view s_strDeferred{"Deferred"};
+static constexpr std::string_view s_strDue{"Due"};
 
 // Task and Project type strings
-static std::string_view s_strParallel{"Parallel"};
-static std::string_view s_strSequential{"Sequential"};
-static std::string_view s_strSingleActions{"SingleActions"};
+static constexpr std::string_view s_strParallel{"Parallel"};
+static constexpr std::string_view s_strSequential{"Sequential"};
+static constexpr std::string_view s_strSingleActions{"SingleActions"};
 
+// GTD Configuration file
+static constexpr std::string_view confFilePath = "../conf/gtd-conf.toml";
+
+/// \brief Get the filename of the database to use from config file
+static std::string_view
+getDbConnPath() {
+	auto config = toml::parse_file(confFilePath);
+	auto op_tableName = config["database"][fmt::format("{}_db", RUNMODE)]
+					 .value<std::string_view>();  // -> std::optional<std::string_view>
+	std::string_view tableName;
+	if(op_tableName.has_value()){
+		tableName = op_tableName.value();
+	} else {
+		tableName = "../conf/sql_scripts/gtd_db_dev.db";
+	}
+	return tableName;
+}
 
 /// \brief Convert string to a Status
 [[nodiscard]]

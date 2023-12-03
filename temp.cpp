@@ -15,6 +15,7 @@
 #include <vector>
 #include <ranges>
 	
+#include "toml.hpp"
 #include "SQLiteCpp/SQLiteCpp.h"
 #include "Folder.hpp"
 #include "Project.hpp"
@@ -60,10 +61,12 @@ formatColumns(const std::vector<const Gtd> & gtdItems) {
 /*****************************************************************************/
 int main()
 {
-    auto contexts = gtd::importContexts("../sql_scripts/temp.db");
-    auto tasks    = gtd::importTasks("../sql_scripts/temp.db");
-    auto projects = gtd::importProjects("../sql_scripts/temp.db");
-    auto folders  = gtd::importFolders("../sql_scripts/temp.db");
+	auto tableName = gtd::getDbConnPath();
+	std::cout << tableName << std::endl;
+    auto contexts = gtd::importContexts(tableName);
+    auto tasks    = gtd::importTasks(tableName);
+    auto projects = gtd::importProjects(tableName);
+    auto folders  = gtd::importFolders(tableName);
 
     if(tasks.empty()) {
 		fmt::println(stderr, "Did not find any tasks");

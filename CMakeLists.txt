@@ -12,11 +12,9 @@ ENDIF()
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++20")
 
 # C++ Sqlite Library
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/SQLiteCpp)
-
 find_package(SQLite3)
 
 include_directories(
@@ -29,6 +27,13 @@ include_directories(
 link_directories ( /usr/local/lib ${CMAKE_CURRENT_SOURCE_DIR}/src/SQLiteCpp )
 
 find_package(fmt)
+
+# AUTO ADD DEFINITIONS TO CODE BASED UPON BUILD TYPE
+IF(CMAKE_BUILD_TYPE STREQUAL "Release")
+	ADD_COMPILE_DEFINITIONS(RUNMODE="prod")
+ELSEIF(CMAKE_BUILD_TYPE STREQUAL "Debug")
+	ADD_COMPILE_DEFINITIONS(RUNMODE="dev")
+ENDIF()
 
 add_executable ( sqlplay
     src/sql_play.cpp

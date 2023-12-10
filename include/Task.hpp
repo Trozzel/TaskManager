@@ -6,6 +6,7 @@
 #define GTD_TASK_HPP
 
 #include <iostream>
+#include <memory>
 #include <string>
 #include <filesystem>
 #include <string_view>
@@ -27,26 +28,40 @@ namespace gtd {
 /// \param _isRepeating - if this is a recurring task
 /// \param _flagged - is flagged or not
 /// \param _repeatSchedule - crontab format repeat schedule
-class Task final : public CompletableBase {
+class Task : public CompletableBase {
 private:
 	// hide from Project since Project has a ProjectType
-    TaskType            _taskType {TaskType::Parallel};
-    LL_t                _projectId {-1};
+    TaskType								_taskType { TaskType::Parallel };
+	std::optional<unique_id_t>  			_projectId { std::nullopt };
 
 public:
     // STATIC FUNCTIONS
     static constexpr
-    TaskType strToTaskType(std::string_view taskTypeStr) noexcept; 
+    TaskType strToTaskType(std::string_view taskTypeStr) noexcept {
+		TaskType taskType;
+		if (taskTypeStr == "Parallel") {
+			taskType = TaskType::Parallel;
+		}
+		else if (taskTypeStr == "Sequential") {
+			taskType = TaskType::Sequential;
+		}
+		else {
+			fmt::print(stderr, "Incorrect Task Type String: '{}'\n", taskTypeStr);
+			taskType = TaskType::Parallel;
+		}
+		return taskType;
+	}
 
     // CTORS
-    Task(std::string_view name = "") :
-            CompletableBase(name) {
-    }
+    Task(USMgr&, std::string_view name = ""); 
 
+	// DTOR
     ~Task() final = default;
 
+	// GETTERS
+	/*************************************************************************/
     [[nodiscard]] [[maybe_unused]]
-	constexpr LL_t 
+	constexpr std::optional<unique_id_t>
     projectId() const noexcept {
         return _projectId;
     }
@@ -59,26 +74,14 @@ public:
 
     // SETTERS
     /*************************************************************************/
-    [[maybe_unused]]
-	constexpr void 
-    setProjectId(LL_t projectId) noexcept {
-        _projectId = projectId;
-    }
+	void
+    setProjectId(unique_id_t projectId, bool update); 
 
-	void 
-    setProjectIdFromStr(const std::string& projectIdStr) {
-        _projectId = (projectIdStr.empty()) ? -1 : std::stoll(projectIdStr);
-    }
+	void
+    setTaskType(TaskType taskType, bool update);
 
-	[[maybe_unused]]
-	constexpr void 
-    setTaskType(TaskType taskType) noexcept {
-		_taskType = taskType;
-	}
-
-	[[maybe_unused]]
-	void 
-    setTaskType(const std::string &taskType);
+	void
+    setTaskType(std::string_view taskType, bool update);
 
 };
 

@@ -6,6 +6,7 @@
 #define  __COMPLETABLE_BASE_HPP__
 
 #include <iostream>
+#include <optional>
 #include <string>
 #include <filesystem>
 #include <string_view>
@@ -18,7 +19,6 @@ namespace gtd {
 
 /// \param _contextId - uniqueId of the context to which task is assigned
 /// \param _projectId - uniqueId of the project to which the task belongs
-/// \param _notes - notes
 /// \param _deferred - deferred start date 
 /// \param _due - due date 
 /// \param _isRepeating - if this is a recurring task
@@ -26,47 +26,49 @@ namespace gtd {
 /// \param _repeatSchedule - crontab format repeat schedule
 class CompletableBase : public GtdBase {
 protected:
-    LL_t                _contextId {-1};
-    std::string         _notes {};
-    time_point_t        _deferred {std::chrono::system_clock::now()};
-    time_point_t        _due {std::chrono::system_clock::now()};
-    bool                _isRepeating {false};
-	bool				_flagged {false};
-	RepeatFrom			_repeatFrom { RepeatFrom::Due };
-	std::string_view	_repeatSchedule {"30 16 * * *"}; // Every day at 4:30pm
+	std::optional<unique_id_t>		_o_contextId {std::nullopt};
+	std::optional<time_point_t>     _o_deferred {std::nullopt};
+    std::optional<time_point_t>     _o_due {std::nullopt};
+    bool							_isRepeating {false};
+	bool							_flagged {false};
+	RepeatFrom						_repeatFrom { RepeatFrom::Due };
+	std::string_view				_repeatSchedule {"30 16 * * *"}; // Every day at 4:30pm
 
 public:
     // CTORS
-    CompletableBase(std::string_view name = "") :
-            GtdBase(name) {
-    }
+    CompletableBase(USMgr&, std::string_view name = "");
 
 	/// \brief although pure virtual destructor, still needs definition for
 	/// children destructors
     virtual ~CompletableBase() = 0;
 
     // GETTERS
+	/*************************************************************************/
     [[nodiscard]] [[maybe_unused]]
-	constexpr LL_t
+	constexpr std::optional<unique_id_t>
     contextId() const noexcept {
-        return _contextId;
+        return _o_contextId;
     }
 
     [[nodiscard]] [[maybe_unused]]
-	std::string_view 
-    notes() const;
+	constexpr const std::optional<time_point_t>
+    deferred() const noexcept {
+        return _o_deferred;
+    }
 
     [[nodiscard]] [[maybe_unused]]
-	constexpr const time_point_t
-    deferred() const noexcept {
-        return _deferred;
+	std::optional<std::string>
+    deferredStr() const;
+
+    [[nodiscard]]
+	constexpr std::optional<time_point_t>
+    due() const noexcept {
+        return _o_due;
     }
 
     [[nodiscard]]
-	constexpr time_point_t  
-    due() const noexcept {
-        return _due;
-    }
+	std::optional<std::string>
+    dueStr() const; 
 
     [[nodiscard]] [[maybe_unused]]
 	constexpr bool 
@@ -80,10 +82,15 @@ public:
 		return _flagged;
 	}
 
+	[[nodiscard]]
 	constexpr RepeatFrom
 	repeatFrom() const noexcept {
 		return _repeatFrom;
 	}
+
+	[[nodiscard]]
+	std::string_view
+	repeatFromStr() const;
 
 	[[nodiscard]]
 	constexpr std::string_view
@@ -94,70 +101,47 @@ public:
     // SETTERS
     /*************************************************************************/
     [[maybe_unused]]
-	constexpr void 
-    setContextId(LL_t contextId) noexcept {
-        _contextId = contextId;
-    }
+	void 
+    setContextId(unique_id_t contextId, bool update); 
 
 	void 
-    setContextIdFromStr(const std::string& contextIdStr) {
-        _contextId = (contextIdStr.empty()) ? -1 : stoll(contextIdStr);
-    }
+    setDeferred(time_point_t deferred, bool update); 
+	[[maybe_unused]]
+
+	void 
+    setDeferred(std::string_view deferredStr, bool update);
+
+	[[maybe_unused]]
+	void 
+    setDue(time_point_t due, bool update); 
+
+	[[maybe_unused]]
+	void 
+    setDue(std::string_view dueStr, bool update);
+
+	[[maybe_unused]]
+	void 
+    setTaskType(const std::string &taskType, bool update);
+
+	[[maybe_unused]]
+	void 
+    setIsRepeating(const int isRepeating, bool update); 
 
     [[maybe_unused]]
-    void setNotes(std::string_view notes) {
-        _notes = notes;
-    }
-
-	constexpr void 
-    setDeferred(time_point_t deferred) {
-        _deferred = deferred;
-    }
-
-	[[maybe_unused]]
-	void 
-    setDeferred(std::string_view deferredStr);
-
-	[[maybe_unused]]
-	constexpr void 
-    setDue(time_point_t due) {
-		_due = due;
-	}
-
-	[[maybe_unused]]
-	void 
-    setDue(std::string_view dueStr);
-
-
-	[[maybe_unused]]
-	void 
-    setTaskType(const std::string &taskType);
-
-	[[maybe_unused]]
-	constexpr void 
-    setIsRepeating(const int isRepeating) noexcept {
-		_isRepeating = isRepeating;
-	}
+	void
+    setFlagged(const int flagged, bool update); 
 
     [[maybe_unused]]
-	constexpr void
-    setFlagged(const int flagged) noexcept {
-		_flagged = flagged;
-	}
-
-    [[maybe_unused]]
-	constexpr void
-    setRepeatFrom(RepeatFrom repeatFrom) noexcept;
+	void
+    setRepeatFrom(RepeatFrom repeatFrom, bool update);
 
 	[[maybe_unused]]
 	void
-	setRepeatFrom(std::string_view repeatFromStr);
+	setRepeatFrom(std::string_view repeatFromStr, bool update);
 
     [[maybe_unused]]
-	constexpr void
-	setRepeatSchedule(std::string_view repeatSchedule) noexcept {
-		_repeatSchedule = repeatSchedule;
-	}
+	void
+	setRepeatSchedule(std::string_view repeatSchedule, bool update) ;
 };
 
 } // namespace gtd

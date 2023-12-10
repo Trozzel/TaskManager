@@ -19,21 +19,16 @@ public:
     // CTORS
     /**************************************************************************/
     // DEFAULT
-	Folder() = default;
-    Folder(std::string_view name);
-
-    // FROM SQLITE
-    Folder(const std::string &uniqueIdStr,
-           const std::string &name,
-           const std::string &statusStr,
-           const std::string &created,
-           const std::string &modified,
-           const std::string &parentIdStr);
+    Folder(USMgr&, std::string_view name = "");
 
     ~Folder() override = default;
 
-    friend std::ostream& operator<<(std::ostream& out, const Folder& folder);
+	// GETTERS
+	/*************************************************************************/
 };
 
 } // namespace gtd
+
+std::ostream& 
+operator<<(std::ostream& out, const gtd::Folder& folder);
 #endif //GTD_FOLDER_HPP

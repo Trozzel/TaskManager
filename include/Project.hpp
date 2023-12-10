@@ -5,7 +5,6 @@
 #include <list>
 #include <initializer_list>
 
-#include <fmt/format.h>
 #include <string_view>
 #include <type_traits>
 
@@ -16,34 +15,38 @@
 
 namespace gtd {
 
-class Project final : public CompletableBase {
+class Project : public CompletableBase {
 
 private:
-	ProjectType			 _projectType {ProjectType::Parallel};
-	LL_t				 _folderId {-1};
-    std::list<LL_t>      _taskIds {};
-    bool                 _completeWithLast { true };
-	std::string_view     _reviewSchedule = {"0 0 * * 0"}; // 12a every Sunday
+	ProjectType					_projectType { ProjectType::Parallel };
+	std::optional<unique_id_t>  _folderId { std::nullopt };
+    std::list<unique_id_t>      _taskIds {};
+    bool						_completeWithLast { true };
+	std::string_view     		_reviewSchedule = {"0 0 * * 0"}; // 12a every Sunday
 
 public:
     // STATIC FUNCTIONS
+	[[nodiscard]]
     static constexpr ProjectType 
-	strToProjectType(std::string_view taskProjectStr) noexcept;
+	strToProjectType(std::string_view projectTypeStr) noexcept {
+		return projectTypeFromStr(projectTypeStr);
+	}
 
     // CTORS
     /**************************************************************************/
     // DEFAULT
-    Project(std::string_view name = "");
+    Project(USMgr&, std::string_view name = "");
 
     ~Project() final = default;
 
     // GETTERS
+	/*************************************************************************/
     [[nodiscard]]
 	constexpr ProjectType
 	projectType() const noexcept { return _projectType; }
 
 	[[nodiscard]]
-	constexpr LL_t
+	constexpr std::optional<unique_id_t>
 	folderId() const noexcept { return _folderId; }
 
     [[nodiscard]] 
@@ -52,58 +55,47 @@ public:
 
 	[[nodiscard]]
 	constexpr std::string_view
-	reviewSchedule() noexcept { return _reviewSchedule; }
+	reviewSchedule() const noexcept { return _reviewSchedule; }
 
     // SETTERS
+	/*************************************************************************/
 	void 
-	setTaskIds(const std::initializer_list<LL_t> & taskIds);
+	setTaskIds(const std::initializer_list<unique_id_t> & taskIds);
+
 	void 
-	setTaskIds(const std::list<LL_t> & taskIds);
+	setTaskIds(const std::list<unique_id_t> & taskIds);
+
     template<typename Iter>
     void 
 	setTaskIds(Iter begin, Iter end);
 
     void 
-	appendTaskIds(const std::initializer_list<LL_t> & taskIds);
+	appendTaskIds(const std::initializer_list<unique_id_t> & taskIds);
+
 	void 
-	appendTaskIds(const std::list<LL_t> & taskIds);
+	appendTaskIds(const std::list<unique_id_t> & taskIds);
+
     template<typename Iter>
     void 
 	appendTaskIds(Iter begin, Iter end);
 
     void 
-	appendTaskId(LL_t taskId);
+	appendTaskId(unique_id_t taskId);
+
     void 
-	appendTaskId(const std::string& taskIdStr);
+	setProjectType(ProjectType projectType, bool update);
 
-    constexpr void 
-	setProjectType(ProjectType projectType) noexcept {
-		_projectType = projectType;
-	}
     void 
-	setProjectType(std::string_view projectType);
+	setProjectType(std::string_view projectType, bool update);
 
-	constexpr void
-	setFolderId(LL_t folderId) noexcept {
-		_folderId = folderId;
-	}
+	void
+	setFolderId(unique_id_t folderId, bool update);
 
-    constexpr void 
-	setCompleteWithLast(bool completeWithLast) noexcept {
-		_completeWithLast = completeWithLast;
-	}
     void 
-	setCompleteWithLast(const std::string& completeWithLastStr);
-    void 
-	setCompleteWithLast(const int completeWithLast);
+	setCompleteWithLast(bool completeWithLast, bool update);
 
-	constexpr void
-	setReviewSchedule(std::string_view reviewSchedule) noexcept {
-		_reviewSchedule = reviewSchedule;
-	}
-
-    friend std::ostream& 
-	operator<<(std::ostream& out, const Project& project);
+	void
+	setReviewSchedule(std::string_view reviewSchedule, bool update);
 };
 
 //							HELPER FUNCTIONS
@@ -134,6 +126,8 @@ using Projects_vec = std::vector<const gtd::Project>;
 const auto
 getProject_it(const gtd::Task& task, const Projects_vec& projects);
 
+std::ostream& 
+operator<<(std::ostream& out, const Project& project);
 } // namespace gtd
 
 #endif // PROJECTS_HPP

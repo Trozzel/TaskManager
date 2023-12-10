@@ -3,7 +3,7 @@
 --
 -- Text encoding used: UTF-8
 --
-PRAGMA foreign_keys = off;
+PRAGMA foreign_keys = OFF;
 BEGIN TRANSACTION;
 
 -- Table: contexts
@@ -213,4 +213,4 @@ END;
 
 
 COMMIT TRANSACTION;
-PRAGMA foreign_keys = on;
+PRAGMA foreign_keys = ON;

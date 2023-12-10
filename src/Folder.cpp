@@ -5,37 +5,22 @@
 #include "Folder.hpp"
 #include "GtdBase.hpp"
 
-using namespace std;
-
 namespace gtd {
 // CTORS
 /****************************************************************************/
-Folder::Folder(std::string_view name) : 
-	GtdBase(name) {}
+Folder::Folder(USMgr& updateStackMgr, std::string_view name) : 
+	GtdBase(updateStackMgr, name) {}
 
-Folder::Folder(const string & uniqueIdStr,
-               const string & name,
-               const string & statusStr,
-               const string & created,
-               const string & modified,
-               const string & parentIdStr) :
-        GtdBase(uniqueIdStr,
-                name,
-                statusStr,
-                created,
-                modified,
-                parentIdStr)
-{
-}
+} // namespace gtd
 
-ostream& operator<<(ostream& out, const Folder& folder) {
-    out << folder._uniqueId << " " << folder._name << " "
-        << statusToStr(folder._status) << " "
-        << fmt::format("{} ", folder._created)
-        << fmt::format("{} ", folder._modified)
-        << folder._parentId;
+std::ostream& 
+operator<<(std::ostream& out, const gtd::Folder& folder) {
+    out << folder.name() << " "
+        << folder.statusStr() << " "
+        << fmt::format("{} ", folder.created())
+        << fmt::format("{} ", folder.modified())
+        << *folder.parentId();
 
     return out;
 }
 
-}

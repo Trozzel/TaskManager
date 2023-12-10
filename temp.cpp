@@ -8,6 +8,7 @@
 #include <iomanip>
 #include <iostream>
 #include <filesystem>
+#include <memory>
 #include <stdexcept>
 #include <string_view>
 #include <type_traits>
@@ -15,7 +16,8 @@
 #include <vector>
 #include <ranges>
 	
-#include "toml.hpp"
+#include "GtdBase.hpp"
+#include "GtdHelper.hpp"
 #include "SQLiteCpp/SQLiteCpp.h"
 #include "Folder.hpp"
 #include "Project.hpp"
@@ -57,32 +59,60 @@ formatColumns(const std::vector<const Gtd> & gtdItems) {
 	}
 }
 
+
 // MAIN
 /*****************************************************************************/
 int main()
 {
-	auto tableName = gtd::getDbConnPath();
-	std::cout << tableName << std::endl;
-    auto contexts = gtd::importContexts(tableName);
-    auto tasks    = gtd::importTasks(tableName);
-    auto projects = gtd::importProjects(tableName);
-    auto folders  = gtd::importFolders(tableName);
+	auto dbPath = gtd::getDbConnPath();
 
-    if(tasks.empty()) {
-		fmt::println(stderr, "Did not find any tasks");
-		return 1;
-    }
+	// Initiate the DB update managers
+	auto contextUpdater = gtd::USMgr("contexts"); 
+	auto folderUpdater = gtd::USMgr("folders"); 
+	auto taskUpdater = gtd::USMgr("tasks");     
+	auto projectUpdater = gtd::USMgr("projects");
+
+	auto contexts = gtd::importContexts(dbPath, contextUpdater);
+    auto folders  = gtd::importFolders(dbPath, folderUpdater);
+    auto tasks    = gtd::importTasks(dbPath, taskUpdater);
+    auto projects = gtd::importProjects(dbPath, projectUpdater);
 
 	// Get parents from all tasks
-	auto childToParent = tasks 
-		| std::views::filter([](const auto& task) {
-				return task.parentId() != -1;
-				})
-		| std::views::transform([&tasks](const auto& task) {
-				return std::make_pair(task, *getParent_it(task, tasks));
-				});
-	
-	for(const auto& p2c : childToParent) {
-		std::cout << p2c.first.name() << " -> " << p2c.second.name() << std::endl;
-	}
+	//auto childToParent = tasks 
+	//	| std::views::filter([](const auto& task) {
+	//			return task.parentId() != std::nullopt;
+	//			})
+	//	| std::views::transform([&tasks](const auto& task) {
+	//			return std::make_pair(task, *getParent_it(task, tasks));
+	//			});
+	//
+	//for(const auto& p2c : childToParent) {
+	//	std::cout << p2c.first.name() << " -> " << p2c.second.name() << std::endl;
+	//	std::cout << "notes: " << *p2c.first.notes() << std::endl;
+	//}
+
+	// Add new Context and test
+	constexpr bool update     = true;
+	constexpr bool dontUpdate = false;
+	std::unique_ptr<gtd::Context> p_josh = std::make_unique<gtd::Context>(contextUpdater, "Josh");
+	auto res = gtd::insertContext(dbPath, *p_josh);
+	contexts.push_back(*p_josh);
+	//std::cout << "Joshua's new uniqueId: " << *(p_josh->uniqueId()) << std::endl;
+
+	auto p_danielleConcert = std::make_unique<gtd::Project>(projectUpdater, "Danielle's concert");
+	p_danielleConcert->setDue("2023-12-05 18:00:00", dontUpdate);
+	res = gtd::insertProject(dbPath, *p_danielleConcert);
+	projects.push_back(*p_danielleConcert);
+	p_danielleConcert->setContextId(5, update);
+	p_danielleConcert->setProjectType(gtd::ProjectType::Sequential, update);
+	p_danielleConcert->setCompleteWithLast(false, update);
+
+	auto p_buyStocking = std::make_unique<gtd::Task>(taskUpdater, "Buy christmas stocking");
+	p_buyStocking->setDue("2023-12-05 16:00:00", dontUpdate);
+	res = gtd::insertTask(dbPath, *p_buyStocking);
+	tasks.push_back(*p_buyStocking);
+	p_buyStocking->setStatus(gtd::Status::Dropped, update);
+
+	auto pUpdater = projectUpdater.getUpdateStack();
+	std::cout << pUpdater->compose() << std::endl;
 }

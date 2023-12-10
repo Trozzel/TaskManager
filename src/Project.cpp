@@ -1,4 +1,6 @@
 #include "Project.hpp"
+#include "CompletableBase.hpp"
+#include "GtdBase.hpp"
 #include "GtdHelper.hpp"
 #include <string_view>
 
@@ -7,63 +9,82 @@ using namespace std;
 namespace gtd {
 
 
-Project::Project(std::string_view name)
-    : CompletableBase(name)
-{
-}
+Project::Project(USMgr& updateStackMgr, std::string_view name)
+    : CompletableBase(updateStackMgr, name) {}
 
-// STATIC FUNCTIONS
-constexpr ProjectType 
-Project::strToProjectType(std::string_view projectTypeStr) noexcept {
-    return strToProjectType(projectTypeStr);
-}
-
-// SETTERS
+// setters
+/*****************************************************************************/
 void 
-Project::setTaskIds(const std::initializer_list<LL_t> & taskIds) {
+Project::setTaskIds(const std::initializer_list<unique_id_t>& taskIds) {
     _taskIds = taskIds;
 }
 
 void 
-Project::setTaskIds(const std::list<LL_t> &taskIds) {
+Project::setTaskIds(const std::list<unique_id_t> &taskIds) {
     _taskIds = taskIds;
 }
 
 void 
-Project::appendTaskIds(const std::initializer_list<LL_t> & taskIds) {
+Project::appendTaskIds(const std::list<unique_id_t> &taskIds) {
+    _taskIds.insert(_taskIds.end(), taskIds.begin(), taskIds.end());
+}
+
+void 
+Project::appendTaskIds(const std::initializer_list<unique_id_t> & taskIds) {
     for(auto it=taskIds.begin(); it != taskIds.end(); ++it) {
         _taskIds.push_back(*it);
     }
 }
 
 void 
-Project::appendTaskId(LL_t taskId) {
+Project::appendTaskId(unique_id_t taskId) {
     _taskIds.push_back(taskId);
 }
 
 void 
-Project::setProjectType(std::string_view projectType) {
+Project::setProjectType(ProjectType projectType, bool update) {
+	_projectType = projectType;
+	if(update) {
+		auto pUpdateStack = _updateStackMgr.getUpdateStack();
+		pUpdateStack->push(*this, "projectType");
+	}
+}
+
+void 
+Project::setProjectType(std::string_view projectType, bool update) {
     _projectType = strToProjectType(projectType);
+	if(update) {
+		auto pUpdateStack = _updateStackMgr.getUpdateStack();
+		pUpdateStack->push(*this, "projectType");
+	}
 }
 
-void 
-Project::setCompleteWithLast(const std::string & completeWithLastStr) {
-    _completeWithLast = static_cast<bool>(stoll(completeWithLastStr));
+void
+Project::setFolderId(unique_id_t folderId, bool update) {
+	_folderId = folderId;
+	if(update) {
+		auto pUpdateStack = _updateStackMgr.getUpdateStack();
+		pUpdateStack->push(*this, "folderId");
+	}
 }
 
-void 
-Project::setCompleteWithLast(const int completeWithLastStr) {
-    _completeWithLast = static_cast<bool>(completeWithLastStr);
+void
+Project::setCompleteWithLast(bool completeWithLast, bool update)
+{
+	_completeWithLast = completeWithLast;
+	if(update) {
+		auto pUpdateStack = _updateStackMgr.getUpdateStack();
+		pUpdateStack->push(*this, "completeWithLast");
+	}
 }
 
-void 
-Project::appendTaskIds(const std::list<LL_t> &taskIds) {
-    _taskIds.insert(_taskIds.end(), taskIds.begin(), taskIds.end());
-}
-
-void 
-Project::appendTaskId(const std::string &taskIdStr) {
-    _taskIds.push_back(stoll(taskIdStr));
+void
+Project::setReviewSchedule(std::string_view reviewSchedule, bool update) {
+	_reviewSchedule = reviewSchedule;
+	if(update) {
+		auto pUpdateStack = _updateStackMgr.getUpdateStack();
+		pUpdateStack->push(*this, "reviewSchedule");
+	}
 }
 
 const auto
@@ -83,11 +104,12 @@ operator<<(std::ostream& out, const Project& project) {
     out << *pBase;
 
     // SEND REMAINED TO STREAM
-    out << project._notes << " " << fmt::format("{} ", project._deferred)
-        << fmt::format("{} ", project.due())
+    out << *project.notes() << " " 
+		<< *project.deferredStr()
+        << *project.dueStr() << " "
         << projectTypeStr(project.projectType()) << " "
         << ios::boolalpha << project.isRepeating() << " "
-        << repeatFromToStr(project._repeatFrom) << " ";
+        << project.repeatFromStr() << " ";
 
     return out;
 }

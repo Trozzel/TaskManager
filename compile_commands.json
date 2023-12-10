@@ -49,6 +49,12 @@
 },
 {
   "directory": "/Users/jorge/Cpp/gtd_app/cmake-build-debug",
+  "command": "/Library/Developer/CommandLineTools/usr/bin/c++ -DFMT_SHARED -DRUNMODE=\\\"dev\\\" -DSQLITE_ENABLE_COLUMN_METADATA -DSQLITE_ENABLE_JSON1 -I/Users/jorge/Cpp/gtd_app/include -I/Users/jorge/Cpp/gtd_app/src/SQLiteCpp/include -I/Library/Frameworks/Mono.framework/Headers -isystem /usr/local/include -g -std=gnu++20 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.0.sdk -fcolor-diagnostics -o CMakeFiles/temp.dir/src/UpdateStack.cpp.o -c /Users/jorge/Cpp/gtd_app/src/UpdateStack.cpp",
+  "file": "/Users/jorge/Cpp/gtd_app/src/UpdateStack.cpp",
+  "output": "CMakeFiles/temp.dir/src/UpdateStack.cpp.o"
+},
+{
+  "directory": "/Users/jorge/Cpp/gtd_app/cmake-build-debug",
   "command": "/Library/Developer/CommandLineTools/usr/bin/c++ -DFMT_SHARED -DRUNMODE=\\\"dev\\\" -DSQLITE_ENABLE_COLUMN_METADATA -DSQLITE_ENABLE_JSON1 -I/Users/jorge/Cpp/gtd_app/include -I/Users/jorge/Cpp/gtd_app/src/SQLiteCpp/include -I/Library/Frameworks/Mono.framework/Headers -isystem /usr/local/include -g -std=gnu++20 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.0.sdk -fcolor-diagnostics -o CMakeFiles/temp.dir/src/CompletableBase.cpp.o -c /Users/jorge/Cpp/gtd_app/src/CompletableBase.cpp",
   "file": "/Users/jorge/Cpp/gtd_app/src/CompletableBase.cpp",
   "output": "CMakeFiles/temp.dir/src/CompletableBase.cpp.o"

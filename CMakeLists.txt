@@ -52,20 +52,29 @@ target_link_libraries ( sqlplay
     dl)
 
 add_executable ( temp
-        src/GtdHelper.cpp
-		src/GtdBase.cpp
-		src/CompletableBase.cpp
-		src/ImplHelpers.cpp
-		src/Context.cpp
-        src/Task.cpp
-		src/Project.cpp
-		src/Folder.cpp
-        temp.cpp)
+	src/GtdHelper.cpp
+	src/GtdBase.cpp
+	src/UpdateStack.cpp
+	src/CompletableBase.cpp
+	src/ImplHelpers.cpp
+	src/Context.cpp
+	src/Task.cpp
+	src/Project.cpp
+	src/Folder.cpp
+	temp.cpp)
 
 target_link_libraries ( temp
-        ${SQLite3_LIBRARIES}
-        sqlite3
-        fmt::fmt
-        SqliteCpp
-        pthread
-        dl)
+	${SQLite3_LIBRARIES}
+	sqlite3
+	fmt::fmt
+	SqliteCpp
+	pthread
+	dl)
+
+IF( EXISTS "${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json" ) 
+  EXECUTE_PROCESS( COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    ${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json
+    ${CMAKE_CURRENT_SOURCE_DIR}/compile_commands.json
+  )
+ENDIF()
+

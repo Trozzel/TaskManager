@@ -26,17 +26,12 @@ public:
 	// CTORS
 	/**************************************************************************/
 	// DEFAULT
-	Context() = default;
-
-	// FROM SQLITE
-	Context(const std::string& uniqueId,
-			std::string_view name,
-			const std::string& statusStr,
-			const std::string& createdStr,
-		    const std::string& modifiedStr,
-			const std::string& parentIdStr);
+	Context(USMgr&, std::string_view name = "");
 
 	~Context() override = default;
+
+	// GETTERS
+	/*************************************************************************/
 };
 
 } // namespace gtd

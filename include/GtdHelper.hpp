@@ -6,10 +6,12 @@
 #define __GTD_GTDHELPER_HPP__
 
 #include <cstring>
+#include <filesystem>
 #include <iomanip>
 #include <string>
 #include <string_view>
 #include <sstream>
+#include <iostream>
 
 #include "fmt/core.h"
 #include "toml.hpp"
@@ -21,6 +23,7 @@
 #endif
 
 using time_point_t = std::chrono::time_point<std::chrono::system_clock>;
+using unique_id_t = uint64_t;
 
 namespace gtd {
 
@@ -69,16 +72,23 @@ static constexpr std::string_view s_strSingleActions{"SingleActions"};
 static constexpr std::string_view confFilePath = "../conf/gtd-conf.toml";
 
 /// \brief Get the filename of the database to use from config file
-static std::string_view
+static std::string
 getDbConnPath() {
-	auto config = toml::parse_file(confFilePath);
-	auto op_tableName = config["database"][fmt::format("{}_db", RUNMODE)]
-					 .value<std::string_view>();  // -> std::optional<std::string_view>
-	std::string_view tableName;
-	if(op_tableName.has_value()){
-		tableName = op_tableName.value();
-	} else {
-		tableName = "../conf/sql_scripts/gtd_db_dev.db";
+	static bool firstRun = true;
+	static std::string tableName;
+	if(firstRun) {
+		auto config = toml::parse_file(confFilePath);
+		if (config.empty()) {
+			std::cerr << "Error opening config file\n";
+		}
+		auto op_tableName = config["database"][fmt::format("{}_db", RUNMODE)]
+						 .value<std::string_view>();  // -> std::optional<std::string_view>
+		if(op_tableName.has_value()){
+			tableName = op_tableName.value();
+		} else {
+			tableName = "../conf/sql_scripts/gtd_db_dev.db";
+		}
+		firstRun = false;
 	}
 	return tableName;
 }
@@ -164,11 +174,13 @@ constexpr RepeatFrom strToRepeatFrom(std::string_view repeatFromStr) {
 /// \brief Return ascii string of a system_clock::time_point
 //  definition in GtdHelper.cpp
 [[nodiscard]]
-std::string timePointToStr(time_point_t tp);
+std::optional<std::string>
+timePointToStr(time_point_t tp);
 
 /// Return string of project type
 [[nodiscard]]
-constexpr std::string_view projectTypeStr(ProjectType projectType) noexcept {
+constexpr std::string_view 
+projectTypeStr(ProjectType projectType) noexcept {
     std::string_view projTypeStr{};
     switch (projectType) {
     case ProjectType::Parallel:
@@ -186,7 +198,8 @@ constexpr std::string_view projectTypeStr(ProjectType projectType) noexcept {
 
 /// Get ProjectType from string
 [[nodiscard]] [[maybe_unused]]
-constexpr ProjectType projectTypeFromSr(std::string_view projectTypeStr) {
+constexpr ProjectType 
+projectTypeFromStr(std::string_view projectTypeStr) noexcept {
     ProjectType projectType;
     if (projectTypeStr == "Parallel") {
         projectType = ProjectType::Parallel;
@@ -198,15 +211,17 @@ constexpr ProjectType projectTypeFromSr(std::string_view projectTypeStr) {
         projectType = ProjectType::SingleActions;
     }
     else {
-        throw std::runtime_error("Unknown ProjectType string, '"
-                                 + std::string(projectTypeStr) + "'");
+		std::cerr << "Unknown ProjectType, '" << projectTypeStr << "'.\n";
+		std::cout << "Setting ProjectType to 'Parallel'\n";
+		projectType = ProjectType::Parallel;
     }
     return projectType;
 }
 
 /// Return string of project type
 [[nodiscard]]
-constexpr std::string_view taskTypeString(TaskType taskType) noexcept {
+constexpr std::string_view 
+taskTypeString(TaskType taskType) noexcept {
     std::string_view taskTypeStr{};
     switch (taskType) {
     case TaskType::Parallel:
@@ -221,7 +236,8 @@ constexpr std::string_view taskTypeString(TaskType taskType) noexcept {
 
 /// Return TaskType for given string
 [[maybe_unused]] [[nodiscard]]
-constexpr TaskType taskTypeFromString(std::string_view taskTypeStr) {
+constexpr TaskType 
+taskTypeFromString(std::string_view taskTypeStr) {
     TaskType taskType;
 
     // Convert to lowercase for ease of comparison
@@ -241,7 +257,8 @@ constexpr TaskType taskTypeFromString(std::string_view taskTypeStr) {
 /// \brief Convert an ASCII time string to chrono::system_clock::time_point
 /// \param tpStr ASCII string with format: yyyy-mm-dd hh:mm:ss
 [[nodiscard]] [[maybe_unused]]
-time_point_t strToTimePoint(std::string_view tpStr);
+time_point_t
+strToTimePoint(std::string_view tpStr);
 
 } // namespace gtd
 

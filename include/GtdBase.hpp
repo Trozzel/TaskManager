@@ -11,171 +11,120 @@
 #include <chrono>
 #include <cctype>
 #include <utility>
+#include <stack>
 
 #include <fmt/chrono.h>
 
 #include "GtdHelper.hpp"
 
-using LL_t = long long;
+using update_pair_t = std::pair<unique_id_t, std::string_view>;
 
 namespace gtd {
+class USMgr;
 
 class GtdBase {
 
 protected:
-    LL_t         _uniqueId{-1};
-    std::string  _name;
-    Status       _status{Status::Active};
-    time_point_t _created;
-    time_point_t _modified;
-    LL_t         _parentId{-1};    // _parentId == -1 --> no parent
+	std::optional<unique_id_t>				 _o_uniqueId{ std::nullopt };
+    std::string  							 _name;
+    Status       							 _status{Status::Active};
+    time_point_t 							 _created;
+    time_point_t 							 _modified;
+	std::optional<unique_id_t> 				 _o_parentId{ std::nullopt };
+	std::optional<std::string>  			 _o_notes { std::nullopt };
+	USMgr&									 _updateStackMgr;
 
 public:
     // CTORS
     /**************************************************************************/
-    GtdBase() = default;
-
-    GtdBase(std::string_view name) :
-            _uniqueId(-1),
-            _name(name),
-            _status(Status::Active),
-            _created(std::chrono::system_clock::now()),  // trivially_copyable
-            _modified(std::chrono::system_clock::now()), // trivially_copyable
-            _parentId(-1) {}
-
-    // BY READING IN DATA AS STRINGS
-    GtdBase(const std::string &uniqueIdStr,
-            std::string_view name,
-            const std::string &statusStr,
-            const std::string &createdStr = "",
-            const std::string &modifiedStr = "",
-            const std::string &parentIdStr = "") :
-            _uniqueId(stoll(uniqueIdStr)),
-            _name(name),
-            _status(strToStatus(statusStr)),
-            _parentId(stoll(parentIdStr))
-	{
-        // IF CREATED STRING IS EMPTY -> ::now()
-        if (createdStr.empty()) {
-            _created = std::chrono::system_clock::now();
-        }
-        else {
-            _created = strToTimePoint(createdStr);
-        }
-        // IF MODIFIED STRING IS EMPTY -> ::now()
-        if (modifiedStr.empty()) {
-            _modified = std::chrono::system_clock::now();
-        }
-        else {
-            _modified = strToTimePoint(modifiedStr);
-        }
-    }
+	GtdBase(USMgr&, std::string_view name = "");
 
 	/// \brief declared as a virtual destructor. But since children will call
-	/// this destructor, it is 
+	/// this destructor, it is defined in GtdBase.cpp
     virtual ~GtdBase() = 0; // pure virtual destructor
 
     // GETTERS
     /**************************************************************************/
     [[nodiscard]]
-    constexpr LL_t 
-	uniqueId() const noexcept { return _uniqueId; }
+    std::optional<unique_id_t>
+	uniqueId() const noexcept { return _o_uniqueId; }
 
+    [[nodiscard]]
     constexpr std::string_view 
-	name() const noexcept { return _name;} const // implicit conversion to std::string_view
+	name() const noexcept { return _name;} // implicit conversion to std::string_view
 
+    [[nodiscard]]
     constexpr Status 
 	status() const noexcept { return _status; }
 
+    [[nodiscard]]
     constexpr std::string_view 
 	statusStr() const noexcept { return statusToStr(_status); }
 
+    [[nodiscard]]
     constexpr time_point_t 
 	created() const noexcept { return _created; }
 
+    [[nodiscard]]
     std::string createdStr() 
 	const { return fmt::format("{}", _created); }
 
+    [[nodiscard]]
     constexpr time_point_t 
 	modified() const noexcept { return _modified; }
 
+    [[nodiscard]]
     std::string 
 	modifiedStr() const { return fmt::format("{}", _modified); }
 
-    constexpr LL_t parentId() const noexcept { return _parentId; } const
+    [[nodiscard]]
+    std::optional<unique_id_t>
+	parentId() const noexcept { return _o_parentId; }
+
+    [[nodiscard]]
+	std::optional<std::string_view>
+	notes() const;
 
     // SETTERS
     /**************************************************************************/
-    void 
-	setUniqueIdFromStr(const std::string &uniqueIdStr) {
-        _uniqueId = (uniqueIdStr.empty()) ? -1 : stoll(uniqueIdStr);
-    }
-
     [[maybe_unused]]
     void 
-	setUniqueId(LL_t id) noexcept {
-        _uniqueId = id;
-    }
-
-    void 
-	setName(std::string_view name) noexcept {
-        _name = name;
-    }
-
-    void 
-	setStatus(std::string_view statusStr) {
-        _status = strToStatus(statusStr);
-    }
-
-    [[maybe_unused]]
-    constexpr void 
-	setStatus(Status status) noexcept {
-        _status = status;
-    }
-
-    void 
-	setCreated(std::string_view created) {
-        _created = strToTimePoint(created);
-    }
-
-    [[maybe_unused]]
-    constexpr void 
-	setCreated(time_point_t tp) noexcept {
-        _created = tp;
-    }
-
-    void 
-	setModified(std::string_view modified) {
-        _modified = strToTimePoint(modified);
-    }
-
-    [[maybe_unused]]
-    constexpr void 
-	setModified(time_point_t tp) noexcept {
-        _modified = tp;
+	setUniqueId(unique_id_t id) noexcept {
+        _o_uniqueId = id;
     }
 
     virtual void 
-	setParentIdFromStr(const std::string &parentIdStr) {
-        _parentId = (parentIdStr.empty()) ? -1 : stoll(parentIdStr);
-    }
+	setName(std::string_view name, bool update);
+
+    virtual void 
+	setStatus(std::string_view statusStr, bool update);
 
     [[maybe_unused]]
-    constexpr virtual void 
-	setParentId(LL_t id) {
-        _parentId = id;
-    }
+    virtual void 
+	setStatus(Status status, bool update) noexcept;
 
-    friend std::ostream&
-	operator<<(std::ostream &out, const GtdBase &base) {
-        out << base._uniqueId << " " << base._name << " "
-            << statusToStr(base._status) << " "
-            << timePointToStr(base._created) << " "
-            << timePointToStr(base._modified) << " "
-            << base._parentId;
+    virtual void 
+	setCreated(std::string_view created, bool);
 
-        return out;
-    };
+    [[maybe_unused]]
+    virtual void 
+	setCreated(time_point_t tp, bool update) noexcept;
+
+    virtual void 
+	setModified(std::string_view modified, bool update);
+
+    [[maybe_unused]]
+    virtual void 
+	setModified(time_point_t tp, bool update) noexcept;
+
+    [[maybe_unused]]
+    virtual void 
+	setParentId(unique_id_t id, bool update);
+
+	[[maybe_unused]]
+	virtual void
+	setNotes(std::string_view notes, bool update);
+
 
 };
 //								HELPER FUNCTIONS
@@ -184,29 +133,107 @@ public:
 /// \brief Get parent from task
 /// \note Must check for it == gtdItems.end() on call
 template<typename Gtd, typename VectorGtd>
-const auto
+auto
 getParent_it(Gtd& child, VectorGtd& gtdItems) {
     static_assert(std::is_base_of_v<gtd::GtdBase, Gtd>);
 	static_assert(std::is_base_of_v<gtd::GtdBase, typename VectorGtd::value_type>);
-    auto parentId = child.parentId();
+    auto parentId = *child.parentId();
     auto it = std::find_if(gtdItems.begin(), gtdItems.end(), 
-			[parentId](const Gtd& item) { 
-			return item.uniqueId() == parentId;
+			[parentId](const Gtd& item) -> bool { 
+			if(!item.parentId()) {
+				return false;
+			}
+			return *item.uniqueId() == parentId;
     });
     return it;
 }
 
 /// Find element by uniqueId
 template<typename Gtd>
-std::string_view 
-getNameById(const std::vector<const Gtd>& gtdItems, LL_t id) {
+std::optional<std::string_view>
+getNameById(const std::vector<const Gtd>& gtdItems, unique_id_t id) {
 	static_assert(std::is_base_of_v<gtd::GtdBase, Gtd>);
 	auto it = std::find_if(gtdItems.begin(), gtdItems.end(),
                             [&gtdItems, id](const Gtd& task) {
+								if(!task.uniqueId()) {
+									return false;
+								}
                                 return task.uniqueId() == id;
                             });
-    return (it != gtdItems.end()) ? it->name() : "NA";
+    return (it != gtdItems.end()) ? it->name() : std::nullopt;
 }
+
+std::ostream&
+operator<<(std::ostream &out, const GtdBase &base); 
+
+
+//							UPDATE STACK BEGIN
+/*****************************************************************************/
+
+// CLASS UPDATE STACK
+/*****************************************************************************/
+class UpdateStack {
+private:
+	std::string_view          _tableName;
+	std::stack<update_pair_t> _dbUpdateStack;
+
+public:
+    UpdateStack(std::string_view table);
+
+    void
+    clear();
+
+    void
+    push(const GtdBase &gtdItem, std::string_view colName);
+
+    void
+    pop();
+
+    update_pair_t &
+    top();
+
+    std::string
+    compose();
+}; // class UpdateStack
+
+// CLASS UpdateStackManager
+/*****************************************************************************/
+class USMgr {
+	// unique_ptr deleter that returns resource to the UpdateStackMgr object
+    struct USPtrDeleter {
+        USMgr& _usMgr;
+        explicit USPtrDeleter(USMgr& usm);
+        void operator()(UpdateStack* updateStackPtr);
+	};
+
+private:
+    using USPtr_t = std::unique_ptr<UpdateStack, USPtrDeleter>;
+	std::string_view	_tableName;
+    USPtr_t				_pUpdateStack{new UpdateStack(_tableName), USPtrDeleter(*this)};
+
+public:
+    USMgr(std::string_view tableName);
+    /// Since UpdateStackManager handles the resource to the UpdateStack 
+	/// object, UpdateStackManager will destroy the object
+    ~USMgr() {
+        /// _pUpdateStack should never be a nullptr at time of 
+		/// UpdateStackManager destructor, but for sanity check...
+        if(_pUpdateStack) {
+            delete _pUpdateStack.release();
+        }
+    }
+
+    // Don't copy
+    USMgr(const USMgr&) = delete;
+    USMgr& operator=(const USMgr&) = delete;
+
+	constexpr std::string_view
+	tableName() noexcept { return _tableName; }
+
+    [[nodiscard]]
+    USPtr_t
+    getUpdateStack();
+};
 
 } // namespace gtd
 

@@ -7,38 +7,43 @@
 #include <system_error>
 #include <type_traits>
 
-#include "GtdBase.hpp"
-#include "GtdHelper.hpp"
 #include "Task.hpp"
 
 using namespace std;
 
 namespace gtd {
 
-// STATIC FUNCTIONS
-constexpr TaskType 
-Task::strToTaskType(std::string_view taskTypeStr) noexcept {
-	TaskType taskType;
-	if (taskTypeStr == "Parallel") {
-		taskType = TaskType::Parallel;
-	}
-	else if (taskTypeStr == "Sequential") {
-		taskType = TaskType::Sequential;
-	}
-	else {
-		fmt::print(stderr, "Incorrect Task Type String: '{}'\n", taskTypeStr);
-		taskType = TaskType::Parallel;
-	}
-	return taskType;
-}
+// CTORS
+Task::Task(USMgr& updateStackMgr, std::string_view name) :
+	CompletableBase(updateStackMgr, name) {}
 
 // SETTERS
 /*****************************************************************************/
 void
-Task::setTaskType(const std::string &taskType) {
-	// gtd::Project should not access this method
-	static_assert(std::is_same_v<decltype(*this), Task&>);
+Task::setProjectId(unique_id_t projectId, bool update) {
+	_projectId = projectId;
+	if(update) {
+		auto pUpdateStack = _updateStackMgr.getUpdateStack();
+		pUpdateStack->push(*this, "projectId");
+	}
+}
+
+void
+Task::setTaskType(TaskType taskType, bool update) {
+	_taskType = taskType;
+	if(update) {
+		auto pUpdateStack = _updateStackMgr.getUpdateStack();
+		pUpdateStack->push(*this, "taskType");
+	}
+}
+
+void
+Task::setTaskType(std::string_view taskType, bool update) {
     _taskType = strToTaskType(taskType);
+	if(update) {
+		auto pUpdateStack = _updateStackMgr.getUpdateStack();
+		pUpdateStack->push(*this, "taskType");
+	}
 }
 
 std::ostream& 
@@ -48,8 +53,9 @@ operator<<(std::ostream& out, const Task& task) {
     out << *pBase;
 
     // SEND REMAINED TO STREAM
-    out << task.notes() << " " << timePointToStr(task.deferred()) << " "
-        << timePointToStr(task.due()) << " "
+    out << *task.notes() << " " 
+		<< *task.deferredStr() << " "
+        << *task.dueStr() << " "
         << taskTypeString(task.taskType()) << " "
         << ios::boolalpha << task.isRepeating(); 
 

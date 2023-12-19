@@ -1,13 +1,11 @@
-#ifndef __IMPL_HELPERS_HPP__
-#define __IMPL_HELPERS_HPP__
+#ifndef IMPL_HELPERS_HPP_
+#define IMPL_HELPERS_HPP_
 
 #include <cstring>
 #include <iterator>
 #include <stdexcept>
 #include <string>
 #include <string_view>
-#include <sys/_types/_size_t.h>
-#include <system_error>
 #include <tuple>
 #include <type_traits>
 #include <vector>
@@ -22,6 +20,7 @@
 #include "Task.hpp"
 #include "Project.hpp"
 #include "Folder.hpp"
+#include "UpdateStack.hpp"
 
 namespace gtd {
 /// \brief get the name of the table to which the element belongs
@@ -148,9 +147,7 @@ insertGtdItem(std::string_view dbPath, Gtd_t& gtdItem) {
 		SQLite::Database db(dbPath, SQLite::OPEN_READWRITE);
 		res = db.exec(getInsertStr<Gtd_t>(gtdItem));
 		// Update the Gtd_t object to access it's newly assigned uniqueId
-		SQLite::Statement query(db, "SELECT last_insert_rowid();");
-		query.executeStep();
-		gtdItem.setUniqueId(query.getColumn(0).getInt64());
+		gtdItem.setUniqueId(db.getLastInsertRowid());
 	} catch (std::exception& e) {
 		std::cerr << "Error: " << e.what() << std::endl;
 		throw(std::runtime_error(fmt::format("Error inserting {}", gtdItem.name())));
@@ -181,25 +178,25 @@ importGtdItems(std::string_view dbPath, USMgr& updateStackMgr) {
 	static_assert(std::is_base_of_v<gtd::GtdBase, Gtd_t>);
 	static_assert(std::is_base_of_v<gtd::GtdBase, typename VectorGtd::value_type>);
 	// Get table name
-	typename std::remove_const_t<VectorGtd> gtdItems;
+	std::remove_const_t<VectorGtd> gtdItems;
 
 	const char* table = updateStackMgr.tableName().data();
     try {
 		// Initiate db connection
-		SQLite::Database db(dbPath);
+		const SQLite::Database db(dbPath);
 
 		// Create SELECT statement
 		//std::string queryStmt = "SELECT * FROM " + std::string(updateStackMgr.tableName());
 
 		// Prepare beginning of sql statement
-		const size_t queryStmtSz = 100;
+		constexpr size_t queryStmtSz = 100;
 		char queryStmt[queryStmtSz] = "SELECT *FROM ";
 		strncat(queryStmt, table, queryStmtSz);
         SQLite::Statement query(db, queryStmt);
 
 		// Populate std::vector<Gtd_t> from database
-		const bool dontUpdate = false;
         while(query.executeStep()) {
+            constexpr bool dontUpdate = false;
 			int colnum {0};
             Gtd_t gtdItem{updateStackMgr};
             gtdItem.setUniqueId(query.getColumn(colnum++).getInt64());
@@ -236,7 +233,7 @@ importGtdItems(std::string_view dbPath, USMgr& updateStackMgr) {
 				gtdItem.setRepeatSchedule(std::string_view(query.getColumn(colnum++).getString()), dontUpdate);
 				if constexpr (std::is_same_v<Gtd_t, gtd::Project>) {
 					gtdItem.setCompleteWithLast(query.getColumn(colnum++).getInt(), dontUpdate);
-					gtdItem.setReviewSchedule(query.getColumn(colnum++).getString(), dontUpdate);
+					gtdItem.setReviewSchedule(query.getColumn(colnum).getString(), dontUpdate);
 				}
 
 			}
@@ -267,4 +264,4 @@ std::vector<Folder>
 importFolders(std::string_view pathname, USMgr&); 
 
 } // namespace gtd
-#endif //__IMPL_HELPERS__
+#endif // IMPL_HELPERS_HPP_

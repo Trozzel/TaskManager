@@ -4,15 +4,17 @@
 
 #include "Folder.hpp"
 #include "GtdBase.hpp"
+#include "FolderContainer.hpp"
 
 namespace gtd {
 // CTORS
 /****************************************************************************/
-Folder::Folder(USMgr& updateStackMgr, std::string_view name) : 
-	GtdBase(updateStackMgr, name) {}
+Folder::Folder(FolderContainer& gtdItems, std::string_view name) :
+    GtdBase(gtdItems, name),
+    _gtdItems(gtdItems)
+{}
 
-} // namespace gtd
-
+// OSTREAM
 std::ostream& 
 operator<<(std::ostream& out, const gtd::Folder& folder) {
     out << folder.name() << " "
@@ -23,4 +25,5 @@ operator<<(std::ostream& out, const gtd::Folder& folder) {
 
     return out;
 }
+} // namespace gtd
 

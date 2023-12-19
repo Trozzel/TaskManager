@@ -2,33 +2,30 @@
 // Created by George Ford on 1/28/22.
 //
 
-#ifndef GTD_FOLDER_HPP
-#define GTD_FOLDER_HPP
-
-#include <string>
+#ifndef GTD_FOLDER_HPP_
+#define GTD_FOLDER_HPP_
 
 #include "GtdBase.hpp"
+#include "FolderContainer.hpp"
 
 namespace gtd {
 
-class Folder : public GtdBase {
-
+class Folder final : public GtdBase
+{
 private:
+    FolderContainer&  _gtdItems;
 
 public:
     // CTORS
     /**************************************************************************/
-    // DEFAULT
-    Folder(USMgr&, std::string_view name = "");
+    explicit
+    Folder( FolderContainer&, std::string_view name = "" );
 
     ~Folder() override = default;
-
-	// GETTERS
-	/*************************************************************************/
 };
 
 } // namespace gtd
 
-std::ostream& 
-operator<<(std::ostream& out, const gtd::Folder& folder);
-#endif //GTD_FOLDER_HPP
+std::ostream&
+operator<<( std::ostream& out, const gtd::Folder& folder );
+#endif //GTD_FOLDER_HPP_

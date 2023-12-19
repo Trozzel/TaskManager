@@ -41,7 +41,8 @@ add_executable ( sqlplay
     src/Task.cpp
     src/Folder.cpp
     src/GtdHelper.cpp
-    src/Project.cpp)
+    src/Project.cpp
+    )
 	
 target_link_libraries ( sqlplay
     ${SQLite3_LIBRARIES}
@@ -55,12 +56,17 @@ add_executable ( temp
 	src/GtdHelper.cpp
 	src/GtdBase.cpp
 	src/UpdateStack.cpp
-	src/CompletableBase.cpp
+    src/Completable.cpp
 	src/ImplHelpers.cpp
 	src/Context.cpp
 	src/Task.cpp
 	src/Project.cpp
 	src/Folder.cpp
+    src/UpdateStack.cpp
+    src/GtdBaseContainer.cpp
+    src/CompleteableContainer.cpp
+    src/ContextContainer.cpp
+    src/FolderContainer.cpp
 	temp.cpp)
 
 target_link_libraries ( temp

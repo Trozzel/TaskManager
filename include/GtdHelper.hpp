@@ -2,12 +2,9 @@
 // Created by George Ford on 6/24/22.
 //
 
-#ifndef __GTD_GTDHELPER_HPP__
-#define __GTD_GTDHELPER_HPP__
+#ifndef GTD_GTDHELPER_HPP_
+#define GTD_GTDHELPER_HPP_
 
-#include <cstring>
-#include <filesystem>
-#include <iomanip>
 #include <string>
 #include <string_view>
 #include <sstream>
@@ -26,9 +23,14 @@ using time_point_t = std::chrono::time_point<std::chrono::system_clock>;
 using unique_id_t = uint64_t;
 
 namespace gtd {
-
 //                                 ENUMS
 /*****************************************************************************/
+/// Gtd Type
+enum class GtdType {
+	Context, Folder, Task, Project
+};
+
+
 /// Task and Project status
 enum class Status {
     Active, OnHold, Dropped, Completed
@@ -71,6 +73,27 @@ static constexpr std::string_view s_strSingleActions{"SingleActions"};
 // GTD Configuration file
 static constexpr std::string_view confFilePath = "../conf/gtd-conf.toml";
 
+/// \brief Get the name of the type of the Gtd Items
+/// This is useful for extracting the name of the table to which the item 
+/// bleongs
+constexpr static
+std::string_view
+gtdTypeToStr(const gtd::GtdType gtdType) noexcept {
+	switch (gtdType) {
+		case GtdType::Context:
+			return "contexts";
+		case GtdType::Folder:
+			return "folders";
+		case GtdType::Task:
+			return "tasks";
+		case GtdType::Project:
+			return "projects";
+		default:
+			std::cerr << "Invalid gtd::GtdType\n";
+			return "NA";
+	}
+}
+
 /// \brief Get the filename of the database to use from config file
 static std::string
 getDbConnPath() {
@@ -81,7 +104,8 @@ getDbConnPath() {
 		if (config.empty()) {
 			std::cerr << "Error opening config file\n";
 		}
-		auto op_tableName = config["database"][fmt::format("{}_db", RUNMODE)]
+		const auto op_tableName = \
+		    config["database"][fmt::format("{}_db", RUNMODE)]
 						 .value<std::string_view>();  // -> std::optional<std::string_view>
 		if(op_tableName.has_value()){
 			tableName = op_tableName.value();
@@ -95,9 +119,9 @@ getDbConnPath() {
 
 /// \brief Convert string to a Status
 [[nodiscard]]
-constexpr Status strToStatus(std::string_view statusStrIn) {
+constexpr Status
+strToStatus(std::string_view statusStrIn) {
     Status status;
-
     if (statusStrIn == "Active") {
         status = Status::Active;
     }
@@ -114,13 +138,13 @@ constexpr Status strToStatus(std::string_view statusStrIn) {
         throw std::runtime_error("Unrecognized status string, "
                                  + std::string(statusStrIn));
     }
-
     return status;
 }
 
 /// \brief Convert a status to a string
 [[nodiscard]]
-constexpr std::string_view statusToStr(Status status) noexcept {
+constexpr std::string_view
+statusToStr(const Status status) noexcept {
     std::string_view statusStr;
     switch (status) {
     case Status::Active:
@@ -141,7 +165,8 @@ constexpr std::string_view statusToStr(Status status) noexcept {
 
 // \brief Convert string to RepeatFrom enum
 [[nodiscard]]
-constexpr std::string_view repeatFromToStr(RepeatFrom repeatFrom) noexcept {
+constexpr std::string_view
+repeatFromToStr(const RepeatFrom repeatFrom) noexcept {
     std::string_view repeatFromStr;
     switch (repeatFrom) {
     case RepeatFrom::Deferred:
@@ -156,7 +181,8 @@ constexpr std::string_view repeatFromToStr(RepeatFrom repeatFrom) noexcept {
 
 /// \brief Convert RepeatFrom enum to string
 [[nodiscard]]
-constexpr RepeatFrom strToRepeatFrom(std::string_view repeatFromStr) {
+constexpr RepeatFrom
+strToRepeatFrom(std::string_view repeatFromStr) {
     RepeatFrom repeatFrom;
     if (repeatFromStr == "Deferred") {
         repeatFrom = RepeatFrom::Deferred;
@@ -221,7 +247,7 @@ projectTypeFromStr(std::string_view projectTypeStr) noexcept {
 /// Return string of project type
 [[nodiscard]]
 constexpr std::string_view 
-taskTypeString(TaskType taskType) noexcept {
+taskTypeString(const TaskType taskType) noexcept {
     std::string_view taskTypeStr{};
     switch (taskType) {
     case TaskType::Parallel:
@@ -262,4 +288,4 @@ strToTimePoint(std::string_view tpStr);
 
 } // namespace gtd
 
-#endif //__GTD_GTDHELPER_HPP__
+#endif //GTD_GTDHELPER_HPP_

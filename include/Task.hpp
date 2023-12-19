@@ -6,11 +6,8 @@
 #define GTD_TASK_HPP
 
 #include <iostream>
-#include <memory>
 #include <string>
-#include <filesystem>
 #include <string_view>
-#include <type_traits>
 
 #include "CompletableBase.hpp"
 #include "GtdHelper.hpp"
@@ -28,7 +25,7 @@ namespace gtd {
 /// \param _isRepeating - if this is a recurring task
 /// \param _flagged - is flagged or not
 /// \param _repeatSchedule - crontab format repeat schedule
-class Task : public CompletableBase {
+class Task final : public CompletableBase {
 private:
 	// hide from Project since Project has a ProjectType
     TaskType								_taskType { TaskType::Parallel };
@@ -52,8 +49,14 @@ public:
 		return taskType;
 	}
 
+	constexpr static
+	std::string_view
+	tableName() noexcept {
+		return "tasks";
+	};
+
     // CTORS
-    Task(USMgr&, std::string_view name = ""); 
+    explicit Task(USMgr&, std::string_view name = "");
 
 	// DTOR
     ~Task() final = default;
@@ -75,13 +78,13 @@ public:
     // SETTERS
     /*************************************************************************/
 	void
-    setProjectId(unique_id_t projectId, bool update); 
+    setProjectId(unique_id_t projectId, bool update = true);
 
 	void
-    setTaskType(TaskType taskType, bool update);
+    setTaskType(TaskType taskType, bool update = true);
 
 	void
-    setTaskType(std::string_view taskType, bool update);
+    setTaskType(std::string_view taskType, bool update = true);
 
 };
 

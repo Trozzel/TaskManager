@@ -6,7 +6,6 @@
 #include <initializer_list>
 
 #include <string_view>
-#include <type_traits>
 
 #include "GtdBase.hpp"
 #include "Task.hpp"
@@ -15,7 +14,7 @@
 
 namespace gtd {
 
-class Project : public CompletableBase {
+class Project final : public CompletableBase {
 
 private:
 	ProjectType					_projectType { ProjectType::Parallel };
@@ -26,6 +25,12 @@ private:
 
 public:
     // STATIC FUNCTIONS
+	constexpr static
+	std::string_view
+	tableName() noexcept {
+		return "projects";
+	}
+	
 	[[nodiscard]]
     static constexpr ProjectType 
 	strToProjectType(std::string_view projectTypeStr) noexcept {
@@ -35,9 +40,9 @@ public:
     // CTORS
     /**************************************************************************/
     // DEFAULT
-    Project(USMgr&, std::string_view name = "");
+    explicit Project(USMgr&, std::string_view name = "");
 
-    ~Project() final = default;
+    ~Project() override = default;
 
     // GETTERS
 	/*************************************************************************/
@@ -50,7 +55,7 @@ public:
 	folderId() const noexcept { return _folderId; }
 
     [[nodiscard]] 
-	constexpr bool 
+	constexpr bool
 	completeWithLast() const noexcept { return _completeWithLast; }
 
 	[[nodiscard]]
@@ -83,19 +88,19 @@ public:
 	appendTaskId(unique_id_t taskId);
 
     void 
-	setProjectType(ProjectType projectType, bool update);
+	setProjectType(ProjectType projectType, bool update = true);
 
     void 
-	setProjectType(std::string_view projectType, bool update);
+	setProjectType(std::string_view projectType, bool update = true);
 
 	void
-	setFolderId(unique_id_t folderId, bool update);
+	setFolderId(unique_id_t folderId, bool update = true);
 
     void 
-	setCompleteWithLast(bool completeWithLast, bool update);
+	setCompleteWithLast(bool completeWithLast, bool update = true);
 
 	void
-	setReviewSchedule(std::string_view reviewSchedule, bool update);
+	setReviewSchedule(std::string_view reviewSchedule, bool update = true);
 };
 
 //							HELPER FUNCTIONS
@@ -123,7 +128,7 @@ void Project::appendTaskIds(Iter begin, Iter end) {
 /// \brief Get gtd::Project object from task
 /// \note Must check for it == projects.end() on call
 using Projects_vec = std::vector<const gtd::Project>;
-const auto
+auto
 getProject_it(const gtd::Task& task, const Projects_vec& projects);
 
 std::ostream& 

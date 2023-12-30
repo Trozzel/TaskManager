@@ -98,7 +98,7 @@ public:
     /*************************************************************************/
     [[maybe_unused]]
     void
-    setContextId( unique_id_t contextId, bool update = true );
+    setContextId( unique_id_t id, bool update = true );
 
     void
     setDeferred( time_point_t deferred, bool update = true );
@@ -117,11 +117,7 @@ public:
 
     [[maybe_unused]]
     void
-    setTaskType( const std::string& taskType, bool update = true );
-
-    [[maybe_unused]]
-    void
-    setIsRepeating( int isRepeating, bool update = true );
+    setIsRepeating( int is_repeating, bool update = true );
 
     [[maybe_unused]]
     void

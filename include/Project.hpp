@@ -4,33 +4,26 @@
 #include <string>
 #include <list>
 #include <initializer_list>
-
 #include <string_view>
 
-#include "GtdBase.hpp"
-#include "Task.hpp"
-#include "CompletableBase.hpp"
+#include "Completable.hpp"
 #include "GtdHelper.hpp"
+#include "ProjectContainer.hpp"
+#include "TaskContainer.hpp"
 
 namespace gtd {
 
-class Project final : public CompletableBase {
+class Project final : public Completable {
 
 private:
+    ProjectContainer&           _gtdItems;
 	ProjectType					_projectType { ProjectType::Parallel };
 	std::optional<unique_id_t>  _folderId { std::nullopt };
     std::list<unique_id_t>      _taskIds {};
     bool						_completeWithLast { true };
-	std::string_view     		_reviewSchedule = {"0 0 * * 0"}; // 12a every Sunday
+	std::string_view     		_reviewSchedule {"0 0 * * 0"}; // 12a every Sunday
 
 public:
-    // STATIC FUNCTIONS
-	constexpr static
-	std::string_view
-	tableName() noexcept {
-		return "projects";
-	}
-	
 	[[nodiscard]]
     static constexpr ProjectType 
 	strToProjectType(std::string_view projectTypeStr) noexcept {
@@ -40,9 +33,9 @@ public:
     // CTORS
     /**************************************************************************/
     // DEFAULT
-    explicit Project(USMgr&, std::string_view name = "");
+    explicit Project(ProjectContainer&, std::string_view name = "");
 
-    ~Project() override = default;
+    ~Project() final;
 
     // GETTERS
 	/*************************************************************************/
@@ -61,6 +54,10 @@ public:
 	[[nodiscard]]
 	constexpr std::string_view
 	reviewSchedule() const noexcept { return _reviewSchedule; }
+
+    [[nodiscard]]
+    std::ranges<pTask_t>
+    getTasks(const TaskContainer&) const;
 
     // SETTERS
 	/*************************************************************************/
@@ -129,7 +126,7 @@ void Project::appendTaskIds(Iter begin, Iter end) {
 /// \note Must check for it == projects.end() on call
 using Projects_vec = std::vector<const gtd::Project>;
 auto
-getProject_it(const gtd::Task& task, const Projects_vec& projects);
+getProject_it(const Task& task, const Projects_vec& projects);
 
 std::ostream& 
 operator<<(std::ostream& out, const Project& project);

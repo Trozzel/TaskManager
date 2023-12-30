@@ -41,6 +41,12 @@ public:
     push (unique_id_t uniqueId, std::string_view colName, bool);
 
     [[nodiscard]]
+    constexpr size_t
+    size() const {
+        return _dbUpdateStack.size();
+    }
+
+    [[nodiscard]]
     constexpr unique_id_t
     topUniqueId() const {
         return std::get<0>(_dbUpdateStack.top());

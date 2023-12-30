@@ -4,7 +4,11 @@
 
 #include "DbBase.hpp"
 
-DbBase::DbBase(std::string_view uri) :
+namespace gtd {
+
+DbBase::DbBase(const std::string_view uri) :
     _uri(uri) {}
 
 DbBase::~DbBase() = default;
+
+} // namespace gtd

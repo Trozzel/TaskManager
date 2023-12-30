@@ -15,4 +15,4 @@ Context::Context(ContextContainer& gtdItems, std::string_view name) :
 {
     _gtdItems.push_back(this);
 }
-}
+} // namespace gtd

@@ -35,7 +35,7 @@ UpdateStack::push( unique_id_t uniqueId, std::string_view colName, std::string v
 
 void
 UpdateStack::push( unique_id_t uniqueId, std::string_view colName, bool value) {
-    _dbUpdateStack.emplace(uniqueId, colName, (value) ? "true" : "false");
+    _dbUpdateStack.emplace(uniqueId, colName, value ? "true" : "false");
 }
 
 
@@ -54,7 +54,6 @@ UpdateStack::compose( const GtdBaseContainer& gtdItems ) {
     if ( gtdItems.empty() ) {
         return "WARNING: no items in " + gtdItems.tableName();
     }
-    auto tableName = gtdItems.tableName();
     std::stringstream ss;
     ss << fmt::format("UPDATE {} SET ", gtdItems.tableName());
     while ( !_dbUpdateStack.empty() ) {

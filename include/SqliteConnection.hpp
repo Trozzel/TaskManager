@@ -5,59 +5,70 @@
 #ifndef SQLITECONNECTION_HPP_
 #define SQLITECONNECTION_HPP_
 
-#include "GtdHelper.hpp"
 #include "SQLiteCpp/Database.h"
 #include "DbBase.hpp"
 #include "SQLiteCpp/Statement.h"
-#include <string>
 #include <string_view>
 #include <sys/_types/_size_t.h>
 #include <type_traits>
 
+template<typename T>
+concept sqlite_type = std::is_integral_v<T> ||
+                      std::is_convertible_v<T, std::string_view> ||
+                      std::is_null_pointer_v<T>;
+namespace gtd {
 class SqliteConnection : public DbBase {
 private:
-	SQLite::Database        _db;
-	int     				_flags = SQLite::OPEN_READONLY;
-
+    int         _flags;
 public:
-	SqliteConnection(std::string_view dbPath, int flags = SQLite::OPEN_READONLY);
-	~SqliteConnection() override = default;
+    explicit SqliteConnection(std::string_view dbPath, int flags = SQLite::OPEN_READWRITE);
+    ~SqliteConnection() override;
 
-	/// \brief performs immediate transaction on database
-	/// \return number of elements changed
-	int  
-	exec(std::string_view queries) override;
+    [[nodiscard]] unique_id_t
+    getLastInsertId() override;
 
-	void
-	reset(int flags);
+    int
+    execute( std::string_view queries ) override;
 
-	SQLite::Statement
-	getStatement(std::string_view statement);
+    bool
+    executeStep() override;
 
-	void
-	setStatement(std::string_view statementStr);
+    void
+    connect() override;
 
-	template<typename Int_t>
-	unsigned long long
-	getColumn(size_t rowNum, std::enable_if_t<std::is_integral_v<Int_t>, bool> = true);
+    bool
+    close() override;
 
-	template<typename ConstChar_t>
-	std::string
-	getColumn(size_t rowNum, std::enable_if_t<std::is_same_v<const char*, ConstChar_t>, bool> = true);
+    int
+    createGtd( std::string_view table, const pGtdBase_t& ) override;
 
-	template<typename StdString_t>
-	std::string
-	getColumn(size_t rowNum, std::enable_if_t<std::is_same_v<
-			std::remove_const_t<std::remove_reference_t<StdString_t>>, std::string>, bool> = true);
-	
-	bool
-	isColumnNull() const;
+    int
+    importAllBase( GtdBaseContainer& ) override;
 
-	auto
-	executeStep();
-	
+    int
+    importAllFolder( FolderContainer& ) override;
+
+    int
+    importAllTask( TaskContainer& ) override;
+
+    int
+    importAllProject( ProjectContainer& ) override;
+
+    bool
+    insertContext( std::string_view table, const pContext_t& ) override;
+
+    bool
+    insertFolder( std::string_view table, const pFolder_t& ) override;
+
+    bool
+    insertTask( std::string_view table, const pTask_t& ) override;
+
+    bool
+    insertProject( std::string_view table, const pProject_t& ) override;
+
+    bool
+    deleteOne( std::string_view table, const pGtdBase_t& ) override;
 };
+} // namespace gtd
 
-
-
-#endif // SQLITECONNECTION_HPP
+#endif // SQLITECONNECTION_HPP_

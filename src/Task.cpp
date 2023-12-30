@@ -2,42 +2,36 @@
 // Created by George Ford on 1/28/22.
 //
 #include "Task.hpp"
-#include "UpdateStack.hpp"
 
 using namespace std;
 
 namespace gtd {
 // CTORS
-Task::Task( USMgr& updateStackMgr, std::string_view name ) :
-    CompletableBase(updateStackMgr, name) {}
+Task::Task( TaskContainer& gtdItems, std::string_view name ) :
+    Completable(gtdItems, name),
+    _gtdItems(gtdItems)
+{
+    _gtdItems.push_back(this);
+}
 
 // SETTERS
 /*****************************************************************************/
 void
-Task::setProjectId( unique_id_t projectId, bool update ) {
-    _projectId = projectId;
-    if ( (_o_uniqueId) ) {
-        const auto pUpdateStack = _updateStackMgr.getUpdateStack();
-        pUpdateStack->push(*this, "projectId");
-    }
+Task::setProjectId( unique_id_t id, bool update ) {
+    _projectId = id;
+    pushToUpdateStack("projectId", projectId(), update);
 }
 
 void
-Task::setTaskType( const TaskType taskType, bool update ) {
-    _taskType = taskType;
-    if ( (_o_uniqueId) ) {
-        const auto pUpdateStack = _updateStackMgr.getUpdateStack();
-        pUpdateStack->push(*this, "taskType");
-    }
+Task::setTaskType( const TaskType type, bool update ) {
+    _taskType = type;
+    pushToUpdateStack("taskType", taskTypeString(_taskType), update);
 }
 
 void
-Task::setTaskType( std::string_view taskType, bool update ) {
-    _taskType = strToTaskType(taskType);
-    if ( (_o_uniqueId) ) {
-        const auto pUpdateStack = _updateStackMgr.getUpdateStack();
-        pUpdateStack->push(*this, "taskType");
-    }
+Task::setTaskType( std::string_view type, bool update ) {
+    _taskType = strToTaskType(type);
+    pushToUpdateStack("taskType", taskTypeString(_taskType), update);
 }
 
 std::ostream&

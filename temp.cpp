@@ -11,7 +11,6 @@
 #include "Task.hpp"
 #include "Context.hpp"
 #include "ImplHelpers.hpp"
-#include "UpdateStack.hpp"
 
 /// \brief Format the columns to same size
 template <typename Gtd>

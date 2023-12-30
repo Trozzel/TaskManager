@@ -3,19 +3,40 @@
 //
 
 #include "FolderContainer.hpp"
-#include "Folder.hpp"
 #include "GtdBase.hpp"
 
 namespace gtd {
 
-FolderContainer::FolderContainer(USMgr& usm) :
+FolderContainer::FolderContainer( USMgr& usm ) :
     GtdBaseContainer(usm)
-{}
+{
+}
 
 FolderContainer::~FolderContainer() = default;
 
-std::string
+const std::string&
 FolderContainer::tableName() const {
-    return "folders";
+    static const std::string table = "folders";
+    return table;
+}
+
+auto
+FolderContainer::begin() {
+    return _gtdItems.begin();
+}
+
+auto
+FolderContainer::cbegin() const {
+    return _gtdItems.cbegin();
+}
+
+auto
+FolderContainer::end() {
+    return _gtdItems.end();
+}
+
+auto
+FolderContainer::cend() const {
+    return _gtdItems.cend();
 }
 } // namespace gtd

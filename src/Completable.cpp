@@ -6,15 +6,13 @@
 #include "Completable.hpp"
 #include "GtdBase.hpp"
 #include "GtdHelper.hpp"
-#include "UpdateStack.hpp"
 
 namespace gtd {
 // CTORS
 /*****************************************************************************/
 Completable::Completable( CompleteableContainer& gtdItems, std::string_view name ) :
     GtdBase(gtdItems, name),
-    _gtdItems(gtdItems)
-{}
+    _gtdItems(gtdItems) {}
 
 // MUST DEFINE PURE VIRTUAL DESTRUCTOR
 Completable::~Completable() = default;
@@ -45,111 +43,57 @@ Completable::repeatFromStr() const {
 // SETTERS
 /*****************************************************************************/
 void
-Completable::setContextId( unique_id_t contextId, bool update ) {
-    *_o_contextId = contextId;
-    if ( update ) {
-        auto& usm = _gtdItems.updateStackManager();
-        auto& pUpdateStack = usm.getUpdateStack();
-        if(this->uniqueId()) {
-            pUpdateStack->push(*this->uniqueId(), "contextId", contextId());
-        }
-    }
+Completable::setContextId( const unique_id_t id, bool update ) {
+    *_o_contextId = id;
+    pushToUpdateStack("id", contextId(), update);
 }
 
 void
 Completable::setDeferred( time_point_t deferred, bool update ) {
     _o_deferred = deferred;
-    if ( update ) {
-        auto& usm = _gtdItems.updateStackManager();
-        auto& pUpdateStack = usm.getUpdateStack();
-        if(this->uniqueId()) {
-            pUpdateStack->push(*this->uniqueId(), "deferred", *deferredStr());
-        }
-    }
+    pushToUpdateStack("deferred", deferredStr(), update);
 }
 
 void
 Completable::setDeferred( std::string_view deferred, bool update ) {
     _o_deferred = strToTimePoint(deferred);
-    if ( update ) {
-        auto& usm = _gtdItems.updateStackManager();
-        auto& pUpdateStack = usm.getUpdateStack();
-        if(this->uniqueId()) {
-            pUpdateStack->push(*this->uniqueId(), "deferred", *deferredStr());
-        }
-    }
+    pushToUpdateStack("deferred", deferredStr(), update);
 }
 
 void
 Completable::setDue( time_point_t tp, bool update ) {
     _o_due = tp;
-    if ( update ) {
-        auto& usm = _gtdItems.updateStackManager();
-        auto& pUpdateStack = usm.getUpdateStack();
-        if(this->uniqueId()) {
-            pUpdateStack->push(*this->uniqueId(), "due", *dueStr());
-        }
-    }
+    pushToUpdateStack("due", dueStr(), update);
 }
 
 void
 Completable::setDue( std::string_view due_str, bool update ) {
     _o_due = strToTimePoint(due_str);
-    if ( update ) {
-        auto& usm = _gtdItems.updateStackManager();
-        auto& pUpdateStack = usm.getUpdateStack();
-        if(this->uniqueId()) {
-            pUpdateStack->push(*this->uniqueId(), "due", *dueStr());
-        }
-    }
+    pushToUpdateStack("due", dueStr(), update);
 }
 
 void
-Completable::setIsRepeating( const int isRepeating, bool update ) {
-    _isRepeating = static_cast<bool>(isRepeating);
-    if ( update ) {
-        auto& usm = _gtdItems.updateStackManager();
-        auto& pUpdateStack = usm.getUpdateStack();
-        if(this->uniqueId()) {
-            pUpdateStack->push(*this->uniqueId(), "isRepeating", isRepeating());
-        }
-    }
+Completable::setIsRepeating( const int is_repeating, bool update ) {
+    _isRepeating = static_cast<bool>(is_repeating);
+    pushToUpdateStack("isRepeating", isRepeating(), update);
 }
 
 void
 Completable::setFlagged( const int flagged, bool update ) {
     _flagged = static_cast<bool>(flagged);
-    if ( update ) {
-        auto& usm = _gtdItems.updateStackManager();
-        auto& pUpdateStack = usm.getUpdateStack();
-        if(this->uniqueId()) {
-            pUpdateStack->push(*this->uniqueId(), "flagged", flagged());
-        }
-    }
+    pushToUpdateStack("flagged", this->flagged(), update);
 }
 
 void
 Completable::setRepeatSchedule( std::string_view schedule, bool update ) {
     _repeatSchedule = schedule;
-    if ( update ) {
-        auto& usm = _gtdItems.updateStackManager();
-        auto& pUpdateStack = usm.getUpdateStack();
-        if(this->uniqueId()) {
-            pUpdateStack->push(*this->uniqueId(), "repeatSchedule", repeatSchedule());
-        }
-    }
+    pushToUpdateStack("repeatSchedule", repeatSchedule(), update);
 }
 
 void
 Completable::setRepeatFrom( std::string_view rptFromStr, bool update ) {
     _repeatFrom = strToRepeatFrom(rptFromStr);
-    if ( update ) {
-        auto& usm = _gtdItems.updateStackManager();
-        auto& pUpdateStack = usm.getUpdateStack();
-        if(this->uniqueId()) {
-            pUpdateStack->push(*this->uniqueId(), "repeatFrom", repeatFromStr());
-        }
-    }
+    pushToUpdateStack("repeatFrom", repeatFromStr(), update);
 }
 
 std::ostream&

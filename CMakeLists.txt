@@ -3,12 +3,14 @@ project(GTD)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-IF( EXISTS "${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json" ) 
+IF( EXISTS "${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json" )
   EXECUTE_PROCESS( COMMAND ${CMAKE_COMMAND} -E copy_if_different
     ${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json
     ${CMAKE_CURRENT_SOURCE_DIR}/compile_commands.json
   )
 ENDIF()
+
+add_compile_options(-Xclang -fconcepts-ts)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -42,7 +44,8 @@ add_executable ( sqlplay
     src/Folder.cpp
     src/GtdHelper.cpp
     src/Project.cpp
-    )
+        include/gtd_concepts.hpp
+)
 	
 target_link_libraries ( sqlplay
     ${SQLite3_LIBRARIES}
@@ -67,6 +70,10 @@ add_executable ( temp
     src/CompleteableContainer.cpp
     src/ContextContainer.cpp
     src/FolderContainer.cpp
+    src/TaskContainer.cpp
+    src/ProjectContainer.cpp
+    src/DbBase.cpp
+    src/SqliteConnection.cpp
 	temp.cpp)
 
 target_link_libraries ( temp

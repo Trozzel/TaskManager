@@ -1,14 +1,32 @@
 #include "Project.hpp"
-#include "CompletableBase.hpp"
+#include "Task.hpp"
+#include "Completable.hpp"
 #include "GtdBase.hpp"
 #include "GtdHelper.hpp"
-#include "UpdateStack.hpp"
 
 using namespace std;
 
 namespace gtd {
-Project::Project( USMgr& updateStackMgr, std::string_view name ) :
-    CompletableBase(updateStackMgr, name) {}
+// CTOR
+Project::Project( ProjectContainer& gtdItems, std::string_view name ) :
+    Completable(gtdItems, name),
+    _gtdItems(gtdItems)
+{
+    _gtdItems.push_back(this);
+}
+
+Project::~Project() = default;
+
+// GETTERS
+/*****************************************************************************/
+std::ranges<pTask_t>
+Project::getTasks( const TaskContainer& tasks ) const {
+    return std::find_if(tasks.cbegin(), tasks.cend(),
+                        [this]( const TaskContainer::const_iterator& pTask ) {
+                            return (*pTask)->parentId() == this->uniqueId();
+                        });
+}
+
 
 // SETTERS
 /*****************************************************************************/
@@ -42,57 +60,31 @@ Project::appendTaskId( unique_id_t taskId ) {
 void
 Project::setProjectType( ProjectType projectType, bool update ) {
     _projectType = projectType;
-    if ( update ) {
-        const auto pUpdateStack = _updateStackMgr.getUpdateStack();
-        pUpdateStack->push(*this, "projectType");
-    }
+    pushToUpdateStack("projectType", projectTypeStr(_projectType), update);
 }
 
 void
 Project::setProjectType( std::string_view projectType, bool update ) {
     _projectType = strToProjectType(projectType);
-    if ( update ) {
-        const auto pUpdateStack = _updateStackMgr.getUpdateStack();
-        pUpdateStack->push(*this, "projectType");
-    }
+    pushToUpdateStack("projectType", projectTypeStr(_projectType), update);
 }
 
 void
-Project::setFolderId( unique_id_t folderId, bool update ) {
-    _folderId = folderId;
-    if ( update ) {
-        const auto pUpdateStack = _updateStackMgr.getUpdateStack();
-        pUpdateStack->push(*this, "folderId");
-    }
+Project::setFolderId( unique_id_t id, const bool update ) {
+    _folderId = id;
+    pushToUpdateStack("folderId", folderId(), update);
 }
 
 void
-Project::setCompleteWithLast( bool completeWithLast, bool update ) {
-    _completeWithLast = completeWithLast;
-    if ( update ) {
-        const auto pUpdateStack = _updateStackMgr.getUpdateStack();
-        pUpdateStack->push(*this, "completeWithLast");
-    }
+Project::setCompleteWithLast( bool completeWLast, const bool update ) {
+    _completeWithLast = completeWLast;
+    pushToUpdateStack("completeWithLast", completeWithLast(), update);
 }
 
 void
-Project::setReviewSchedule( std::string_view reviewSchedule, bool update ) {
-    _reviewSchedule = reviewSchedule;
-    if ( update ) {
-        const auto pUpdateStack = _updateStackMgr.getUpdateStack();
-        pUpdateStack->push(*this, "reviewSchedule");
-    }
-}
-
-auto
-getProject_it( const gtd::Task& task, const Projects_vec& projects ) {
-    auto       projectId = task.projectId();
-    const auto it        = std::ranges::find_if(
-        projects.cbegin(), projects.cend(),
-        [projectId]( const gtd::Project& project ) {
-            return project.uniqueId() == projectId;
-        });
-    return it;
+Project::setReviewSchedule( std::string_view review, const bool update ) {
+    _reviewSchedule = review;
+    pushToUpdateStack("reviewSchedule", repeatSchedule(), update);
 }
 
 std::ostream&

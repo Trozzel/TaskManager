@@ -8,20 +8,50 @@
 #include "GtdBaseContainer.hpp"
 
 namespace gtd {
-
 class Context;
 using pContext_t = std::unique_ptr<Context>;
 
-class ContextContainer final : public GtdBaseContainer {
+class ContextContainer final : public GtdBaseContainer
+{
 private:
-    std::vector<pContext_t>  _gtdItems;
+    std::vector<pContext_t> _gtdItems;
 
 public:
-    explicit ContextContainer(USMgr&);
+    using value_type = std::vector<pContext_t>::value_type;
+    using iterator = std::vector<pContext_t>::iterator;
+    using const_iterator = std::vector<pContext_t>::const_iterator;
+    using size_type = std::vector<pContext_t>::size_type;
+    using difference_type = std::vector<pContext_t>::difference_type;
+
+    explicit
+    ContextContainer( USMgr& );
+    ContextContainer( const ContextContainer& ) = delete;
     ~ContextContainer() override;
 
-    [[nodiscard]] std::string
+    ContextContainer&
+    operator=( const ContextContainer& ) = delete;
+
+    [[nodiscard]] const std::string&
     tableName() const override;
+
+    [[nodiscard]]
+    auto
+    begin() override;
+
+    [[nodiscard]]
+    auto
+    cbegin() const override;
+
+    [[nodiscard]]
+    auto
+    end() override;
+
+    [[nodiscard]]
+    auto
+    cend() const override;
+
+    bool
+    importAllFromDb() override;
 };
 } //namespace gtd
 

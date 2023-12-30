@@ -1,9 +1,9 @@
 #include <optional>
 
 #include "GtdBase.hpp"
-#include "UpdateStack.hpp"
 
 namespace gtd {
+
 // CTORS
 /*****************************************************************************/
 GtdBase::GtdBase( GtdBaseContainer& gtdItems, const std::string_view name ) :
@@ -28,131 +28,59 @@ GtdBase::notes() const {
 // SETTERS
 /*****************************************************************************/
 
-/// \note implementation is handled in derived classes to write to DB upon
-/// update
 void
 GtdBase::setName( std::string_view name, const bool update ) {
     _name = name;
     // Only updates if the Gtd_t object has a uniqueId (i.e. already present )
-    if ( update ) {
-        auto& usm = _gtdItems.updateStackManager();
-        auto& pUpdateStack = usm.getUpdateStack();
-        if(this->uniqueId()) {
-            pUpdateStack->push(*this->uniqueId(), "name", name);
-        }
-    }
+    pushToUpdateStack("name", this->name(), update);
 }
 
-/// \note implementation is handled in derived classes to write to DB upon
-/// update
 void
 GtdBase::setStatus( std::string_view status, const bool update ) {
     _status = strToStatus(status);
-    if ( update ) {
-        auto& usm = _gtdItems.updateStackManager();
-        auto& pUpdateStack = usm.getUpdateStack();
-        if(this->uniqueId()) {
-            pUpdateStack->push(*this->uniqueId(), "status", statusStr());
-        }
-    }
+    pushToUpdateStack("status", _status, update);
 }
 
-/// \note implementation is handled in derived classes to write to DB upon
-/// update
 void
 GtdBase::setStatus( const Status status, const bool update ) {
     _status = status;
-    if ( update ) {
-        auto& usm = _gtdItems.updateStackManager();
-        auto& pUpdateStack = usm.getUpdateStack();
-        if(this->uniqueId()) {
-            pUpdateStack->push(*this->uniqueId(), "status", statusStr());
-        }
-    }
+    pushToUpdateStack("status", statusStr(), update);
 }
 
-/// \note implementation is handled in derived classes to write to DB upon
-/// update
 void
 GtdBase::setCreated( std::string_view created, const bool update ) {
     _created = strToTimePoint(created);
-    if ( update ) {
-        auto& usm = _gtdItems.updateStackManager();
-        auto& pUpdateStack = usm.getUpdateStack();
-        if(this->uniqueId()) {
-            pUpdateStack->push(*this->uniqueId(), "created", createdStr());
-        }
-    }
+    pushToUpdateStack("created", createdStr(), update);
 }
 
-/// \note implementation is handled in derived classes to write to DB upon
-/// update
 void
 GtdBase::setCreated( const time_point_t tp, const bool update ) {
     _created = tp;
-    if ( update ) {
-        auto& usm = _gtdItems.updateStackManager();
-        auto& pUpdateStack = usm.getUpdateStack();
-        if(this->uniqueId()) {
-            pUpdateStack->push(*this->uniqueId(), "created", createdStr());
-        }
-    }
+    pushToUpdateStack("created", createdStr(), update);
 }
 
-/// \note implementation is handled in derived classes to write to DB upon
-/// update
 void
 GtdBase::setModified( std::string_view modified, const bool update ) {
     _modified = strToTimePoint(modified);
-    if ( update ) {
-        auto& usm = _gtdItems.updateStackManager();
-        auto& pUpdateStack = usm.getUpdateStack();
-        if(this->uniqueId()) {
-            pUpdateStack->push(*this->uniqueId(), "modified", modifiedStr());
-        }
-    }
+    pushToUpdateStack("modified", this->modifiedStr(), update);
 }
 
-/// \note implementation is handled in derived classes to write to DB upon
-/// update
 void
 GtdBase::setModified( const time_point_t tp, const bool update ) {
     _modified = tp;
-    if ( update ) {
-        auto& usm = _gtdItems.updateStackManager();
-        auto& pUpdateStack = usm.getUpdateStack();
-        if(this->uniqueId()) {
-            pUpdateStack->push(*this->uniqueId(), "modified", modifiedStr());
-        }
-    }
+    pushToUpdateStack("modified", this->modifiedStr(), update);
 }
 
-/// \note implementation is handled in derived classes to write to DB upon
-/// update
 void
 GtdBase::setParentId( const unique_id_t id, const bool update ) {
     _o_parentId = id;
-    if ( update ) {
-        auto& usm = _gtdItems.updateStackManager();
-        auto& pUpdateStack = usm.getUpdateStack();
-        if(this->uniqueId()) {
-            pUpdateStack->push(*this->uniqueId(), "parentId", parentId());
-        }
-    }
+    pushToUpdateStack("parentId", parentId(), update);
 }
 
-/// \note implementation is handled in derived classes to write to DB upon
-/// update
 void
-GtdBase::GtdBase::setNotes( std::string_view notes, const bool update ) {
+GtdBase::setNotes( std::string_view notes, const bool update ) {
     _o_notes = notes;
-    if ( update ) {
-        auto& usm = _gtdItems.updateStackManager();
-        auto& pUpdateStack = usm.getUpdateStack();
-        if(this->uniqueId()) {
-            pUpdateStack->push(*this->uniqueId(), "notes", this->notes());
-        }
-    }
+    pushToUpdateStack("notes", this->notes(), update);
 }
 
 // PULL OPERATOR FOR OSTREAM

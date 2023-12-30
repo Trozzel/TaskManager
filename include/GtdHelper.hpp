@@ -27,7 +27,7 @@ namespace gtd {
 /*****************************************************************************/
 /// Gtd Type
 enum class GtdType {
-	Context, Folder, Task, Project
+	Context, Folder, Task, Project, Virtual
 };
 
 
@@ -88,7 +88,7 @@ gtdTypeToStr(const gtd::GtdType gtdType) noexcept {
 			return "tasks";
 		case GtdType::Project:
 			return "projects";
-		default:
+		default: // Virtual will do this
 			std::cerr << "Invalid gtd::GtdType\n";
 			return "NA";
 	}

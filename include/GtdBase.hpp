@@ -16,6 +16,26 @@ class USMgr;
 
 class GtdBase
 {
+protected: // Helper functions
+    /// \brief Push element to the UpdateStack
+    /// \note Val_t must be std::string_view, const std::string&, or unique_id_t
+    template<typename Value_t>
+    void
+    pushToUpdateStack(std::string_view colName, Value_t value, bool update) const {
+        // Ensure that Value_t is one of the accepted types
+        static_assert(std::is_same_v<Value_t, std::string_view> ||
+            std::is_same_v<Value_t, const std::string&> ||
+            std::is_integral_v<Value_t> &&
+            !std::is_same_v<Value_t, time_point_t>);
+        if ( update ) {
+            auto& usm = _gtdItems.updateStackManager();
+            auto& pUpdateStack = usm.getUpdateStack();
+            if(this->uniqueId()) {
+                pUpdateStack->push(*this->uniqueId(), colName, value);
+            }
+        }
+    }
+
 protected:
     GtdBaseContainer&          _gtdItems;
     std::string                _name;

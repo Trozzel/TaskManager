@@ -6,8 +6,19 @@
 #include "GtdBaseContainer.hpp"
 
 namespace gtd {
+
 GtdBaseContainer::GtdBaseContainer(USMgr& usMgr) :
     _usMgr(usMgr)
+{}
+
+GtdBaseContainer::GtdBaseContainer( USMgr& usMgr, std::unique_ptr<DbBase> dbCon ) :
+    _usMgr(usMgr),
+    _dbCon(std::move(dbCon))
+{}
+
+GtdBaseContainer::GtdBaseContainer( USMgr& usMgr, DbBase* dbCon ) :
+    _usMgr(usMgr),
+    _dbCon(dbCon)
 {}
 
 GtdBaseContainer::~GtdBaseContainer() = default;
@@ -15,6 +26,26 @@ GtdBaseContainer::~GtdBaseContainer() = default;
 const USMgr&
 GtdBaseContainer::updateStackManager() const {
     return _usMgr;
+}
+
+auto
+GtdBaseContainer::begin() {
+    return _gtdItems.begin();
+}
+
+auto
+GtdBaseContainer::cbegin() const {
+    return _gtdItems.cbegin();
+}
+
+auto
+GtdBaseContainer::end() {
+    return _gtdItems.end();
+}
+
+auto
+GtdBaseContainer::cend() const {
+    return _gtdItems.cend();
 }
 
 const pGtdBase_t&
@@ -81,4 +112,13 @@ GtdBaseContainer::getAfterCreated( const pGtdBase_t& other ) const {
                 return other->created() > pGtdItem->created();
             });
 }
+
+int
+GtdBaseContainer::updateToDb() const {
+    const auto& pUpdateStack = _usMgr.getUpdateStack();
+    const size_t numElem = pUpdateStack->size();
+    pUpdateStack->compose(*this);
+    return numElem;
+}
+
 } // namespace  gtd

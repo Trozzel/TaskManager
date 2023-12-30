@@ -6,30 +6,21 @@
 #define GTD_TASK_HPP
 
 #include <iostream>
-#include <string>
 #include <string_view>
 
-#include "CompletableBase.hpp"
+#include "Completable.hpp"
+#include "TaskContainer.hpp"
 #include "GtdHelper.hpp"
 
 namespace gtd {
 
-/// \brief gtd::Task mirrors the table, tasks, as an in-memoy storage of a
-/// given task
-/// \param _contextId - uniqueId of the context to which task is assigned
-/// \param _projectId - uniqueId of the project to which the task belongs
-/// \param _notes - notes
-/// \param _deferred - deferred start date 
-/// \param _due - due date 
-/// \param _taskType of enum class TaskType. Either Sequential or Parallel 
-/// \param _isRepeating - if this is a recurring task
-/// \param _flagged - is flagged or not
-/// \param _repeatSchedule - crontab format repeat schedule
-class Task final : public CompletableBase {
+class Task final : public Completable {
+
 private:
 	// hide from Project since Project has a ProjectType
-    TaskType								_taskType { TaskType::Parallel };
-	std::optional<unique_id_t>  			_projectId { std::nullopt };
+    TaskContainer&              _gtdItems;
+    TaskType					_taskType { TaskType::Parallel };
+	std::optional<unique_id_t> 	_projectId { std::nullopt };
 
 public:
     // STATIC FUNCTIONS
@@ -49,14 +40,8 @@ public:
 		return taskType;
 	}
 
-	constexpr static
-	std::string_view
-	tableName() noexcept {
-		return "tasks";
-	};
-
     // CTORS
-    explicit Task(USMgr&, std::string_view name = "");
+    explicit Task(TaskContainer&,  std::string_view name = "");
 
 	// DTOR
     ~Task() final = default;

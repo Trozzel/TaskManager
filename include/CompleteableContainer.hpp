@@ -18,34 +18,55 @@ protected:
 
 public:
     // Type definitions
-    using value_type     = std::vector<pCompletable_t>::value_type;
-    using iterator       = std::vector<pCompletable_t>::iterator;
+    using value_type = std::vector<pCompletable_t>::value_type;
+    using iterator = std::vector<pCompletable_t>::iterator;
     using const_iterator = std::vector<pCompletable_t>::const_iterator;
-    using size_type      = std::vector<pCompletable_t>::size_type;
+    using size_type = std::vector<pCompletable_t>::size_type;
+    using difference_type = std::vector<pCompletable_t>::difference_type;
 
-    explicit CompleteableContainer(USMgr&);
+    explicit
+    CompleteableContainer( USMgr& );
+    CompleteableContainer( const CompleteableContainer& );
     ~CompleteableContainer() override;
 
-    [[nodiscard]] std::string
+    CompleteableContainer&
+    operator=( const CompleteableContainer& );
+
+    [[nodiscard]] const std::string&
     tableName() const override = 0;
 
-    virtual void
-    push_back(pCompletable_t);
+    [[nodiscard]]
+    auto
+    begin() override;
+
+    [[nodiscard]]
+    auto
+    cbegin() const override;
+
+    [[nodiscard]]
+    auto
+    end() override;
+
+    [[nodiscard]]
+    auto
+    cend() const override;
 
     virtual void
-    push_back(Completable*);
+    push_back( pCompletable_t );
+
+    virtual void
+    push_back( Completable* );
+    [[nodiscard]] std::ranges<pCompletable_t>
+    getWithContextId( unique_id_t ) const;
 
     [[nodiscard]] std::ranges<pCompletable_t>
-    getWithContextId(unique_id_t) const;
+    getAfterDeferredInclusive( time_point_t ) const;
 
     [[nodiscard]] std::ranges<pCompletable_t>
-    getAfterDeferredInclusive(time_point_t) const;
+    getBeforeDeferredInclusive( time_point_t ) const;
 
     [[nodiscard]] std::ranges<pCompletable_t>
-    getBeforeDeferredInclusive(time_point_t) const;
-
-    [[nodiscard]] std::ranges<pCompletable_t>
-    getAfterDueInclusive(time_point_t) const;
+    getAfterDueInclusive( time_point_t ) const;
 
     [[nodiscard]] std::ranges<pCompletable_t>
     getFlagged() const;

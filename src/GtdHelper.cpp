@@ -19,16 +19,13 @@ timePointToStr(time_point_t tp) {
 
     // RETURN TIME STRING FROM system_clock::time_point
     // Returns "NULL" if before year 2000
-    const auto tp_t = system_clock::to_time_t(tp);
-    if (tp_t < y2000_t) {
+    if (const auto tp_t = system_clock::to_time_t(tp); tp_t < y2000_t) {
         return std::nullopt;
     }
-    else {
-		const auto time = std::chrono::system_clock::to_time_t(tp);
-		char s_time[100];
-		std::strftime(s_time, sizeof(s_time), "%F %T", std::localtime(&time));
-		return std::string(s_time);
-    }
+    const auto time = system_clock::to_time_t(tp);
+    char s_time[100];
+    std::strftime(s_time, sizeof(s_time), "%F %T", std::localtime(&time));
+    return std::string(s_time);
 }
 
 time_point_t

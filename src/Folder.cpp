@@ -12,11 +12,13 @@ namespace gtd {
 Folder::Folder(FolderContainer& gtdItems, std::string_view name) :
     GtdBase(gtdItems, name),
     _gtdItems(gtdItems)
-{}
+{
+    _gtdItems.push_back(this);
+}
 
 // OSTREAM
 std::ostream& 
-operator<<(std::ostream& out, const gtd::Folder& folder) {
+operator<<(std::ostream& out, const Folder& folder) {
     out << folder.name() << " "
         << folder.statusStr() << " "
         << fmt::format("{} ", folder.created())

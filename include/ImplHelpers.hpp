@@ -23,6 +23,7 @@
 #include "UpdateStack.hpp"
 
 namespace gtd {
+
 /// \brief get the name of the table to which the element belongs
 template<typename Gtd_t>
 constexpr const char*
@@ -174,13 +175,13 @@ insertProject(std::string_view dbPath, gtd::Project& project);
 /// \brief Get Gtd Items from db
 template<typename Gtd_t, typename VectorGtd>
 VectorGtd
-importGtdItems(std::string_view dbPath, USMgr& updateStackMgr) {
+importGtdItems(std::string_view dbPath, USMgr& updateStackMgr, const GtdType gtdType) {
 	static_assert(std::is_base_of_v<gtd::GtdBase, Gtd_t>);
 	static_assert(std::is_base_of_v<gtd::GtdBase, typename VectorGtd::value_type>);
 	// Get table name
 	std::remove_const_t<VectorGtd> gtdItems;
 
-	const char* table = updateStackMgr.tableName().data();
+	const char* table = gtdTypeToStr(gtdType).data();
     try {
 		// Initiate db connection
 		const SQLite::Database db(dbPath);
@@ -190,7 +191,7 @@ importGtdItems(std::string_view dbPath, USMgr& updateStackMgr) {
 
 		// Prepare beginning of sql statement
 		constexpr size_t queryStmtSz = 100;
-		char queryStmt[queryStmtSz] = "SELECT *FROM ";
+		char queryStmt[queryStmtSz] = "SELECT * FROM ";
 		strncat(queryStmt, table, queryStmtSz);
         SQLite::Statement query(db, queryStmt);
 
@@ -208,7 +209,7 @@ importGtdItems(std::string_view dbPath, USMgr& updateStackMgr) {
             gtdItem.setCreated(std::string_view(query.getColumn(colnum++).getString()), dontUpdate);
             gtdItem.setModified(std::string_view(query.getColumn(colnum++).getString()), dontUpdate);
 			gtdItem.setNotes(query.getColumn(colnum++).getString(), dontUpdate);
-			if constexpr(std::is_base_of_v<gtd::CompletableBase, Gtd_t>) {
+			if constexpr(std::is_base_of_v<gtd::Completable, Gtd_t>) {
 				if(!query.isColumnNull(colnum++)) {
 					gtdItem.setContextId(query.getColumn(colnum - 1).getInt64(), dontUpdate);
 				}

@@ -3,6 +3,7 @@
 //
 #ifndef DBBASE_HPP_
 #define DBBASE_HPP_
+
 #include <GtdHelper.hpp>
 #include <string_view>
 

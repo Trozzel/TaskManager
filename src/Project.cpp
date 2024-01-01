@@ -27,17 +27,11 @@ Project::getTasks( const TaskContainer& tasks ) const {
                         });
 }
 
-
 // SETTERS
 /*****************************************************************************/
 void
-Project::setTaskIds( const std::initializer_list<unique_id_t>& taskIds ) {
-    _taskIds = taskIds;
-}
-
-void
-Project::setTaskIds( const std::list<unique_id_t>& taskIds ) {
-    _taskIds = taskIds;
+Project::setTaskIds( std::ranges::input_range auto&& taskIds ) {
+    _taskIds = std::list<Task>(taskIds.begin(), taskIds.end());
 }
 
 void

@@ -62,16 +62,9 @@ public:
     // SETTERS
 	/*************************************************************************/
 	void 
-	setTaskIds(const std::initializer_list<unique_id_t> & taskIds);
+	setTaskIds(std::ranges::range auto && taskIds);
 
-	void 
-	setTaskIds(const std::list<unique_id_t> & taskIds);
-
-    template<typename Iter>
-    void 
-	setTaskIds(Iter begin, Iter end);
-
-    void 
+    void
 	appendTaskIds(const std::initializer_list<unique_id_t> & taskIds);
 
 	void 

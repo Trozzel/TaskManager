@@ -9,7 +9,7 @@ build/
 *.DS_Store
 temp2*
 
-
+compile_commands.json
 cmake-build-*
 old_stuff
 sql_scripts/create_*

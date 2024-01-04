@@ -7,118 +7,58 @@
 
 namespace gtd {
 
-GtdBaseContainer::GtdBaseContainer(USMgr& usMgr) :
-    _usMgr(usMgr)
-{}
+static_assert(IsBaseContainer<GtdContainer>);
 
-GtdBaseContainer::GtdBaseContainer( USMgr& usMgr, std::unique_ptr<DbBase> dbCon ) :
-    _usMgr(usMgr),
-    _dbCon(std::move(dbCon))
-{}
+GtdContainer::GtdBaseContainer( USMgr& usm ) :
+    _usMgr(usm) {}
 
-GtdBaseContainer::GtdBaseContainer( USMgr& usMgr, DbBase* dbCon ) :
-    _usMgr(usMgr),
-    _dbCon(dbCon)
-{}
-
-GtdBaseContainer::~GtdBaseContainer() = default;
+GtdContainer::~GtdBaseContainer() = default;
 
 const USMgr&
-GtdBaseContainer::updateStackManager() const {
+GtdContainer::updateStackManager() const {
     return _usMgr;
 }
 
-auto
-GtdBaseContainer::begin() {
-    return _gtdItems.begin();
+auto&
+GtdContainer::begin() {
+    return _gtds.begin();
 }
 
-auto
-GtdBaseContainer::cbegin() const {
-    return _gtdItems.cbegin();
+const auto&
+GtdContainer::cbegin() const {
+    return _gtds.cbegin();
 }
 
-auto
-GtdBaseContainer::end() {
-    return _gtdItems.end();
+auto&
+GtdContainer::end() {
+    return _gtds.end();
 }
 
-auto
-GtdBaseContainer::cend() const {
-    return _gtdItems.cend();
+const auto&
+GtdContainer::cend() const {
+    return _gtds.cend();
 }
 
-const pGtdBase_t&
-GtdBaseContainer::operator[]( const size_t idx ) const {
-    return _gtdItems[idx];
+const auto&
+GtdContainer::operator[]( const size_t idx ) const {
+    return _gtds[idx];
 }
 
-const pGtdBase_t&
-GtdBaseContainer::at( const size_t idx ) const {
-    return _gtdItems.at(idx);
+const auto&
+GtdContainer::at( const size_t idx ) const {
+    return _gtds.at(idx);
 }
 
-void
-GtdBaseContainer::push_back( GtdBase* pGtdBase) {
-    _gtdItems.push_back(pGtdBase_t(pGtdBase));
-}
-
-void
-GtdBaseContainer::push_back(pGtdBase_t pGtdBase) {
-    _gtdItems.push_back(std::move(pGtdBase));
+const auto&
+GtdContainer::gtdItemByUniqueId( const unique_id_t uniqueId ) const {
+    return *std::ranges::find_if(_gtds.cbegin(), _gtds.cend(),
+                                 [uniqueId]( const auto&& pGtdItem ) {
+                                     return *pGtdItem->uniqueId() == uniqueId;
+                                 });
 }
 
 bool
-GtdBaseContainer::empty() const {
-    return _gtdItems.empty();
+GtdContainer::empty() const {
+    return _gtds.empty();
 }
-
-const pGtdBase_t&
-GtdBaseContainer::gtdItemByUniqueId( const unique_id_t uniqueId ) const {
-    return *std::ranges::find_if(_gtdItems.cbegin(), _gtdItems.cend(),
-        [uniqueId](const pGtdBase_t& pGtdItem) {
-            return *pGtdItem->uniqueId() == uniqueId;
-        });
-}
-
-std::ranges<pGtdBase_t>
-GtdBaseContainer::getBeforeCreated( const time_point_t tp ) const {
-    return _gtdItems |
-            std::views::filter([tp]( const pGtdBase_t& pGtdItem  ) {
-                return pGtdItem->created() < tp;
-            });
-}
-
-std::ranges<pGtdBase_t>
-GtdBaseContainer::getBeforeCreated( const pGtdBase_t& other ) const {
-    return _gtdItems |
-            std::views::filter([&other]( const auto& pGtdItem ) {
-                return other->created() < pGtdItem->created();
-            });
-}
-
-std::ranges<pGtdBase_t>
-GtdBaseContainer::getAfterCreated( const time_point_t tp ) const {
-    return _gtdItems |
-            std::views::filter([tp]( const pGtdBase_t& pGtdItem ) {
-                return pGtdItem->created() > tp;
-            });
-}
-
-std::ranges<pGtdBase_t>
-GtdBaseContainer::getAfterCreated( const pGtdBase_t& other ) const {
-    return _gtdItems |
-            std::views::filter([&other]( const pGtdBase_t& pGtdItem ) {
-                return other->created() > pGtdItem->created();
-            });
-}
-
-int
-GtdBaseContainer::updateToDb() const {
-    const auto& pUpdateStack = _usMgr.getUpdateStack();
-    const size_t numElem = pUpdateStack->size();
-    pUpdateStack->compose(*this);
-    return numElem;
-}
-
-} // namespace  gtd
+} // namespace gtd

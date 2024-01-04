@@ -50,7 +50,7 @@ UpdateStack::top() {
 }
 
 std::string
-UpdateStack::compose( const GtdBaseContainer& gtdItems ) {
+UpdateStack::compose( const GtdContainer& gtdItems ) {
     if ( gtdItems.empty() ) {
         return "WARNING: no items in " + gtdItems.tableName();
     }

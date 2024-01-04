@@ -1,7 +1,6 @@
 #ifndef PROJECTS_HPP
 #define PROJECTS_HPP
 
-#include <string>
 #include <list>
 #include <initializer_list>
 #include <string_view>
@@ -9,120 +8,122 @@
 #include "Completable.hpp"
 #include "GtdHelper.hpp"
 #include "ProjectContainer.hpp"
-#include "TaskContainer.hpp"
 
 namespace gtd {
-
-class Project final : public Completable {
-
+class Project final : public Completable
+{
 private:
-    ProjectContainer&           _gtdItems;
-	ProjectType					_projectType { ProjectType::Parallel };
-	std::optional<unique_id_t>  _folderId { std::nullopt };
-    std::list<unique_id_t>      _taskIds {};
-    bool						_completeWithLast { true };
-	std::string_view     		_reviewSchedule {"0 0 * * 0"}; // 12a every Sunday
+    ProjectContainer&          _projects;
+    ProjectType                _projectType{ProjectType::Parallel};
+    std::optional<unique_id_t> _folderId{std::nullopt};
+    std::vector<unique_id_t>   _taskIds{};
+    bool                       _completeWithLast{true};
+    std::string_view           _reviewSchedule{"0 0 * * 0"}; // 12a every Sunday
 
 public:
-	[[nodiscard]]
-    static constexpr ProjectType 
-	strToProjectType(std::string_view projectTypeStr) noexcept {
-		return projectTypeFromStr(projectTypeStr);
-	}
+    using gtd_category = project_tag;
+    [[nodiscard]]
+    static constexpr ProjectType
+    strToProjectType( const std::string_view projectTypeStr ) noexcept {
+        return projectTypeFromStr(projectTypeStr);
+    }
 
     // CTORS
     /**************************************************************************/
     // DEFAULT
-    explicit Project(ProjectContainer&, std::string_view name = "");
+    explicit
+    Project( ProjectContainer&, std::string_view name = "" );
 
     ~Project() final;
 
+    [[nodiscard]]
+    constexpr static const char*
+        tableName() noexcept { return "projects"; }
+
     // GETTERS
-	/*************************************************************************/
+    /*************************************************************************/
     [[nodiscard]]
-	constexpr ProjectType
-	projectType() const noexcept { return _projectType; }
-
-	[[nodiscard]]
-	constexpr std::optional<unique_id_t>
-	folderId() const noexcept { return _folderId; }
-
-    [[nodiscard]] 
-	constexpr bool
-	completeWithLast() const noexcept { return _completeWithLast; }
-
-	[[nodiscard]]
-	constexpr std::string_view
-	reviewSchedule() const noexcept { return _reviewSchedule; }
+    constexpr ProjectType
+    projectType() const noexcept {
+        return _projectType;
+    }
 
     [[nodiscard]]
-    std::ranges<pTask_t>
-    getTasks(const TaskContainer&) const;
+    constexpr std::optional<unique_id_t>
+    folderId() const noexcept {
+        return _folderId;
+    }
+
+    [[nodiscard]]
+    constexpr bool
+    completeWithLast() const noexcept {
+        return _completeWithLast;
+    }
+
+    [[nodiscard]]
+    constexpr std::string_view
+    reviewSchedule() const noexcept {
+        return _reviewSchedule;
+    }
+
+    [[nodiscard]]
+    std::ranges::range auto&&
+    getTasks( std::ranges::range auto&& tasks ) const {
+        return tasks |
+            std::views::filter([this](auto&& task) {
+                return task.projectId() == uniqueId().value_or(-1); // -1 ensures false
+            });
+    }
 
     // SETTERS
-	/*************************************************************************/
-	void 
-	setTaskIds(std::ranges::range auto && taskIds);
+    /*************************************************************************/
+    void
+    setTaskIds( std::ranges::input_range auto&& taskIds ) {
+        _taskIds = std::list(std::ranges::cbegin(taskIds), std::ranges::cend(taskIds));
+    }
 
     void
-	appendTaskIds(const std::initializer_list<unique_id_t> & taskIds);
+    appendTaskIds( std::initializer_list<unique_id_t>&& taskIds );
 
-	void 
-	appendTaskIds(const std::list<unique_id_t> & taskIds);
+    void
+    appendTaskIds( std::ranges::range auto&& taskIds );
 
-    template<typename Iter>
-    void 
-	appendTaskIds(Iter begin, Iter end);
+    template <typename Iter>
+    void
+    appendTaskIds( Iter begin, Iter end );
 
-    void 
-	appendTaskId(unique_id_t taskId);
+    void
+    appendTaskId( unique_id_t taskId );
 
-    void 
-	setProjectType(ProjectType projectType, bool update = true);
+    void
+    setProjectType( ProjectType projectType, bool update = true );
 
-    void 
-	setProjectType(std::string_view projectType, bool update = true);
+    void
+    setProjectType( std::string_view projectType, bool update = true );
 
-	void
-	setFolderId(unique_id_t folderId, bool update = true);
+    void
+    setFolderId( unique_id_t folderId, bool update = true );
 
-    void 
-	setCompleteWithLast(bool completeWithLast, bool update = true);
+    void
+    setCompleteWithLast( bool completeWithLast, bool update = true );
 
-	void
-	setReviewSchedule(std::string_view reviewSchedule, bool update = true);
+    void
+    setReviewSchedule( std::string_view reviewSchedule, bool update = true );
 };
 
 //							HELPER FUNCTIONS
 /*****************************************************************************/
-
-/// \brief Associate given project with its tasks (Project::_taskIds)
-template<typename Iter>
-void Project::setTaskIds(Iter begin, Iter end) {
-	static_assert(std::is_integral_v<typename Iter::value_type>);
-    _taskIds.clear();
-    for(; begin != end; ++begin) {
+template <typename Iter>
+void
+Project::appendTaskIds( Iter begin, Iter end ) {
+    static_assert(std::is_integral_v<typename Iter::value_type>);
+    for ( ; begin != end; ++begin ) {
         _taskIds.push_back(*begin);
     }
 }
 
-/// \brief Append tasks to the Project::_taskIds
-template<typename Iter>
-void Project::appendTaskIds(Iter begin, Iter end) {
-	static_assert(std::is_integral_v<typename Iter::value_type>);
-    for(; begin != end; ++begin) {
-        _taskIds.push_back(*begin);
-    }
-}
-
-/// \brief Get gtd::Project object from task
-/// \note Must check for it == projects.end() on call
-using Projects_vec = std::vector<const gtd::Project>;
-auto
-getProject_it(const Task& task, const Projects_vec& projects);
-
-std::ostream& 
-operator<<(std::ostream& out, const Project& project);
+std::ostream&
+operator<<( std::ostream& out, const Project& project );
 } // namespace gtd
 
 #endif // PROJECTS_HPP

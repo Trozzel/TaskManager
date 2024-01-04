@@ -9,55 +9,52 @@
 
 namespace gtd {
 class Task;
-using pTask_t = std::unique_ptr<Task>;
 
-class TaskContainer final : public CompleteableContainer
+class TaskContainer/* final : public CompleteableContainer */
 {
 private:
-    std::vector<pTask_t> _gtdItems;
+    std::vector<Task> _tasks{};
+    USMgr&            _usm;
 
 public:
-    using value_type = std::vector<pTask_t>::value_type;
-    using iterator = std::vector<pTask_t>::iterator;
-    using const_iterator = std::vector<pTask_t>::const_iterator;
-    using size_type = std::vector<pTask_t>::size_type;
-    using difference_type = std::vector<pTask_t>::difference_type;
+    using value_type = Task;
+    using iterator = std::vector<Task>::iterator;
+    using const_iterator = std::vector<Task>::const_iterator;
+    using size_type = std::vector<Task>::size_type;
+    using difference_type = std::vector<Task>::difference_type;
+
+    [[nodiscard]] static const std::string&
+    tableName();
 
     explicit
     TaskContainer( USMgr& );
 
-    TaskContainer( const TaskContainer& other ) :
-        CompleteableContainer(other),
-        _gtdItems(other._gtdItems) {}
+    TaskContainer( const TaskContainer& other );
 
-    ~TaskContainer() override;
+    ~TaskContainer();
 
     TaskContainer&
     operator=( const TaskContainer& );
 
-    [[nodiscard]] const std::string&
-    tableName() const override;
+    [[nodiscard]]
+    auto
+    begin();
 
     [[nodiscard]]
     auto
-    begin() override;
+    cbegin() const;
 
     [[nodiscard]]
     auto
-    cbegin() const override;
+    end();
 
     [[nodiscard]]
     auto
-    end() override;
+    cend() const;
 
-    [[nodiscard]]
-    auto
-    cend() const override;
-
-    [[nodiscard]] std::ranges<pTask_t>
+    [[nodiscard]] std::ranges::range auto&&
     getByProjectId( unique_id_t ) const;
 };
-
 } // namespace gtd
 
 #endif //TASKCONTAINER_HPP

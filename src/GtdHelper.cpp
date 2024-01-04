@@ -12,7 +12,7 @@ using namespace std;
 namespace gtd {
 
 std::optional<std::string>
-timePointToStr(time_point_t tp) {
+timePointToStr(const time_point_t tp) {
     using chrono::system_clock;
     // YEAR 2000 RAW TIME
     static constexpr long y2000_t = 949881676;
@@ -29,7 +29,7 @@ timePointToStr(time_point_t tp) {
 }
 
 time_point_t
-strToTimePoint(std::string_view tpStr) {
+strToTimePoint(const std::string_view tpStr) {
     std::tm tm = {};
     std::stringstream ss(tpStr.data());
     ss >> std::get_time(&tm, "%Y-%m-%d %H:%M:%S");

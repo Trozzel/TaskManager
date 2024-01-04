@@ -4,109 +4,158 @@
 #ifndef GTDBASECONTAINER_HPP_
 #define GTDBASECONTAINER_HPP_
 
-#include <DbBase.hpp>
 #include <vector>
+#include <ranges>
 
 #include "GtdHelper.hpp"
-#include "UpdateStack.hpp"
+#include "gtd_concepts.hpp"
 
 namespace gtd {
-class GtdBase;
+class Gtd;
+class USMgr;
 
-using pGtdBase_t = std::unique_ptr<GtdBase>;
-
-/// \brief Class that contains vector of GtdBase objects. Facilitates
-/// inter-GtdBase interactions
-class GtdBaseContainer
+template <GtdImpl Gtd_t>
+class GtdContainer
 {
 protected:
-    std::vector<pGtdBase_t>      _gtdItems{};
-    USMgr&                       _usMgr;
-    std::unique_ptr<DbBase>      _dbCon = nullptr;
+    std::vector<Gtd_t> _gtds{};
+    USMgr&             _usMgr;
 
 public:
-    // Type definitions
-    using value_type = std::vector<pGtdBase_t>::value_type;
-    using iterator = std::vector<pGtdBase_t>::iterator;
-    using const_iterator = std::vector<pGtdBase_t>::const_iterator;
-    using size_type = std::vector<pGtdBase_t>::size_type;
-    using difference_type = std::vector<pGtdBase_t>::difference_type;
+    using iterator = typename std::vector<Gtd_t>::iterator;
+    using const_iterator = typename std::vector<Gtd_t>::const_iterator;
+    using reverse_iterator = typename std::vector<Gtd_t>::reverse_iterator;
+    using const_reverse_iterator = typename std::vector<Gtd_t>::const_reverse_iterator;
+    using value_type = typename std::vector<Gtd_t>::value_type;
+    using refernce = typename std::vector<Gtd_t>::reference;
+    using refernce_iterator = typename std::vector<Gtd_t>::reference_iterator;
+    using difference_type = typename std::vector<Gtd_t>::difference_type;
 
-    // CTORS
     explicit
-    GtdBaseContainer( USMgr& );
-    GtdBaseContainer( USMgr&, std::unique_ptr<DbBase> );
-    GtdBaseContainer( USMgr&, DbBase* );
+    GtdContainer( USMgr& usm ) :
+        _usMgr(usm) {}
 
-    // ~GtdBaseContainer() = default in source file for inheriting classes
-    virtual ~GtdBaseContainer() = 0;
+    GtdContainer( const GtdContainer& ) = delete;
+    GtdContainer&
+    operator=( const GtdContainer& ) = delete;
 
-    GtdBaseContainer( const GtdBaseContainer& ) = delete;
-
-    GtdBaseContainer&
-    operator=( const GtdBaseContainer& ) = delete;
-
-    [[nodiscard]]
-    virtual const std::string&
-    tableName() const;
+    ~GtdContainer() = default;
 
     [[nodiscard]]
     const USMgr&
-    updateStackManager() const;
+    updateStackManager() const {
+        return _usMgr;
+    }
 
     [[nodiscard]]
-    virtual auto
-    begin();
+    iterator
+    begin() {
+        return _gtds.begin();
+    }
 
     [[nodiscard]]
-    virtual auto
-    cbegin() const;
+    const_iterator
+    cbegin() const {
+        return _gtds.cbegin();
+    }
 
     [[nodiscard]]
-    virtual auto
-    end();
+    iterator
+    end() {
+        return _gtds.end();
+    }
 
     [[nodiscard]]
-    virtual auto
-    cend() const;
+    const_iterator
+    cend() const {
+        return _gtds.cend();
+    }
 
-    virtual const pGtdBase_t&
-    operator[]( size_t idx ) const;
+    [[nodiscard]] const Gtd_t&
+    at( const size_t idx ) const {
+        return _gtds.at(idx);
+    }
 
-    [[nodiscard]] virtual const pGtdBase_t&
-    at( size_t ) const;
+    [[nodiscard]] Gtd_t&
+    at( const size_t idx ) {
+        return _gtds.at(idx);
+    }
 
-    virtual void
-    push_back( GtdBase* );
+    void
+    push_back( Gtd_t gtd ) {
+        _gtds.push_back(std::move(gtd));
+    }
 
-    virtual void
-    push_back( pGtdBase_t );
+    void
+    push_back( const Gtd_t& gtd ) {
+        _gtds.push_back(gtd);
+    }
 
-    [[nodiscard]] virtual const pGtdBase_t&
-    gtdItemByUniqueId( unique_id_t ) const;
+    template <typename... Args>
+    void
+    emplace_back( Args... args ) {
+        _gtds.emplace_back(args...);
+    }
+
+    void
+    erase( const Gtd_t& gtd ) {
+        _gtds.erase(
+            std::find(_gtds.cbegin(), _gtds.cend(), gtd));
+    }
+
+	void 
+	erase( const unique_id_t id ) {
+		_gtds.erase(
+			std::find(*_gtds.uniqueId() == id)
+				);
+	}
+
+    [[nodiscard]] const auto&&
+    gtdItemByUniqueId( const unique_id_t id ) const {
+        auto sameUniqueId = [id]( auto&& gtd ) {
+            return gtd.uniqueId().value_or(-1) == id;
+        };
+        return _gtds |
+                std::views::filter(sameUniqueId) |
+                std::views::take(1);
+    }
 
     [[nodiscard]] bool
-    empty() const;
+    empty() const {
+        return _gtds.empty();
+    }
 
-    [[nodiscard]] std::ranges<pGtdBase_t> // view to _gtdBases
-    getBeforeCreated( time_point_t ) const;
+    [[nodiscard]] std::ranges::range auto&&
+    getBeforeCreated( const time_point_t tp ) const {
+        return _gtds |
+                std::views::filter([tp]( auto&& gtd ) {
+                    return gtd.created() < tp;
+                });
+    }
 
-    [[nodiscard]] std::ranges<pGtdBase_t> // view to _gtdBases
-    getBeforeCreated( const GtdBase& ) const;
+    [[nodiscard]] std::ranges::range auto&&
+    getBeforeCreated( const Gtd_t& gtd ) const {
+        return _gtds |
+                std::views::filter([&gtd]( auto&& other ) {
+                    return other.created() < gtd.created();
+                });
+    }
 
-    [[nodiscard]] std::ranges<pGtdBase_t> // view to _gtdBases
-    getAfterCreated( time_point_t ) const;
+    [[nodiscard]] std::ranges::range auto&&
+    getAfterCreated( const time_point_t tp ) const {
+        return _gtds |
+                std::views::filter([tp]( auto&& gtd ) {
+                    return gtd.created() > tp;
+                });
+    }
 
-    [[nodiscard]] std::ranges<pGtdBase_t> // view to _gtdBases
-    getAfterCreated( const GtdBase& ) const;
-
-    /// \brief Import all elements from given table into container
-    virtual bool
-    importAllFromDb() = 0;
-
-    /// \return number of elements
-    [[nodiscard]] virtual int
-    updateToDb() const;
+    [[nodiscard]] std::ranges::range auto&&
+    getAfterCreated( const Gtd_t& gtd ) const {
+        return _gtds |
+                std::views::filter([&gtd]( auto&& other ) {
+                    return other.created() > gtd.created();
+                });
+    }
 };
 } // namespace gtd
 

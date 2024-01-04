@@ -13,6 +13,7 @@
 
 #include "CompleteableContainer.hpp"
 #include "GtdBase.hpp"
+#include "gtd_concepts.hpp"
 #include "GtdHelper.hpp"
 
 namespace gtd {
@@ -30,12 +31,11 @@ protected:
     std::string_view            _repeatSchedule{"30 16 * * *"}; // Every day at 4:30pm
 
 public:
+    using gtd_category = completable_tag;
     // CTORS
     explicit
     Completable( CompleteableContainer&, std::string_view name = "" );
 
-    /// \brief although pure virtual destructor, still needs definition for
-    /// children destructors
     ~Completable() override = 0;
 
     // GETTERS
@@ -136,6 +136,8 @@ public:
     setRepeatSchedule( std::string_view schedule, bool update = true );
 };
 } // namespace gtd
+
+static_assert(IsCompletable<gtd::Completable>);
 
 std::ostream&
 operator<<( std::ostream& out, const gtd::Completable& completable );

@@ -6,6 +6,7 @@
 #define GTD_FOLDER_HPP_
 
 #include "GtdBase.hpp"
+#include "gtd_concepts.hpp"
 #include "FolderContainer.hpp"
 
 namespace gtd {
@@ -16,6 +17,7 @@ private:
     FolderContainer&  _gtdItems;
 
 public:
+    using gtd_category = folder_tag;
     // CTORS
     /**************************************************************************/
     explicit
@@ -23,6 +25,8 @@ public:
 
     ~Folder() override = default;
 };
+
+static_assert(IsGtdBase<Folder>);
 
 } // namespace gtd
 

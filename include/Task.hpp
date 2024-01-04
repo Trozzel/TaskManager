@@ -23,6 +23,7 @@ private:
 	std::optional<unique_id_t> 	_projectId { std::nullopt };
 
 public:
+    using gtd_category = task_tag;
     // STATIC FUNCTIONS
     static constexpr
     TaskType strToTaskType(std::string_view taskTypeStr) noexcept {

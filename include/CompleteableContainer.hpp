@@ -11,7 +11,7 @@
 namespace gtd {
 using pCompletable_t = std::unique_ptr<Completable>;
 
-class CompleteableContainer : public GtdBaseContainer
+class CompleteableContainer : public GtdContainer
 {
 protected:
     std::vector<pCompletable_t> _gtdItems;

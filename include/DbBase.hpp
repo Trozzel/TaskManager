@@ -7,14 +7,13 @@
 #include <GtdHelper.hpp>
 #include <string_view>
 
-#include "GtdBaseContainer.hpp"
-#include "ContextContainer.hpp"
-#include "FolderContainer.hpp"
-#include "TaskContainer.hpp"
-#include "ProjectContainer.hpp"
-
 // Forward declaration of GtdBaseContainer for importing and updating records
 namespace gtd {
+class GtdBaseContainer;
+class ContextContainer;
+class FolderContainer;
+class TaskContainer;
+
 class DbBase
 {
 protected:

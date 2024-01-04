@@ -5,24 +5,30 @@
 #ifndef GTD_APP_CONTEXT_HPP
 #define GTD_APP_CONTEXT_HPP
 
-#include "GtdBase.hpp"
 #include "ContextContainer.hpp"
 
 namespace gtd {
 
-class Context final : public GtdBase
+class Context final : public Gtd
 {
 private:
-    ContextContainer&   _gtdItems;
+    GtdContainer&   _gtds;
 
 public:
+    using gtd_category = context_tag;
 	// CTORS
 	/**************************************************************************/
 	explicit
-    Context(ContextContainer&, std::string_view name = "");
+    Context(GtdContainer&, std::string_view name = "");
 
-	~Context() override = default;
+	~Context() override;
+
+    [[nodiscard]]
+    constexpr static const char*
+    tableName() noexcept { return "contexts"; }
 };
+
+static_assert(IsContext<Context>);
 
 } // namespace gtd
 

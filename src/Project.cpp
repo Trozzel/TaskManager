@@ -7,12 +7,14 @@
 using namespace std;
 
 namespace gtd {
+
+static_assert(IsProject<Project>);
+
 // CTOR
 Project::Project( ProjectContainer& gtdItems, std::string_view name ) :
     Completable(gtdItems, name),
-    _gtdItems(gtdItems)
-{
-    _gtdItems.push_back(this);
+    _projects(gtdItems) {
+    _projects.push_back(this);
 }
 
 Project::~Project() = default;
@@ -35,12 +37,12 @@ Project::setTaskIds( std::ranges::input_range auto&& taskIds ) {
 }
 
 void
-Project::appendTaskIds( const std::list<unique_id_t>& taskIds ) {
+Project::appendTaskIds( std::ranges::range auto&& taskIds ) {
     _taskIds.insert(_taskIds.end(), taskIds.begin(), taskIds.end());
 }
 
 void
-Project::appendTaskIds( const std::initializer_list<unique_id_t>& taskIds ) {
+Project::appendTaskIds( std::initializer_list<unique_id_t>&& taskIds ) {
     for ( unsigned long long taskId : taskIds ) {
         _taskIds.push_back(taskId);
     }

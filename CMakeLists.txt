@@ -10,9 +10,9 @@ IF( EXISTS "${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json" )
   )
 ENDIF()
 
-add_compile_options(-Xclang -fconcepts-ts)
+#add_compile_options(-Xclang -fconcepts-ts)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # C++ Sqlite Library
@@ -77,6 +77,18 @@ add_executable ( temp
 	temp.cpp)
 
 target_link_libraries ( temp
+	${SQLite3_LIBRARIES}
+	sqlite3
+	fmt::fmt
+	SqliteCpp
+	pthread
+	dl)
+
+add_executable(gtd_template
+	src/GtdHelper.cpp
+	src/template_main.cpp)
+
+target_link_libraries ( gtd_template
 	${SQLite3_LIBRARIES}
 	sqlite3
 	fmt::fmt

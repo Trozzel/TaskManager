@@ -14,7 +14,7 @@ namespace gtd {
 class Folder;
 using pFolder_t = std::unique_ptr<Folder>;
 
-class FolderContainer final : public GtdBaseContainer {
+class FolderContainer final : public GtdContainer {
 private:
     std::vector<pFolder_t>  _gtdItems{};
 

@@ -10,10 +10,10 @@ static_assert(std::input_or_output_iterator<CompleteableContainer::iterator>);
 static_assert(std::ranges::input_range<CompleteableContainer>);
 
 CompleteableContainer::CompleteableContainer( USMgr& usm ) :
-    GtdBaseContainer(usm) {}
+    GtdContainer(usm) {}
 
 CompleteableContainer::CompleteableContainer( const CompleteableContainer& other ) :
-    GtdBaseContainer(other),
+    GtdContainer(other),
     _gtdItems(other._gtdItems) {}
 
 CompleteableContainer&

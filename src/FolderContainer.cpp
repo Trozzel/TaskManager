@@ -8,7 +8,7 @@
 namespace gtd {
 
 FolderContainer::FolderContainer( USMgr& usm ) :
-    GtdBaseContainer(usm)
+    GtdContainer(usm)
 {
 }
 

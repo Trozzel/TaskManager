@@ -59,7 +59,7 @@ int
 SqliteConnection::createGtd( std::string_view table, const pGtdBase_t& ) {}
 
 int
-SqliteConnection::importAllBase( GtdBaseContainer& gtdItems ) {
+SqliteConnection::importAllBase( GtdContainer& gtdItems ) {
     int count = 0;
     try {
         SQLite::Database  db(_uri, _flags);

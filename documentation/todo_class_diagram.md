@@ -16,22 +16,23 @@
 
     Subject --o Observer : observers
 
-    class TodoBase {
-        #int uniqueId
-        #string name
-        #int parentId
-        #datetime created
-        #datetime modified
-        +getUniqueId()
-        +getName()
-        +getParentId()
-        +getCreated()
-        +getUpdated()
-        +setName(string)
-        +setParentId(int)
+    class GtdBase {
+        - int uniqueId
+        - str name
+        - int parentId
+        - datetime created
+        - datetime modified
+        +uniqueId()
+        +tableName()
+        +name()
+        +parentId()
+        +created()
+        +updated()
+        +name(string)
+        +parentId(int)
         +update()
     }
-    <<interface>> TodoBase
+    <<interface>> GtdBase
 
    TodoBase <-- Context
 ```

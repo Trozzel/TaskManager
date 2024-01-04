@@ -5,7 +5,8 @@
 #ifndef GTD_CONCEPTS_HPP_
 #define GTD_CONCEPTS_HPP_
 
-#include <type_traits>
+#include <__concepts/same_as.h>
+#include <__ranges/concepts.h>
 #include <string_view>
 
 #include "GtdHelper.hpp"
@@ -14,28 +15,19 @@ template <typename Int>
 concept Integral = std::is_integral_v<std::remove_reference_t<Int>>;
 
 template <typename T>
-concept FromConstChar = std::is_convertible_v<T, std::string_view>;
+concept StringType = std::is_convertible_v<T, std::string_view>;
 
-template <typename T>
-concept OptionalStr = requires( T val )
-{
-    { val.value() } -> FromConstChar;
-    { *val } -> FromConstChar;
-};
-
-template <typename T>
-concept OptionalTimePoint = requires( T val )
-{
-    { val.value() } -> time_point_t;
-    { *val } -> time_point_t;
-};
+// SQLITE TYPE CONCEPTS
+template<typename T>
+concept SqliteType = std::convertible_to<T, std::string_view> || 
+	std::integral<T>;
 
 // GTDBASE CONCEPTS
 /*****************************************************************************/
 template <typename Gtd_t>
 concept GtdBaseGetters = requires( Gtd_t gtd )
 {
-    { gtd.uniqueId() } -> std::optional<unique_id_t>;
+    { gtd.uniqueId() } -> std::same_as<std::optional<unique_id_t>>;
     { gtd.name() } -> std::convertible_to<std::string_view>;
     { gtd.status() } -> std::same_as<gtd::Status>;
     { gtd.statusStr() } -> std::convertible_to<std::string_view>;
@@ -43,8 +35,8 @@ concept GtdBaseGetters = requires( Gtd_t gtd )
     { gtd.createdStr() } -> std::convertible_to<std::string_view>;
     { gtd.modified() } -> std::same_as<time_point_t>;
     { gtd.modifiedStr() } -> std::convertible_to<std::string_view>;
-    { gtd.parentId() } -> std::optional<unique_id_t>;
-    { gtd.notes() } -> OptionalStr;
+    { gtd.parentId() } -> std::same_as<std::optional<unique_id_t>>;
+    { gtd.notes() } -> std::same_as<std::optional<std::string_view>>;
 };
 
 template <typename Gtd_t>
@@ -72,7 +64,7 @@ template <typename Gtd_t>
 concept SetStatusStr = GtdBaseGetters<Gtd_t> &&
         requires( Gtd_t gtd, std::string_view val )
         {
-            { gtd.setStatusStr(val) };
+            { gtd.setStatus(val) };
         };
 
 template <typename Gtd_t>
@@ -86,7 +78,7 @@ template <typename Gtd_t>
 concept SetCreatedStr = GtdBaseGetters<Gtd_t> &&
         requires( Gtd_t gtd, const std::string& tp )
         {
-            { gtd.setCreatedStr(tp) };
+            { gtd.setCreated(tp) };
         };
 
 template <typename Gtd_t>
@@ -100,7 +92,7 @@ template <typename Gtd_t>
 concept SetModifiedStr = GtdBaseGetters<Gtd_t> &&
         requires( Gtd_t gtd, const std::string& tp )
         {
-            { gtd.setModifiedStr(tp) };
+            { gtd.setModified(tp) };
         };
 
 template <typename Gtd_t>
@@ -130,6 +122,27 @@ concept IsGtdBase = GtdBaseGetters<Gtd_t> &&
         SetParentId<Gtd_t> &&
         SetNotes<Gtd_t>;
 
+// IMPLEMENTATION CLASS CONCEPTS
+/******************************************************************************/
+template <typename Gtd_t>
+concept GtdImpl = IsGtdBase<Gtd_t> &&
+        requires( Gtd_t )
+        {
+            { Gtd_t::tableName() } -> std::same_as<const char*>;
+        };
+
+template <typename Context_t>
+concept IsContext = requires (gtd::GtdType gtdType) {
+	gtdType == gtd::GtdType::Context;
+	GtdImpl<Context_t>;
+};
+
+template <typename Folder_t>
+concept IsFolder = requires (gtd::GtdType gtdType) {
+	gtdType == gtd::GtdType::Folder;
+	GtdImpl<Folder_t>;
+};
+
 template <typename GtdContainer>
 concept GtdBaseRange = IsGtdBase<typename GtdContainer::value_type> &&
         std::ranges::range<GtdContainer>;
@@ -138,19 +151,19 @@ concept GtdBaseRange = IsGtdBase<typename GtdContainer::value_type> &&
 /*****************************************************************************/
 template <typename Gtd_t>
 concept CompletableGetters = IsGtdBase<Gtd_t> &&
-    requires( Gtd_t gtd )
-{
-    { gtd.contextId() } -> std::optional<unique_id_t>;
-    { gtd.deferred() } -> OptionalTimePoint;
-    { gtd.deferredStr() } -> OptionalStr;
-    { gtd.due() } -> OptionalTimePoint;
-    { gtd.dueStr() } -> OptionalStr;
-    { gtd.isRepeating() } -> bool;
-    { gtd.flagged() } -> bool;
-    { gtd.repeatFrom() } -> gtd::RepeatFrom;
-    { gtd.repeatFromStr() } -> std::string_view;
-    { gtd.repeatSchedule() } -> std::string_view;
-};
+        requires( Gtd_t gtd )
+        {
+            { gtd.contextId() } -> std::same_as<std::optional<unique_id_t>>;
+            { gtd.deferred() } -> std::same_as<std::optional<time_point_t>>;
+            { gtd.deferredStr() } -> std::same_as<std::optional<std::string>>;
+            { gtd.due() } -> std::same_as<std::optional<time_point_t>>;
+            { gtd.dueStr() } -> std::same_as<std::optional<std::string>>;
+            { gtd.isRepeating() } -> std::same_as<bool>;
+            { gtd.flagged() } -> std::same_as<bool>;
+            { gtd.repeatFrom() } -> std::same_as<gtd::RepeatFrom>;
+            { gtd.repeatFromStr() } -> std::same_as<std::string_view>;
+            { gtd.repeatSchedule() } -> std::same_as<std::string_view>;
+        };
 
 template <typename Gtd_t>
 concept SetContextId = CompletableGetters<Gtd_t> &&
@@ -170,7 +183,7 @@ template <typename Gtd_t>
 concept SetDeferredStr = CompletableGetters<Gtd_t> &&
         requires( Gtd_t gtd, std::string_view tp, bool update )
         {
-            { gtd.setDeferredStr(tp, update) };
+            { gtd.setDeferred(tp, update) };
         };
 
 template <typename Gtd_t>
@@ -184,7 +197,7 @@ template <typename Gtd_t>
 concept SetDueStr = CompletableGetters<Gtd_t> &&
         requires( Gtd_t gtd, std::string_view tp, bool update )
         {
-            { gtd.setDueStr(tp, update) };
+            { gtd.setDue(tp, update) };
         };
 
 template <typename Gtd_t>
@@ -239,32 +252,32 @@ concept IsCompletable = CompletableGetters<Gtd_t> &&
 /******************************************************************************/
 template <typename Gtd_t>
 concept TaskGetters = IsCompletable<Gtd_t> &&
-    requires( Gtd_t gtd )
-{
-    { gtd.projectId() } -> std::optional<unique_id_t>;
-    { gtd.taskType() } -> gtd::TaskType;
-};
+        requires( Gtd_t gtd )
+        {
+            { gtd.projectId() } -> std::same_as<std::optional<unique_id_t>>;
+            { gtd.taskType() } -> std::same_as<gtd::TaskType>;
+        };
 
 template <typename Gtd_t>
 concept SetProjectId = TaskGetters<Gtd_t> &&
-    requires( Gtd_t gtd, unique_id_t id, bool update )
-{
-    { gtd.setProjectId(id, update) };
-};
+        requires( Gtd_t gtd, unique_id_t id, bool update )
+        {
+            { gtd.setProjectId(id, update) };
+        };
 
 template <typename Gtd_t>
 concept SetTaskType = TaskGetters<Gtd_t> &&
-    requires( Gtd_t gtd, gtd::TaskType taskType, bool update )
-{
-    { gtd.setTaskType(taskType, update) };
-};
+        requires( Gtd_t gtd, gtd::TaskType taskType, bool update )
+        {
+            { gtd.setTaskType(taskType, update) };
+        };
 
 template <typename Gtd_t>
 concept SetTaskTypeStr = TaskGetters<Gtd_t> &&
-    requires( Gtd_t gtd, std::string_view taskType, bool update )
-{
-    { gtd.setTaskType(taskType, update) };
-};
+        requires( Gtd_t gtd, std::string_view taskType, bool update )
+        {
+            { gtd.setTaskType(taskType, update) };
+        };
 
 template <typename Gtd_t>
 concept IsTask = TaskGetters<Gtd_t> &&
@@ -278,23 +291,39 @@ concept TaskRange = IsTask<typename GtdContainer::value_type> &&
 
 // PROJECT CONCEPTS
 /*****************************************************************************/
+namespace gtd {
+class Task;
+
+template <typename T>
+struct DummyContainer
+{
+    using value_type = T;
+    T*
+    begin() const;// {return tasks[0];}
+    T*
+    end() const;// {return tasks[0];}
+};
+}
+
+template <typename Gtd_t>
+concept GetTasks = requires( Gtd_t gtd, gtd::DummyContainer<gtd::Task> tasks )
+{
+    IsGtdBase<gtd::DummyContainer<gtd::Task>::value_type>;
+    { gtd.getTasks(tasks) } -> std::ranges::range;
+};
+
 template <typename Gtd_t>
 concept ProjectGetters = requires( Gtd_t gtd )
 {
-    { gtd.projectType() } -> gtd::ProjectType;
-    { gtd.folderId() } -> std::optional<unique_id_t>;
-    { gtd.completeWithLast() } -> bool;
-    { gtd.reviewSchedule() } -> std::string_view;
-    { gtd.getTasks() } -> TaskRange;
+    { gtd.projectType() } -> std::same_as<gtd::ProjectType>;
+    { gtd.folderId() } -> std::same_as<std::optional<unique_id_t>>;
+    { gtd.completeWithLast() } -> std::same_as<bool>;
+    { gtd.reviewSchedule() } -> std::same_as<std::string_view>;
 };
-
-template <typename T>
-concept UidRange = std::ranges::range<T> &&
-    std::same_as<typename T::value_type, unique_id_t>;
 
 template <typename Gtd_t>
 concept SetTaskIds = ProjectGetters<Gtd_t> &&
-        requires( Gtd_t gtd, std::ranges::input_range auto&& taskIds )
+        requires( Gtd_t gtd, gtd::DummyContainer<unique_id_t> taskIds )
         {
             { gtd.setTaskIds(taskIds) };
         };
@@ -308,24 +337,24 @@ concept AppendTaskId = ProjectGetters<Gtd_t> &&
 
 template <typename Gtd_t>
 concept AppendTaskIds = ProjectGetters<Gtd_t> &&
-        requires( Gtd_t gtd, std::ranges::input_range auto&& taskIds )
+        requires( Gtd_t gtd, gtd::DummyContainer<unique_id_t> taskIds )
         {
-            { gtd.setTaskIds(taskIds) };
+            { gtd.appendTaskIds(taskIds) };
         };
 
 template <typename Gtd_t>
 concept SetProjectType = ProjectGetters<Gtd_t> &&
-    requires( Gtd_t gtd, gtd::ProjectType pt, bool update )
-{
-    { gtd.setProjectType(pt, update) };
-};
+        requires( Gtd_t gtd, gtd::ProjectType pt, bool update )
+        {
+            { gtd.setProjectType(pt, update) };
+        };
 
 template <typename Gtd_t>
 concept SetProjectTypeStr = ProjectGetters<Gtd_t> &&
-    requires( Gtd_t gtd, std::string_view pt, bool update )
-{
-    { gtd.setProjectType(pt, update) };
-};
+        requires( Gtd_t gtd, std::string_view pt, bool update )
+        {
+            { gtd.setProjectType(pt, update) };
+        };
 
 template <typename Gtd_t>
 concept SetFolderId = ProjectGetters<Gtd_t> &&
@@ -343,21 +372,39 @@ concept SetCompleteWithLast = ProjectGetters<Gtd_t> &&
 
 template <typename Gtd_t>
 concept SetReviewSchedule = ProjectGetters<Gtd_t> &&
-    requires( Gtd_t gtd, std::string_view rs, bool update )
-{
-    { gtd.setReviewSchedule(rs, update) };
-};
+        requires( Gtd_t gtd, std::string_view rs, bool update )
+        {
+            { gtd.setReviewSchedule(rs, update) };
+        };
 
-template<typename Gtd_t>
+template <typename Gtd_t>
 concept IsProject = ProjectGetters<Gtd_t> &&
-    UidRange<Gtd_t> &&
-    SetTaskIds<Gtd_t> &&
-    AppendTaskIds<Gtd_t> &&
-    AppendTaskIds<Gtd_t> &&
-    SetProjectType<Gtd_t> &&
-    SetProjectTypeStr<Gtd_t> &&
-    SetFolderId<Gtd_t> &&
-    SetCompleteWithLast<Gtd_t> &&
-    SetReviewSchedule<Gtd_t>;
+        GetTasks<Gtd_t> &&
+        SetTaskIds<Gtd_t> &&
+        AppendTaskIds<Gtd_t> &&
+        AppendTaskIds<Gtd_t> &&
+        SetProjectType<Gtd_t> &&
+        SetProjectTypeStr<Gtd_t> &&
+        SetFolderId<Gtd_t> &&
+        SetCompleteWithLast<Gtd_t> &&
+        SetReviewSchedule<Gtd_t>;
+
+// GTD CONTAINER CONCEPTS
+/*****************************************************************************/
+template <typename BaseContainer_t>
+concept IsBaseContainer = std::ranges::range<BaseContainer_t> &&
+    IsGtdBase<typename BaseContainer_t::value_type>;
+
+template<typename ImplContainer_t>
+concept IsImplContainer = std::ranges::range<ImplContainer_t> &&
+	GtdImpl<typename ImplContainer_t::value_type>;
+
+template <typename TaskContainer_t>
+concept IsTaskContainer = std::ranges::range<TaskContainer_t> &&
+    IsTask<typename TaskContainer_t::value_type>;
+
+template <typename ProjectContainer_t>
+concept IsProjectContainer = std::ranges::range<ProjectContainer_t> &&
+	IsProject<typename ProjectContainer_t::range_value_t>;
 
 #endif //GTD_CONCEPTS_HPP_

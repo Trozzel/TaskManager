@@ -9,10 +9,11 @@
 namespace gtd {
 // CTORS
 /****************************************************************************/
-Context::Context(ContextContainer& gtdItems, std::string_view name) :
-	GtdBase(gtdItems, name),
-    _gtdItems(gtdItems)
+Context::Context(GtdContainer& gtdItems, std::string_view name) :
+	Gtd(gtdItems, name),
+    _gtds(gtdItems)
 {
-    _gtdItems.push_back(this);
+    _gtds.push_back(this);
 }
+
 } // namespace gtd

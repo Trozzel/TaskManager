@@ -9,41 +9,42 @@
 namespace gtd {
 
 TaskContainer::TaskContainer( USMgr& usm ) :
-    CompleteableContainer(usm) {}
+    _usm(usm) {}
 
 TaskContainer::~TaskContainer() = default;
 
+// STATIC - return the table name
 const std::string&
-TaskContainer::tableName() const {
+TaskContainer::tableName() {
     const static std::string table = "tasks";
     return table;
 }
 
-std::ranges<pTask_t>
+std::ranges::range auto&&
 TaskContainer::getByProjectId( unique_id_t id ) const {
-    return _gtdItems |
-            std::views::filter([id]( const pTask_t& pTask ) {
+    return _tasks |
+            std::views::filter([id]( const auto& pTask ) {
                 return *pTask->projectId() == id;
             });
 }
 
 auto
 TaskContainer::begin() {
-    return _gtdItems.begin();
+    return _tasks.begin();
 }
 
 auto
 TaskContainer::cbegin() const {
-    return _gtdItems.cbegin();
+    return _tasks.cbegin();
 }
 
 auto
 TaskContainer::end() {
-    return _gtdItems.end();
+    return _tasks.end();
 }
 
 auto
 TaskContainer::cend() const {
-    return _gtdItems.cend();
+    return _tasks.cend();
 }
 } // namespace gtd

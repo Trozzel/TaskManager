@@ -7,7 +7,7 @@
 
 namespace gtd {
 ContextContainer::ContextContainer( USMgr& usm ) :
-    GtdBaseContainer(usm)
+    GtdContainer(usm)
 {
 }
 

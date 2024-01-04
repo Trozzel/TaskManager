@@ -11,7 +11,7 @@ namespace gtd {
 class Context;
 using pContext_t = std::unique_ptr<Context>;
 
-class ContextContainer final : public GtdBaseContainer
+class ContextContainer final : public GtdContainer
 {
 private:
     std::vector<pContext_t> _gtdItems;

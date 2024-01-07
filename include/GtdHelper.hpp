@@ -23,14 +23,60 @@ using time_point_t = std::chrono::time_point<std::chrono::system_clock>;
 using unique_id_t = uint64_t;
 
 namespace gtd {
-//                                 ENUMS
+//
+class GtdBase;
+class Context;
+class Folder;
+class Completable;
+class Task;
+class Project;
+
+//								   TAGS
 /*****************************************************************************/
 /// Gtd Type
 enum class GtdType {
-	Context, Folder, Task, Project
+	Context, Folder, Task, Project, NA
 };
 
+struct base_tag {
+	using type = GtdBase;
+	static constexpr bool constructible = false;
+	static constexpr bool completable = false;
+	static constexpr auto gtd_type = GtdType::NA;
+};
+struct context_tag : base_tag {
+	using type = Context;
+	static constexpr bool constructible = true;
+	static constexpr bool completable = false;
+	static constexpr auto gtd_type = GtdType::Context;
+};
+struct folder_tag : base_tag {
+	using type = Folder;
+	static constexpr bool constructible = true;
+	static constexpr bool completable = false;
+	static constexpr auto gtd_type = GtdType::Folder;
+};
+struct completable_tag : context_tag {
+	using type = Completable;
+	static constexpr bool constructible = false;
+	static constexpr bool completable = true;
+	static constexpr auto gtd_type = GtdType::NA;
+};
+struct task_tag : completable_tag {
+	using type = Task;
+	static constexpr bool constructible = true;
+	static constexpr bool completable = true;
+	static constexpr auto gtd_type = GtdType::Task;
+};
+struct project_tag : completable_tag {
+	using type = Project;
+	static constexpr bool constructible = true;
+	static constexpr bool completable = true;
+	static constexpr auto gtd_type = GtdType::Project;
+};
 
+//                                 ENUMS
+/*****************************************************************************/
 /// Task and Project status
 enum class Status {
     Active, OnHold, Dropped, Completed
@@ -78,7 +124,7 @@ static constexpr std::string_view confFilePath = "../conf/gtd-conf.toml";
 /// bleongs
 constexpr static
 std::string_view
-gtdTypeToStr(const gtd::GtdType gtdType) noexcept {
+gtdTypeToTableName(const gtd::GtdType gtdType) noexcept {
 	switch (gtdType) {
 		case GtdType::Context:
 			return "contexts";

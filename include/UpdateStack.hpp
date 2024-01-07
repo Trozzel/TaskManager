@@ -5,25 +5,42 @@
 #ifndef UPDATESTACK_HPP_
 #define UPDATESTACK_HPP_
 
+#include <stack>
+
 #include "GtdHelper.hpp"
-#include "GtdBaseContainer.hpp"
 
 namespace gtd {
+
 using ColName_t = std::string_view;
 using ValueStr_t = std::string;
-using stack_elem_t = std::tuple<unique_id_t, ColName_t, ValueStr_t>;
+using id_colname_t = std::tuple<unique_id_t, ColName_t, ValueStr_t>;
 
 // CLASS UPDATE STACK
 /*****************************************************************************/
+/**
+ * Singleton that is shared by all GtdContainers
+ * @brief composes UPDATE queries to be sent to the database
+ */ 
 class UpdateStack
 {
 protected:
-    std::stack<stack_elem_t> _dbUpdateStack;
+    std::stack<id_colname_t> _dbUpdateStack;
 
 public:
     UpdateStack( );
 
     ~UpdateStack();
+
+	UpdateStack(const UpdateStack&) = delete;
+
+	UpdateStack&
+	operator=(const UpdateStack&) = delete;
+
+	static UpdateStack&
+		getInstance() {
+			static UpdateStack us;
+			return us;
+		}
 
     void
     clear();
@@ -62,61 +79,14 @@ public:
     pop();
 
     [[nodiscard]]
-    stack_elem_t&
+    id_colname_t&
     top();
 
-    std::string
-    compose( const GtdBaseContainer& );
+    //std::string
+    //compose( const GtdContainer<>& );
 
 }; // class UpdateStack
 
-// CLASS UpdateStackManager
-/// \brief SINGLETON PATTERN use getInstance to get reference to the single
-/// instance
-/// Since USMgr handles a unique pointer, Single pattern facilitates handling
-/// the allocated object within the unique pointer
-/*****************************************************************************/
-class USMgr
-{
-    // unique_ptr deleter that returns resource to the UpdateStackMgr object
-    struct USPtrDeleter
-    {
-        USMgr& _usMgr;
-        explicit
-        USPtrDeleter( USMgr& usm );
-        void
-        operator()( UpdateStack* updateStackPtr ) const;
-    };
-
-private:
-    using USPtr_t = std::unique_ptr<UpdateStack, USPtrDeleter>;
-    USPtr_t _pUpdateStack;
-
-    USMgr( const USMgr& );
-    USMgr&
-    operator=( const USMgr& );
-public:
-    // CTORS
-    /*************************************************************************/
-    /// \brief Default CTOR to allow for lazy construction.
-    /// \warn USPtr_t will be set to nullptr
-    USMgr( );
-
-    /// Since UpdateStackManager handles the resource to the UpdateStack
-    /// object, UpdateStackManager will destroy the object
-    ~USMgr() {
-        /// _pUpdateStack should never be a nullptr at time of
-        /// UpdateStackManager destructor, but for sanity check...
-        if ( _pUpdateStack ) {
-            delete _pUpdateStack.release();
-        }
-    }
-
-    [[nodiscard]]
-    const USPtr_t&
-    getUpdateStack() const;
-
-};
 
 } // namespace gtd
 

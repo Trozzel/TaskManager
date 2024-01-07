@@ -1,44 +1,55 @@
 #ifndef GTDBASE_HPP_
 #define GTDBASE_HPP_
 
-#include <string>
-#include <string_view>
 #include <chrono>
 #include <ranges>
 
 #include "fmt/chrono.h" // Needed for timepoint_t to string
 
 #include "GtdHelper.hpp"
-#include "GtdBaseContainer.hpp"
+#include "gtd_concepts.hpp"
 
 namespace gtd {
-class USMgr;
 
+// FORWARD DECLARATIONS	
+/*****************************************************************************/
+template<typename Gtd_t>
+class GtdContainer;
+
+class UpdateStack;
+
+/*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*/
+//							GTDBASE CLASS
+/*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*/
 class GtdBase
 {
+public:
+	// Class traits
+	using gtd_category = base_tag; 
+private:
+	// Hide from inheriting classes
+	using pContainer = std::shared_ptr<GtdContainer<GtdBase>>;
+	pContainer							 _gtdItems {nullptr};
 protected:
-    GtdBaseContainer&          _gtdItems;
-    std::string                _name;
-    std::optional<unique_id_t> _o_uniqueId{std::nullopt};
-    Status                     _status{Status::Active};
-    time_point_t               _created;
-    time_point_t               _modified;
-    std::optional<unique_id_t> _o_parentId{std::nullopt};
-    std::optional<std::string> _o_notes{std::nullopt};
+    std::string							 _name;
+    std::optional<unique_id_t> 			 _o_uniqueId {std::nullopt};
+    Status                     			 _status {Status::Active};
+    time_point_t               			 _created;
+    time_point_t               			 _modified;
+    std::optional<unique_id_t> 			 _o_parentId {std::nullopt};
+    std::optional<std::string> 			 _o_notes {std::nullopt};
 
 public:
     // CTORS
     /**************************************************************************/
-    explicit GtdBase( GtdBaseContainer&, std::string_view name = "" );
+    //explicit GtdBase( pContainer cont, std::string_view name = "" ); 
+	explicit GtdBase( std::string_view name);
+	GtdBase(const GtdBase&) = default;
+	GtdBase(GtdBase&&) noexcept;
+    virtual ~GtdBase() noexcept = default; 
 
-    /// \brief declared as a virtual destructor. But since children will call
-    /// this destructor, it is defined in GtdBase.cpp
-    virtual ~GtdBase() = 0; // pure virtual destructor
-
-    // Cannot copy an USMgr reference from another GtdBase, since GtdType must
-    // be passed to the USMgr CTOR
     GtdBase&
-    operator=( const GtdBase& );
+    operator=( const GtdBase& ) = default;
     GtdBase&
     operator=( GtdBase&& ) noexcept;
 
@@ -101,17 +112,18 @@ public:
 
     [[nodiscard]]
     std::optional<std::string_view>
-    notes() const;
+    notes() const {
+		return _o_notes;
+	}
 
     // SETTERS
-    /**************************************************************************/
-    [[maybe_unused]]
-    void
-    setUniqueId( unique_id_t id ) noexcept {
+    /*************************************************************************/
+    constexpr void
+    setUniqueId( const unique_id_t id ) noexcept {
         _o_uniqueId = id;
     }
 
-    virtual void
+    void
     setName( std::string_view name, bool update = true );
 
     virtual void
@@ -144,11 +156,64 @@ public:
     setNotes( std::string_view notes, bool update = true );
 };
 
-std::ostream&
-operator<<( std::ostream& out, const GtdBase& base );
+/*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*/
+//							CONTEXT CLASS
+/*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*/
+class Context : public GtdBase {
+public:
+	using gtd_category = context_tag;
+private:
+	using pContainer = std::shared_ptr<GtdContainer<Context>>;
+	pContainer							 _gtdItems {nullptr};
+public:
+	// CTORS
+	/*************************************************************************/
+	Context( pContainer, std::string_view name );
+	Context( const Context& ) = default;
+	Context( Context&& );
 
-/// GtdBaseContainer
-/******************************************************************************/
+	~Context() noexcept = default;
+
+	// ASSIGMENT OPERATORS
+	/*************************************************************************/
+	Context&
+	operator=( const Context& ) = default;
+
+	Context&
+	operator=( Context&& );
+};
+
+/*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*/
+//							FOLDER CLASS
+/*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*/
+class Folder : public GtdBase {
+public:
+	using gtd_category = folder_tag;
+private:
+	using pContainer = std::shared_ptr<GtdContainer<Project>>;
+	pContainer							 _gtdItems {nullptr};
+public:
+	// CTORS
+	/*************************************************************************/
+	Folder( pContainer, std::string_view name );
+	Folder( const Folder& ) = default;
+	Folder( Folder&& );
+
+	~Folder() noexcept = default;
+
+	// ASSIGMENT OPERATORS
+	/*************************************************************************/
+	Folder&
+	operator=( const Folder& ) = default;
+
+	Folder&
+	operator=( Folder&& );
+}; 
+
 } // namespace gtd
+
+
+std::ostream&
+operator<<( std::ostream& out, const gtd::GtdBase& base );
 
 #endif // GTDBASE_HPP_

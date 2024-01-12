@@ -7,32 +7,13 @@ namespace gtd {
 // CLASS UpdateStack
 /*****************************************************************************/
 
-UpdateStack::UpdateStack() = default;
-
-UpdateStack::~UpdateStack() = default;
-
 void
 UpdateStack::clear() {
-	_dbUpdateStack = std::stack<id_colname_t>();
+	_dbUpdateStack = std::stack<id_col_val_t>();
 }
 
 void
-UpdateStack::push( const unique_id_t uniqueId, std::string_view colName, const unique_id_t value) {
-    _dbUpdateStack.emplace(uniqueId, colName, std::to_string(value));
-}
-
-void
-UpdateStack::push( unique_id_t uniqueId, std::string_view colName, std::string_view value) {
-    _dbUpdateStack.emplace(uniqueId, colName, std::string(value));
-}
-
-void
-UpdateStack::push( unique_id_t uniqueId, std::string_view colName, std::string value) {
-    _dbUpdateStack.emplace(uniqueId, colName, std::move(value));
-}
-
-void
-UpdateStack::push( unique_id_t uniqueId, std::string_view colName, bool value) {
+UpdateStack::push( const unique_id_t uniqueId, const std::string_view colName, const bool value) {
     _dbUpdateStack.emplace(uniqueId, colName, (value) ? "true" : "false");
 }
 
@@ -42,8 +23,8 @@ UpdateStack::pop() {
 	_dbUpdateStack.pop();
 }
 
-id_colname_t&
-UpdateStack::top() {
+id_col_val_t&
+UpdateStack::top() const {
 	return _dbUpdateStack.top();
 }
 

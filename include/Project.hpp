@@ -1,27 +1,36 @@
 #ifndef PROJECTS_HPP
 #define PROJECTS_HPP
 
-#include <list>
-#include <initializer_list>
 #include <string_view>
 
 #include "Completable.hpp"
 #include "GtdHelper.hpp"
-#include "ProjectContainer.hpp"
 
 namespace gtd {
 class Project final : public Completable
 {
+public:
+    using gtd_category = project_tag;
+
 private:
-    ProjectContainer&          _projects;
+    using pContainer = std::shared_ptr<GtdContainer<Project>>;
+
+    pContainer                 _projects;
     ProjectType                _projectType{ProjectType::Parallel};
     std::optional<unique_id_t> _folderId{std::nullopt};
     std::vector<unique_id_t>   _taskIds{};
     bool                       _completeWithLast{true};
-    std::string_view           _reviewSchedule{"0 0 * * 0"}; // 12a every Sunday
+    std::string_view           _reviewSchedule = {"0 0 * * 0"}; // 12a every Sunday
 
 public:
-    using gtd_category = project_tag;
+    // STATIC FUNCTIONS
+    /*************************************************************************/
+    constexpr static
+    std::string_view
+    tableName() noexcept {
+        return "projects";
+    }
+
     [[nodiscard]]
     static constexpr ProjectType
     strToProjectType( const std::string_view projectTypeStr ) noexcept {
@@ -32,13 +41,30 @@ public:
     /**************************************************************************/
     // DEFAULT
     explicit
-    Project( ProjectContainer&, std::string_view name = "" );
+    Project( pContainer, std::string_view name = "" );
+    explicit
+    Project( GtdContainer<Project>*, std::string_view name = "" );
 
-    ~Project() final;
+    Project(const Project&);
+    Project(Project&&) noexcept;
 
-    [[nodiscard]]
-    constexpr static const char*
-        tableName() noexcept { return "projects"; }
+    ~Project() override = default;
+
+    // ASSIGNMENT OPERATORS
+    /*************************************************************************/
+    Project&
+    operator=( const Project& );
+
+    Project&
+    operator=( Project&& ) noexcept;
+
+    // COMPARISON OPERATORS
+    /*************************************************************************/
+    bool
+    operator==( const Project& ) const;
+
+    bool
+    operator!=( const Project& ) const;
 
     // GETTERS
     /*************************************************************************/
@@ -66,27 +92,76 @@ public:
         return _reviewSchedule;
     }
 
-    [[nodiscard]]
-    std::ranges::range auto&&
-    getTasks( std::ranges::range auto&& tasks ) const {
-        return tasks |
-            std::views::filter([this](auto&& task) {
-                return task.projectId() == uniqueId().value_or(-1); // -1 ensures false
-            });
-    }
-
     // SETTERS
     /*************************************************************************/
+
+    // OVERRIDE SETTERS
+    /*************************************************************************/
     void
-    setTaskIds( std::ranges::input_range auto&& taskIds ) {
-        _taskIds = std::list(std::ranges::cbegin(taskIds), std::ranges::cend(taskIds));
-    }
+    setName( std::string_view name, bool update = true ) override;
 
     void
-    appendTaskIds( std::initializer_list<unique_id_t>&& taskIds );
+    setStatus( std::string_view status, bool update = true ) override;
 
     void
-    appendTaskIds( std::ranges::range auto&& taskIds );
+    setStatus( Status status, bool update = true ) override;
+
+    void
+    setParentId( unique_id_t id, bool update = true ) override;
+
+    void
+    setNotes( std::string_view notes, bool update = true ) override;
+
+    void
+    setContextId( unique_id_t id, bool update = true ) override;
+
+    void
+    setDeferred( time_point_t deferred, bool update = true ) override;
+
+    void
+    setDeferred( std::string_view deferred, bool update = true ) override;
+
+    void
+    setDue( time_point_t tp, bool update = true ) override;
+
+    void
+    setDue( std::string_view due_str, bool update = true ) override;
+
+    void
+    setTaskType( const std::string& taskType, bool update = true ) override;
+
+    void
+    setIsRepeating( int isRepeating, bool update = true ) override;
+
+    void
+    setFlagged( int flagged, bool update = true ) override;
+
+    void
+    setRepeatFrom( RepeatFrom repeatFrom, bool update = true ) override;
+
+    void
+    setRepeatFrom( std::string_view rptFromStr, bool update = true ) override;
+
+    void
+    setRepeatSchedule( std::string_view schedule, bool update = true ) override;
+
+    // PROJECT SETTERS
+    /*************************************************************************/
+    void
+    setTaskIds( const std::initializer_list<unique_id_t>& taskIds );
+
+    void
+    setTaskIds( const std::vector<unique_id_t>& taskIds );
+
+    template <typename Iter>
+    void
+    setTaskIds( Iter begin, Iter end );
+
+    void
+    appendTaskIds( const std::initializer_list<unique_id_t>& taskIds );
+
+    void
+    appendTaskIds( const std::vector<unique_id_t>& taskIds );
 
     template <typename Iter>
     void
@@ -102,7 +177,7 @@ public:
     setProjectType( std::string_view projectType, bool update = true );
 
     void
-    setFolderId( unique_id_t folderId, bool update = true );
+    setFolderId( unique_id_t id, bool update = true );
 
     void
     setCompleteWithLast( bool completeWithLast, bool update = true );
@@ -113,15 +188,6 @@ public:
 
 //							HELPER FUNCTIONS
 /*****************************************************************************/
-template <typename Iter>
-void
-Project::appendTaskIds( Iter begin, Iter end ) {
-    static_assert(std::is_integral_v<typename Iter::value_type>);
-    for ( ; begin != end; ++begin ) {
-        _taskIds.push_back(*begin);
-    }
-}
-
 std::ostream&
 operator<<( std::ostream& out, const Project& project );
 } // namespace gtd

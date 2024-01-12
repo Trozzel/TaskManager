@@ -1,40 +1,36 @@
+#include <memory>
 #include <string>
 #include <iostream>
 
-#include <sqlite3.h>
+//#include "Task.cpp"
+#include "Context.hpp"
+#include "Folder.hpp"
+#include "Project.hpp"
+#include "GtdContainer.hpp"
 
-using namespace std;
+auto
+main() -> int {
+    const auto tasks = std::make_shared<gtd::GtdContainer<gtd::Task>>();
+    auto& t1 = tasks->create(tasks, "George");
+    auto& t2 = tasks->create(tasks, "George Isaac");
+    t2.setFlagged(true);
 
-string valString(char* val) {
-	return ((val)? val : "NULL");
-}
+    const auto folders = std::make_shared<gtd::GtdContainer<gtd::Folder>>();
+    auto&      f1      = folders->create(folders, "F1");
+    auto&      f2      = folders->create(folders, "F2");
 
-static int callback (void*, int numCols, char** values, char** colNames) {
-	int status = 0;
+    std::cout << "Task table is:    " << tasks->tableName() << std::endl;
+    //std::cout << "Context table is: " << contexts->tableName() << std::endl;
 
-	cout << "In callback function" << endl;
-	for(int i = 0; i < numCols; ++i) {
-		cout << colNames[i] << ": " << valString(values[i]) << endl;
-	}
-	cout << endl;
-	return status;
-}
+    const auto flagged = tasks->getFlagged();
 
-int main()
-{
-	const char dbPath[] = "../sql_scripts/temp.db";
-	sqlite3* db;
-	int rc = sqlite3_open(dbPath, &db);
+    for ( const auto& item : flagged ) {
+        std::cout << "Printing flagged tasks...\n";
+        std::cout << item.name() << std::endl;
+    }
 
-	if(rc) {
-		cout << "Could not open the database" << endl;
-		sqlite3_close(db);
-		return 1;
-	}
-
-	char* errMsg;
-	char sql[] = "SELECT * FROM contexts";
-	sqlite3_exec(db, sql, callback, NULL, &errMsg);
-
-	sqlite3_close(db);
+    for ( const auto& task : *tasks ) {
+        std::cout << std::boolalpha;
+        std::cout << task.name() << " is " << (task.flagged() ? "" : "not ") << "flagged\n";
+    }
 }

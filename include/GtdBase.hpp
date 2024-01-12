@@ -3,20 +3,20 @@
 
 #include <chrono>
 #include <ranges>
+#include <type_traits>
 
 #include "fmt/chrono.h" // Needed for timepoint_t to string
 
 #include "GtdHelper.hpp"
-#include "gtd_concepts.hpp"
 
 namespace gtd {
 
 // FORWARD DECLARATIONS	
 /*****************************************************************************/
+class GtdBase;
+
 template<typename Gtd_t>
 class GtdContainer;
-
-class UpdateStack;
 
 /*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*/
 //							GTDBASE CLASS
@@ -28,8 +28,6 @@ public:
 	using gtd_category = base_tag; 
 private:
 	// Hide from inheriting classes
-	using pContainer = std::shared_ptr<GtdContainer<GtdBase>>;
-	pContainer							 _gtdItems {nullptr};
 protected:
     std::string							 _name;
     std::optional<unique_id_t> 			 _o_uniqueId {std::nullopt};
@@ -42,16 +40,23 @@ protected:
 public:
     // CTORS
     /**************************************************************************/
-    //explicit GtdBase( pContainer cont, std::string_view name = "" ); 
 	explicit GtdBase( std::string_view name);
 	GtdBase(const GtdBase&) = default;
 	GtdBase(GtdBase&&) noexcept;
-    virtual ~GtdBase() noexcept = default; 
+    virtual ~GtdBase() noexcept = 0;
 
     GtdBase&
     operator=( const GtdBase& ) = default;
     GtdBase&
     operator=( GtdBase&& ) noexcept;
+
+    // COMPARISON OPERATORS
+    /*************************************************************************/
+    bool
+    operator==(const GtdBase&) const;
+
+    bool
+    operator!=(const GtdBase&) const;
 
     // GETTERS
     /**************************************************************************/
@@ -123,95 +128,26 @@ public:
         _o_uniqueId = id;
     }
 
-    void
-    setName( std::string_view name, bool update = true );
+    virtual void
+    setName( std::string_view name, bool update );
 
     virtual void
-    setStatus( std::string_view status, bool update = true );
-
-    [[maybe_unused]]
-    virtual void
-    setStatus( Status status, bool update = true );
-
-    virtual void
-    setCreated( std::string_view created, bool update = true );
+    setStatus( std::string_view status, bool update );
 
     [[maybe_unused]]
     virtual void
-    setCreated( time_point_t tp, bool update = true );
-
-    virtual void
-    setModified( std::string_view modified, bool update = true );
+    setStatus( Status status, bool update );
 
     [[maybe_unused]]
     virtual void
-    setModified( time_point_t tp, bool update = true );
+    setParentId( unique_id_t id, bool update );
 
     [[maybe_unused]]
     virtual void
-    setParentId( unique_id_t id, bool update = true );
-
-    [[maybe_unused]]
-    virtual void
-    setNotes( std::string_view notes, bool update = true );
+    setNotes( std::string_view notes, bool update );
 };
-
-/*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*/
-//							CONTEXT CLASS
-/*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*/
-class Context : public GtdBase {
-public:
-	using gtd_category = context_tag;
-private:
-	using pContainer = std::shared_ptr<GtdContainer<Context>>;
-	pContainer							 _gtdItems {nullptr};
-public:
-	// CTORS
-	/*************************************************************************/
-	Context( pContainer, std::string_view name );
-	Context( const Context& ) = default;
-	Context( Context&& );
-
-	~Context() noexcept = default;
-
-	// ASSIGMENT OPERATORS
-	/*************************************************************************/
-	Context&
-	operator=( const Context& ) = default;
-
-	Context&
-	operator=( Context&& );
-};
-
-/*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*/
-//							FOLDER CLASS
-/*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*/
-class Folder : public GtdBase {
-public:
-	using gtd_category = folder_tag;
-private:
-	using pContainer = std::shared_ptr<GtdContainer<Project>>;
-	pContainer							 _gtdItems {nullptr};
-public:
-	// CTORS
-	/*************************************************************************/
-	Folder( pContainer, std::string_view name );
-	Folder( const Folder& ) = default;
-	Folder( Folder&& );
-
-	~Folder() noexcept = default;
-
-	// ASSIGMENT OPERATORS
-	/*************************************************************************/
-	Folder&
-	operator=( const Folder& ) = default;
-
-	Folder&
-	operator=( Folder&& );
-}; 
 
 } // namespace gtd
-
 
 std::ostream&
 operator<<( std::ostream& out, const gtd::GtdBase& base );

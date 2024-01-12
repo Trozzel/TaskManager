@@ -40,10 +40,12 @@ add_executable(runtime
 	src/Completable.cpp
 	src/GtdHelper.cpp
 	src/UpdateStack.cpp
-	src/Completable.cpp
 	src/Task.cpp
+    src/Project.cpp
+    src/Context.cpp
+    src/Folder.cpp
 	src/main.cpp
-	)
+)
 
 target_link_libraries ( runtime
 	${SQLite3_LIBRARIES}
@@ -58,5 +60,6 @@ IF( EXISTS "${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json" )
     ${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json
     ${CMAKE_CURRENT_SOURCE_DIR}/compile_commands.json
   )
+
 ENDIF()
 

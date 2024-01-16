@@ -1,0 +1,7 @@
+# This file is managed by Conan, contents will be overwritten.
+# To keep your changes, remove these comment lines, but the plugin won't be able to modify your requirements
+
+requirements:
+  - "sqlitecpp/3.3.1"
+  - "fmt/10.1.1"
+  - "sqlite3/3.44.2"

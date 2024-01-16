@@ -2,8 +2,6 @@
 #define GTDBASE_HPP_
 
 #include <chrono>
-#include <ranges>
-#include <type_traits>
 
 #include "fmt/chrono.h" // Needed for timepoint_t to string
 

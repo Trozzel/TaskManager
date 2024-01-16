@@ -4,15 +4,12 @@
 #ifndef GTDCONTAINER_HPP_
 #define GTDCONTAINER_HPP_
 
-#include <__ranges/filter_view.h>
 #include <ranges>
 #include <algorithm>
 
 #include "GtdHelper.hpp"
 #include "Context.hpp"
-#include "Folder.hpp"
 #include "Project.hpp"
-#include "Task.hpp"
 #include "UpdateStack.hpp"
 #include "gtd_concepts.hpp"
 

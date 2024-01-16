@@ -46,19 +46,39 @@ public:
     // OVERRIDE SETTERS
     /*************************************************************************/
     void
-    setName( std::string_view name, bool update = true ) override;
+    setName( std::string_view name, bool update) override;
+    void
+    setName(std::string_view const name) {
+        setName(name, true);
+    }
 
     void
-    setStatus( std::string_view status, bool update = true ) override;
+    setStatus( std::string_view status, bool update) override;
+    void
+    setStatus(std::string_view const status) {
+        setStatus(status, true);
+    }
 
     void
-    setStatus( Status status, bool update = true ) override;
+    setStatus( Status status, bool update) override;
+    void
+    setStatus(Status const status) {
+        setStatus(status, true);
+    }
 
     void
-    setParentId( unique_id_t id, bool update = true ) override;
+    setParentId( unique_id_t id, bool update) override;
+    void
+    setParentId(unique_id_t const id) {
+        setParentId(id, true);
+    }
 
     void
-    setNotes( std::string_view notes, bool update = true ) override;
+    setNotes( std::string_view notes, bool update) override;
+    void
+    setNotes(std::string_view const notes) {
+        setNotes(notes, true);
+    }
 };
 } // namespace gtd
 

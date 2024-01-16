@@ -7,7 +7,7 @@
 
 #include <string>
 #include <string_view>
-#include <sstream>
+#include <chrono>
 #include <iostream>
 
 #include "fmt/core.h"
@@ -191,6 +191,8 @@ strToStatus(std::string_view statusStrIn) {
 [[nodiscard]]
 constexpr std::string_view
 statusToStr(const Status status) noexcept {
+    // This is a bug.  Address of statusStr is returned, but statusStr is
+    // destroyed when the function returns.
     std::string_view statusStr;
     switch (status) {
     case Status::Active:

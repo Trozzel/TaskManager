@@ -12,7 +12,7 @@
 namespace gtd {
 using ColName_t = std::string_view;
 using ValueStr_t = std::string;
-using id_col_val_t = const std::tuple<unique_id_t, ColName_t, ValueStr_t>;
+using id_col_val_t = std::tuple<unique_id_t, ColName_t, ValueStr_t>;
 
 // CLASS UPDATE STACK
 /*****************************************************************************/
@@ -62,19 +62,19 @@ public:
     push( unique_id_t uniqueId, std::string_view colName, bool );
 
     [[nodiscard]]
-    constexpr unique_id_t
+    unique_id_t
     topUniqueId() const {
         return std::get<0>(_dbUpdateStack.top());
     }
 
     [[nodiscard]]
-    constexpr ColName_t
+    ColName_t
     topColName() const {
         return std::get<1>(_dbUpdateStack.top());
     }
 
     [[nodiscard]]
-    constexpr const ValueStr_t&
+    const ValueStr_t&
     topValueStr() const {
         return std::get<2>(_dbUpdateStack.top());
     }
@@ -83,7 +83,7 @@ public:
     pop();
 
     [[nodiscard]]
-    id_col_val_t&
+    id_col_val_t const &
     top() const;
 
     //std::string

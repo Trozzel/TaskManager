@@ -23,7 +23,7 @@ UpdateStack::pop() {
 	_dbUpdateStack.pop();
 }
 
-id_col_val_t&
+id_col_val_t const &
 UpdateStack::top() const {
 	return _dbUpdateStack.top();
 }

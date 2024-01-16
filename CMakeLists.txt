@@ -3,63 +3,51 @@ project(GTD)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-IF( EXISTS "${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json" ) 
-  EXECUTE_PROCESS( COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    ${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json
-    ${CMAKE_CURRENT_SOURCE_DIR}/compile_commands.json
-  )
-ENDIF()
+IF (EXISTS "${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json")
+    EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json
+            ${CMAKE_CURRENT_SOURCE_DIR}/compile_commands.json
+    )
+ENDIF ()
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # C++ Sqlite Library
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/SQLiteCpp)
 find_package(SQLite3)
+find_package(SQLiteCpp REQUIRED)
+find_package(fmt REQUIRED)
 
-include_directories(
-		${CMAKE_CURRENT_SOURCE_DIR}/include
-        ${CMAKE_CURRENT_SOURCE_DIR}/src/SQLiteCpp/include/
-		/usr/local/include
-		${SQLite3_INCLUDE_DIRS})
-
-# NECESSARY ON MAC
-link_directories ( /usr/local/lib ${CMAKE_CURRENT_SOURCE_DIR}/src/SQLiteCpp )
-
-find_package(fmt)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # AUTO ADD DEFINITIONS TO CODE BASED UPON BUILD TYPE
-IF(CMAKE_BUILD_TYPE STREQUAL "Release")
-	ADD_COMPILE_DEFINITIONS(RUNMODE="prod")
-ELSEIF(CMAKE_BUILD_TYPE STREQUAL "Debug")
-	ADD_COMPILE_DEFINITIONS(RUNMODE="dev")
-ENDIF()
+IF (CMAKE_BUILD_TYPE STREQUAL "Release")
+    ADD_COMPILE_DEFINITIONS(RUNMODE="prod")
+ELSEIF (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    ADD_COMPILE_DEFINITIONS(RUNMODE="dev")
+ENDIF ()
 
 add_executable(runtime
-	src/GtdBase.cpp
-	src/Completable.cpp
-	src/GtdHelper.cpp
-	src/UpdateStack.cpp
-	src/Task.cpp
-    src/Project.cpp
-    src/Context.cpp
-    src/Folder.cpp
-	src/main.cpp
+        src/GtdBase.cpp
+        src/Completable.cpp
+        src/GtdHelper.cpp
+        src/UpdateStack.cpp
+        src/Task.cpp
+        src/Project.cpp
+        src/Context.cpp
+        src/Folder.cpp
+        src/main.cpp
 )
 
-target_link_libraries ( runtime
-	${SQLite3_LIBRARIES}
-	sqlite3
-	fmt::fmt
-	SqliteCpp
-	pthread
-	dl)
+target_link_libraries(runtime
+        SQLite::SQLite3
+        fmt::fmt
+        SQLiteCpp)
 
-IF( EXISTS "${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json" ) 
-  EXECUTE_PROCESS( COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    ${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json
-    ${CMAKE_CURRENT_SOURCE_DIR}/compile_commands.json
-  )
+IF (EXISTS "${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json")
+    EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json
+            ${CMAKE_CURRENT_SOURCE_DIR}/compile_commands.json
+    )
 
-ENDIF()
-
+ENDIF ()

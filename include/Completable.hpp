@@ -5,38 +5,44 @@
 #ifndef COMPLETABLE_HPP_
 #define COMPLETABLE_HPP_
 
-#include <iostream>
-#include <optional>
-#include <string>
-#include <filesystem>
-#include <string_view>
-
-#include "CompleteableContainer.hpp"
 #include "GtdBase.hpp"
-#include "gtd_concepts.hpp"
-#include "GtdHelper.hpp"
 
 namespace gtd {
 
 class Completable : public GtdBase
 {
+public:
+	using gtd_category = completable_tag;
+private:
+	// Hide from inheriting classes
+	using pContainer = std::shared_ptr<GtdContainer<Completable>>;
+	pContainer				        _gtdItems {nullptr};
+
 protected:
-    CompleteableContainer&      _gtdItems;
-    std::optional<unique_id_t>  _o_contextId{std::nullopt};
-    std::optional<time_point_t> _o_deferred{std::nullopt};
-    std::optional<time_point_t> _o_due{std::nullopt};
-    bool                        _isRepeating{false};
-    bool                        _flagged{false};
-    RepeatFrom                  _repeatFrom{RepeatFrom::Due};
-    std::string_view            _repeatSchedule{"30 16 * * *"}; // Every day at 4:30pm
+    std::optional<unique_id_t>		_o_contextId{std::nullopt};
+    std::optional<time_point_t> 	_o_deferred{std::nullopt};
+    std::optional<time_point_t> 	_o_due{std::nullopt};
+    bool                        	_isRepeating{false};
+    bool                        	_flagged{false};
+    RepeatFrom                  	_repeatFrom{RepeatFrom::Due};
+    std::string_view            	_repeatSchedule{"30 16 * * *"}; // Every day at 4:30pm
 
 public:
-    using gtd_category = completable_tag;
     // CTORS
+	/*************************************************************************/
     explicit
-    Completable( CompleteableContainer&, std::string_view name = "" );
+    Completable( std::string_view name = "" );
+	Completable( const Completable& );
+	Completable( Completable&& );
 
-    ~Completable() override = 0;
+    ~Completable() override = default;
+
+	// ASSIGMENT OPERATORS
+	/*************************************************************************/
+	Completable&
+	operator=( const Completable& );
+	Completable&
+	operator=( Completable&& );
 
     // GETTERS
     /*************************************************************************/
@@ -66,7 +72,7 @@ public:
     std::optional<std::string>
     dueStr() const;
 
-    [[nodiscard]] [[maybe_unused]]
+    [[nodiscard]]
     constexpr bool
     isRepeating() const noexcept {
         return _isRepeating;
@@ -85,8 +91,10 @@ public:
     }
 
     [[nodiscard]]
-    std::string_view
-    repeatFromStr() const;
+    constexpr std::string_view
+    repeatFromStr() const {
+		return repeatFromToStr(_repeatFrom);
+	}
 
     [[nodiscard]]
     constexpr std::string_view
@@ -98,7 +106,7 @@ public:
     /*************************************************************************/
     [[maybe_unused]]
     void
-    setContextId( unique_id_t id, bool update = true );
+    setContextId( unique_id_t contextId, bool update = true );
 
     void
     setDeferred( time_point_t deferred, bool update = true );
@@ -117,7 +125,11 @@ public:
 
     [[maybe_unused]]
     void
-    setIsRepeating( int is_repeating, bool update = true );
+    setTaskType( const std::string& taskType, bool update = true );
+
+    [[maybe_unused]]
+    void
+    setIsRepeating( int isRepeating, bool update = true );
 
     [[maybe_unused]]
     void
@@ -136,8 +148,6 @@ public:
     setRepeatSchedule( std::string_view schedule, bool update = true );
 };
 } // namespace gtd
-
-static_assert(IsCompletable<gtd::Completable>);
 
 std::ostream&
 operator<<( std::ostream& out, const gtd::Completable& completable );

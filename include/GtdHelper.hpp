@@ -23,62 +23,79 @@ using time_point_t = std::chrono::time_point<std::chrono::system_clock>;
 using unique_id_t = uint64_t;
 
 namespace gtd {
-// GTD TYPE TAGS
+//
+class GtdBase;
+class Context;
+class Folder;
+class Completable;
+class Task;
+class Project;
+
+//								   TAGS
 /*****************************************************************************/
-struct gtdbase_tag {};
+/// Gtd Type
+enum class GtdType {
+	Context, Folder, Task, Project, NA
+};
 
-struct completable_tag {};
-
-struct context_tag {};
-
-struct folder_tag {};
-
-struct task_tag {};
-
-struct project_tag {};
+struct base_tag {
+	using type = GtdBase;
+	static constexpr bool constructible = false;
+	static constexpr bool completable = false;
+	static constexpr auto gtd_type = GtdType::NA;
+};
+struct context_tag : base_tag {
+	using type = Context;
+	static constexpr bool constructible = true;
+	static constexpr bool completable = false;
+	static constexpr auto gtd_type = GtdType::Context;
+};
+struct folder_tag : base_tag {
+	using type = Folder;
+	static constexpr bool constructible = true;
+	static constexpr bool completable = false;
+	static constexpr auto gtd_type = GtdType::Folder;
+};
+struct completable_tag : context_tag {
+	using type = Completable;
+	static constexpr bool constructible = false;
+	static constexpr bool completable = true;
+	static constexpr auto gtd_type = GtdType::NA;
+};
+struct task_tag : completable_tag {
+	using type = Task;
+	static constexpr bool constructible = true;
+	static constexpr bool completable = true;
+	static constexpr auto gtd_type = GtdType::Task;
+};
+struct project_tag : completable_tag {
+	using type = Project;
+	static constexpr bool constructible = true;
+	static constexpr bool completable = true;
+	static constexpr auto gtd_type = GtdType::Project;
+};
 
 //                                 ENUMS
 /*****************************************************************************/
-/// Gtd Type
-enum class GtdType
-{
-    Context,
-    Folder,
-    Task,
-    Project,
-    Virtual
-};
-
 /// Task and Project status
-enum class Status
-{
-    Active,
-    OnHold,
-    Dropped,
-    Completed
+enum class Status {
+    Active, OnHold, Dropped, Completed
 };
 
 /// \brief Determines how to apply repeat criteria
 /// \note Due and Deferred
-enum class RepeatFrom
-{
-    Due,
-    Deferred
+enum class RepeatFrom {
+    Due, Deferred
 };
 
 /// \brief enum class describing various types of Tasks
-enum class TaskType
-{
-    Parallel,
-    Sequential
+enum class TaskType {
+    Parallel, Sequential
 };
 
 /// \brief enum class describing various types of Projects
-enum class ProjectType
-{
-    Parallel,
-    Sequential,
-    SingleActions
+enum class ProjectType {
+    Parallel, Sequential, SingleActions
 };
 
 /// \brief string_views to eliminate std::string heap allocations
@@ -103,70 +120,69 @@ static constexpr std::string_view s_strSingleActions{"SingleActions"};
 static constexpr std::string_view confFilePath = "../conf/gtd-conf.toml";
 
 /// \brief Get the name of the type of the Gtd Items
-/// This is useful for extracting the name of the table to which the item
+/// This is useful for extracting the name of the table to which the item 
 /// bleongs
 constexpr static
 std::string_view
-gtdTypeToStr( const gtd::GtdType gtdType ) noexcept {
-    switch ( gtdType ) {
-    case GtdType::Context:
-        return "contexts";
-    case GtdType::Folder:
-        return "folders";
-    case GtdType::Task:
-        return "tasks";
-    case GtdType::Project:
-        return "projects";
-    default: // Virtual will do this
-        std::cerr << "Invalid gtd::GtdType\n";
-        return "NA";
-    }
+gtdTypeToTableName(const gtd::GtdType gtdType) noexcept {
+	switch (gtdType) {
+		case GtdType::Context:
+			return "contexts";
+		case GtdType::Folder:
+			return "folders";
+		case GtdType::Task:
+			return "tasks";
+		case GtdType::Project:
+			return "projects";
+		default:
+			std::cerr << "Invalid gtd::GtdType\n";
+			return "NA";
+	}
 }
 
 /// \brief Get the filename of the database to use from config file
 static std::string
 getDbConnPath() {
-    static bool        firstRun = true;
-    static std::string tableName;
-    if ( firstRun ) {
-        auto config = toml::parse_file(confFilePath);
-        if ( config.empty() ) {
-            std::cerr << "Error opening config file\n";
-        }
-        const auto op_tableName =
-                config["database"][fmt::format("{}_db", RUNMODE)]
-                .value<std::string_view>();  // -> std::optional<std::string_view>
-        if ( op_tableName.has_value() ) {
-            tableName = op_tableName.value();
-        }
-        else {
-            tableName = "../conf/sql_scripts/gtd_db_dev.db";
-        }
-        firstRun = false;
-    }
-    return tableName;
+	static bool firstRun = true;
+	static std::string tableName;
+	if(firstRun) {
+		auto config = toml::parse_file(confFilePath);
+		if (config.empty()) {
+			std::cerr << "Error opening config file\n";
+		}
+		const auto op_tableName = \
+		    config["database"][fmt::format("{}_db", RUNMODE)]
+						 .value<std::string_view>();  // -> std::optional<std::string_view>
+		if(op_tableName.has_value()){
+			tableName = op_tableName.value();
+		} else {
+			tableName = "../conf/sql_scripts/gtd_db_dev.db";
+		}
+		firstRun = false;
+	}
+	return tableName;
 }
 
 /// \brief Convert string to a Status
 [[nodiscard]]
 constexpr Status
-strToStatus( std::string_view statusStrIn ) {
+strToStatus(std::string_view statusStrIn) {
     Status status;
-    if ( statusStrIn == "Active" ) {
+    if (statusStrIn == "Active") {
         status = Status::Active;
     }
-    else if ( statusStrIn == "OnHold" ) {
+    else if (statusStrIn == "OnHold") {
         status = Status::OnHold;
     }
-    else if ( statusStrIn == "Dropped" ) {
+    else if (statusStrIn == "Dropped") {
         status = Status::Dropped;
     }
-    else if ( statusStrIn == "Completed" ) {
+    else if (statusStrIn == "Completed") {
         status = Status::Completed;
     }
     else {
         throw std::runtime_error("Unrecognized status string, "
-            + std::string(statusStrIn));
+                                 + std::string(statusStrIn));
     }
     return status;
 }
@@ -174,9 +190,9 @@ strToStatus( std::string_view statusStrIn ) {
 /// \brief Convert a status to a string
 [[nodiscard]]
 constexpr std::string_view
-statusToStr( const Status status ) noexcept {
+statusToStr(const Status status) noexcept {
     std::string_view statusStr;
-    switch ( status ) {
+    switch (status) {
     case Status::Active:
         statusStr = std::string_view(s_strActive);
         break;
@@ -196,9 +212,9 @@ statusToStr( const Status status ) noexcept {
 // \brief Convert string to RepeatFrom enum
 [[nodiscard]]
 constexpr std::string_view
-repeatFromToStr( const RepeatFrom repeatFrom ) noexcept {
+repeatFromToStr(const RepeatFrom repeatFrom) noexcept {
     std::string_view repeatFromStr;
-    switch ( repeatFrom ) {
+    switch (repeatFrom) {
     case RepeatFrom::Deferred:
         repeatFromStr = s_strDeferred;
         break;
@@ -212,16 +228,16 @@ repeatFromToStr( const RepeatFrom repeatFrom ) noexcept {
 /// \brief Convert RepeatFrom enum to string
 [[nodiscard]]
 constexpr RepeatFrom
-strToRepeatFrom( std::string_view repeatFromStr ) {
+strToRepeatFrom(std::string_view repeatFromStr) {
     RepeatFrom repeatFrom;
-    if ( repeatFromStr == "Deferred" ) {
+    if (repeatFromStr == "Deferred") {
         repeatFrom = RepeatFrom::Deferred;
     }
-    else if ( repeatFromStr == "Due" ) {
+    else if (repeatFromStr == "Due") {
         repeatFrom = RepeatFrom::Due;
     }
     else {
-        fmt::println("repeatFromStr: {}", repeatFromStr);
+		fmt::println("repeatFromStr: {}", repeatFromStr );
         throw std::runtime_error("error: Unrecognized RepeatFrom string");
     }
     return repeatFrom;
@@ -231,14 +247,14 @@ strToRepeatFrom( std::string_view repeatFromStr ) {
 //  definition in GtdHelper.cpp
 [[nodiscard]]
 std::optional<std::string>
-timePointToStr( time_point_t tp );
+timePointToStr(time_point_t tp);
 
 /// Return string of project type
 [[nodiscard]]
-constexpr std::string_view
-projectTypeStr( ProjectType projectType ) noexcept {
+constexpr std::string_view 
+projectTypeStr(ProjectType projectType) noexcept {
     std::string_view projTypeStr{};
-    switch ( projectType ) {
+    switch (projectType) {
     case ProjectType::Parallel:
         projTypeStr = s_strParallel;
         break;
@@ -254,32 +270,32 @@ projectTypeStr( ProjectType projectType ) noexcept {
 
 /// Get ProjectType from string
 [[nodiscard]] [[maybe_unused]]
-constexpr ProjectType
-projectTypeFromStr( std::string_view projectTypeStr ) noexcept {
+constexpr ProjectType 
+projectTypeFromStr(std::string_view projectTypeStr) noexcept {
     ProjectType projectType;
-    if ( projectTypeStr == "Parallel" ) {
+    if (projectTypeStr == "Parallel") {
         projectType = ProjectType::Parallel;
     }
-    else if ( projectTypeStr == "Sequential" ) {
+    else if (projectTypeStr == "Sequential") {
         projectType = ProjectType::Sequential;
     }
-    else if ( projectTypeStr == "SingleActions" ) {
+    else if (projectTypeStr == "SingleActions") {
         projectType = ProjectType::SingleActions;
     }
     else {
-        std::cerr << "Unknown ProjectType, '" << projectTypeStr << "'.\n";
-        std::cout << "Setting ProjectType to 'Parallel'\n";
-        projectType = ProjectType::Parallel;
+		std::cerr << "Unknown ProjectType, '" << projectTypeStr << "'.\n";
+		std::cout << "Setting ProjectType to 'Parallel'\n";
+		projectType = ProjectType::Parallel;
     }
     return projectType;
 }
 
 /// Return string of project type
 [[nodiscard]]
-constexpr std::string_view
-taskTypeString( const TaskType taskType ) noexcept {
+constexpr std::string_view 
+taskTypeString(const TaskType taskType) noexcept {
     std::string_view taskTypeStr{};
-    switch ( taskType ) {
+    switch (taskType) {
     case TaskType::Parallel:
         taskTypeStr = s_strParallel;
         break;
@@ -292,20 +308,20 @@ taskTypeString( const TaskType taskType ) noexcept {
 
 /// Return TaskType for given string
 [[maybe_unused]] [[nodiscard]]
-constexpr TaskType
-taskTypeFromString( std::string_view taskTypeStr ) {
+constexpr TaskType 
+taskTypeFromString(std::string_view taskTypeStr) {
     TaskType taskType;
 
     // Convert to lowercase for ease of comparison
-    if ( taskTypeStr == "Parallel" ) {
+    if (taskTypeStr == "Parallel") {
         taskType = TaskType::Parallel;
     }
-    else if ( taskTypeStr == "Sequential" ) {
+    else if (taskTypeStr == "Sequential") {
         taskType = TaskType::Sequential;
     }
     else {
         throw std::runtime_error("Unknown TaskType string, '"
-            + std::string(taskTypeStr) + "'");
+                                 + std::string(taskTypeStr) + "'");
     }
     return taskType;
 }
@@ -314,7 +330,8 @@ taskTypeFromString( std::string_view taskTypeStr ) {
 /// \param tpStr ASCII string with format: yyyy-mm-dd hh:mm:ss
 [[nodiscard]] [[maybe_unused]]
 time_point_t
-strToTimePoint( std::string_view tpStr );
+strToTimePoint(std::string_view tpStr);
+
 } // namespace gtd
 
 #endif //GTD_GTDHELPER_HPP_

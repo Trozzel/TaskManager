@@ -3,14 +3,12 @@ project(GTD)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-IF( EXISTS "${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json" )
+IF( EXISTS "${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json" ) 
   EXECUTE_PROCESS( COMMAND ${CMAKE_COMMAND} -E copy_if_different
     ${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json
     ${CMAKE_CURRENT_SOURCE_DIR}/compile_commands.json
   )
 ENDIF()
-
-#add_compile_options(-Xclang -fconcepts-ts)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -37,58 +35,17 @@ ELSEIF(CMAKE_BUILD_TYPE STREQUAL "Debug")
 	ADD_COMPILE_DEFINITIONS(RUNMODE="dev")
 ENDIF()
 
-add_executable ( sqlplay
-    src/sql_play.cpp
-    src/Context.cpp
-    src/Task.cpp
-    src/Folder.cpp
-    src/GtdHelper.cpp
-    src/Project.cpp
-        include/gtd_concepts.hpp
-)
-	
-target_link_libraries ( sqlplay
-    ${SQLite3_LIBRARIES}
-	sqlite3
-    fmt::fmt
-    SqliteCpp
-    pthread
-    dl)
-
-add_executable ( temp
-	src/GtdHelper.cpp
+add_executable(runtime
 	src/GtdBase.cpp
-	src/UpdateStack.cpp
-    src/Completable.cpp
-	src/ImplHelpers.cpp
-	src/Context.cpp
-	src/Task.cpp
-	src/Project.cpp
-	src/Folder.cpp
-    src/UpdateStack.cpp
-    src/GtdBaseContainer.cpp
-    src/CompleteableContainer.cpp
-    src/ContextContainer.cpp
-    src/FolderContainer.cpp
-    src/TaskContainer.cpp
-    src/ProjectContainer.cpp
-    src/DbBase.cpp
-    src/SqliteConnection.cpp
-	temp.cpp)
-
-target_link_libraries ( temp
-	${SQLite3_LIBRARIES}
-	sqlite3
-	fmt::fmt
-	SqliteCpp
-	pthread
-	dl)
-
-add_executable(gtd_template
+	src/Completable.cpp
 	src/GtdHelper.cpp
-	src/template_main.cpp)
+	src/UpdateStack.cpp
+	src/Completable.cpp
+	src/Task.cpp
+	src/main.cpp
+	)
 
-target_link_libraries ( gtd_template
+target_link_libraries ( runtime
 	${SQLite3_LIBRARIES}
 	sqlite3
 	fmt::fmt

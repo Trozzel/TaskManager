@@ -1,134 +1,62 @@
 #ifndef GTDBASE_HPP_
 #define GTDBASE_HPP_
 
-#include <optional>
-#include <string>
-#include <string_view>
 #include <chrono>
 #include <ranges>
-#include <type_traits>
 
 #include "fmt/chrono.h" // Needed for timepoint_t to string
 
 #include "GtdHelper.hpp"
 #include "gtd_concepts.hpp"
-#include "GtdBaseContainer.hpp"
 
 namespace gtd {
-class USMgr;
 
-template <GtdType gtdType>
+// FORWARD DECLARATIONS	
+/*****************************************************************************/
+template<typename Gtd_t>
+class GtdContainer;
+
+class UpdateStack;
+
+/*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*/
+//							GTDBASE CLASS
+/*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*/
 class GtdBase
 {
-protected: // Helper functions
-    template <SqliteType Value_t>
-    void
-    pushToUpdateStack( std::string_view colName, Value_t value, const bool update ) const {
-        // Ensure that Value_t is one of the accepted types
-        if ( update ) {
-            auto& usm          = _gtds.updateStackManager();
-            auto& pUpdateStack = usm.getUpdateStack();
-            if ( this->uniqueId() ) {
-                pUpdateStack->push(*this->uniqueId(), colName, value);
-            }
-        }
-    }
-
+public:
+	// Class traits
+	using gtd_category = base_tag; 
+private:
+	// Hide from inheriting classes
+	using pContainer = std::shared_ptr<GtdContainer<GtdBase>>;
+	pContainer							 _gtdItems {nullptr};
 protected:
-	// BASE MEMBERS
-	GtdType					   _gtdType{gtdType};
-    GtdContainer<GtdBase>&     _gtds;
-    std::string                _name;
-    std::optional<unique_id_t> _o_uniqueId{std::nullopt};
-    Status                     _status{Status::Active};
-    time_point_t               _created;
-    time_point_t               _modified;
-    std::optional<unique_id_t> _o_parentId{std::nullopt};
-    std::optional<std::string> _o_notes{std::nullopt};
+    std::string							 _name;
+    std::optional<unique_id_t> 			 _o_uniqueId {std::nullopt};
+    Status                     			 _status {Status::Active};
+    time_point_t               			 _created;
+    time_point_t               			 _modified;
+    std::optional<unique_id_t> 			 _o_parentId {std::nullopt};
+    std::optional<std::string> 			 _o_notes {std::nullopt};
 
 public:
-	static constexpr const char*
-	tableName() {
-		if      constexpr(gtdType == GtdType::Context) return "contexts";
-		else if constexpr(gtdType == GtdType::Folder)  return "folders";
-		else if constexpr(gtdType == GtdType::Task)    return "tasks";
-		else if constexpr(gtdType == GtdType::Project) return "projects";
-	}
     // CTORS
     /**************************************************************************/
-    explicit
-    GtdBase( GtdContainer<GtdBase>& gtds, const std::string_view name = "" ) :
-        _gtds(gtds),
-        _name(name) 
-	{
-        _gtds.push_back(*this);
-    }
-
-    GtdBase( const GtdBase& other ) :
-        _gtds(other._gtds),
-        _name(other._name),
-        _o_uniqueId(other._o_uniqueId),
-        _status(other._status),
-        _o_parentId(other._o_parentId),
-        _o_notes(other._o_notes) 
-	{
-        _gtds.push_back(*this);
-    }
-
-    GtdBase( GtdBase&& other ) :
-        _gtds(other._gtds),
-		_name(std::move(other._name)),
-		_o_uniqueId(std::move(other._o_uniqueId)),
-		_status(other._status),
-		_created(other._created),
-		_modified(other._modified),
-		_o_parentId(std::move(other._o_parentId)),
-		_o_notes(std::move(other._o_notes))
-	{
-		_gtds.push_back(*this);
-	}
-
-    virtual ~GtdBase() {
-        fmt::println("Removing {} from Container", name());
-        _gtds.erase(*this);
-    }
+    //explicit GtdBase( pContainer cont, std::string_view name = "" ); 
+	explicit GtdBase( std::string_view name);
+	GtdBase(const GtdBase&) = default;
+	GtdBase(GtdBase&&) noexcept;
+    virtual ~GtdBase() noexcept = default; 
 
     GtdBase&
-    operator=( const GtdBase& other )
-    {
-        if(this != &other) {
-            _gtds = other._gtds;
-            _name = other._name;
-            _o_uniqueId = other._o_uniqueId;
-            _status = other._status;
-            _o_parentId = other._o_parentId;
-            _o_notes = other._o_notes;
-            _gtds.push_back(*this);
-        }
-        return *this;
-    }
-
+    operator=( const GtdBase& ) = default;
     GtdBase&
-    operator=( GtdBase&& other ) noexcept 
-	{
-		if(this != &other) {
-			_gtds = other._gtds;
-			_name = std::move(other._name);
-			_o_uniqueId = std::move(other._o_uniqueId);
-			_status = other._status;
-			_created = other._created;
-			_modified = other._modified;
-			_o_parentId = std::move(other._o_parentId);
-			_o_notes = std::move(other._o_notes);
-			_gtds.push_back(*this);
-		}
-		return *this;
-	}
+    operator=( GtdBase&& ) noexcept;
 
     // GETTERS
     /**************************************************************************/
     [[nodiscard]]
-    constexpr std::optional<unique_id_t>
+    std::optional<unique_id_t>
     uniqueId() const noexcept {
         return _o_uniqueId;
     }
@@ -137,7 +65,7 @@ public:
     constexpr std::string_view
     name() const noexcept {
         return _name;
-    }
+    } // implicit conversion to std::string_view
 
     [[nodiscard]]
     constexpr Status
@@ -189,87 +117,103 @@ public:
 	}
 
     // SETTERS
-    /**************************************************************************/
-    [[maybe_unused]]
-    void
+    /*************************************************************************/
+    constexpr void
     setUniqueId( const unique_id_t id ) noexcept {
         _o_uniqueId = id;
     }
 
-	void
-    setName( const std::string_view name, const bool update = true ) {
-		_name = name;
-		// Only updates if the Gtd_t object has a uniqueId (i.e. already present )
-		pushToUpdateStack("name", this->name(), update);
-	}
-
     void
-    setStatus( const std::string_view status, const bool update = true ) {
-		_status = strToStatus(status);
-		pushToUpdateStack("status", _status, update);
-	}
+    setName( std::string_view name, bool update = true );
+
+    virtual void
+    setStatus( std::string_view status, bool update = true );
 
     [[maybe_unused]]
-    void
-    setStatus( const Status status, const bool update = true ) {
-		_status = status;
-		pushToUpdateStack("status", statusStr(), update);
-	}
+    virtual void
+    setStatus( Status status, bool update = true );
 
-    void
-    setCreated( const std::string_view created, const bool update = true ) {
-		_created = strToTimePoint(created);
-		pushToUpdateStack("created", createdStr(), update);
-	}
+    virtual void
+    setCreated( std::string_view created, bool update = true );
 
     [[maybe_unused]]
-    void
-    setCreated( const time_point_t tp, const bool update = true ) {
-		_created = tp;
-		pushToUpdateStack("created", createdStr(), update);
-	}
+    virtual void
+    setCreated( time_point_t tp, bool update = true );
 
-    void
-    setModified( const std::string_view modified, const bool update = true ){
-		_modified = strToTimePoint(modified);
-		pushToUpdateStack("modified", this->modifiedStr(), update);
-	}
+    virtual void
+    setModified( std::string_view modified, bool update = true );
 
     [[maybe_unused]]
-    void
-    setModified( const time_point_t tp, const bool update = true ) {
-		_modified = tp;
-		pushToUpdateStack("modified", this->modifiedStr(), update);
-	}
+    virtual void
+    setModified( time_point_t tp, bool update = true );
 
     [[maybe_unused]]
-    void
-    setParentId( unique_id_t id, bool update = true ) {
-		_o_parentId = id;
-		pushToUpdateStack("parentId", parentId(), update);
-	}
+    virtual void
+    setParentId( unique_id_t id, bool update = true );
 
     [[maybe_unused]]
-    void
-    setNotes( std::string_view notes, bool update = true ) {
-		_o_notes = notes;
-		pushToUpdateStack("notes", this->notes(), update);
-	}
-
+    virtual void
+    setNotes( std::string_view notes, bool update = true );
 };
 
-static_assert(IsGtdBase<GtdBase<GtdType::Context>>);
-static_assert(IsGtdBase<GtdBase<GtdType::Folder>>);
+/*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*/
+//							CONTEXT CLASS
+/*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*/
+class Context : public GtdBase {
+public:
+	using gtd_category = context_tag;
+private:
+	using pContainer = std::shared_ptr<GtdContainer<Context>>;
+	pContainer							 _gtdItems {nullptr};
+public:
+	// CTORS
+	/*************************************************************************/
+	Context( pContainer, std::string_view name );
+	Context( const Context& ) = default;
+	Context( Context&& );
 
+	~Context() noexcept = default;
 
-template<GtdType gtdType>
-std::ostream&
-operator<<( std::ostream& out, const GtdBase<gtdType>& gtd ) {
-	out << "TASK: '" << gtd.name() << "'\n'";
-	return out;
-}
+	// ASSIGMENT OPERATORS
+	/*************************************************************************/
+	Context&
+	operator=( const Context& ) = default;
 
-/******************************************************************************/
+	Context&
+	operator=( Context&& );
+};
+
+/*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*/
+//							FOLDER CLASS
+/*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*/
+class Folder : public GtdBase {
+public:
+	using gtd_category = folder_tag;
+private:
+	using pContainer = std::shared_ptr<GtdContainer<Project>>;
+	pContainer							 _gtdItems {nullptr};
+public:
+	// CTORS
+	/*************************************************************************/
+	Folder( pContainer, std::string_view name );
+	Folder( const Folder& ) = default;
+	Folder( Folder&& );
+
+	~Folder() noexcept = default;
+
+	// ASSIGMENT OPERATORS
+	/*************************************************************************/
+	Folder&
+	operator=( const Folder& ) = default;
+
+	Folder&
+	operator=( Folder&& );
+}; 
+
 } // namespace gtd
+
+
+std::ostream&
+operator<<( std::ostream& out, const gtd::GtdBase& base );
 
 #endif // GTDBASE_HPP_

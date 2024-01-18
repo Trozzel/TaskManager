@@ -5,28 +5,25 @@
 #ifndef GTD_TASK_HPP
 #define GTD_TASK_HPP
 
-#include <iostream>
-#include <string_view>
-
 #include "Completable.hpp"
-#include "TaskContainer.hpp"
 #include "GtdHelper.hpp"
 
 namespace gtd {
 
 class Task final : public Completable {
-
+public:
+	using gtd_category = task_tag;
 private:
-	// hide from Project since Project has a ProjectType
-    TaskContainer&              _gtdItems;
-    TaskType					_taskType { TaskType::Parallel };
-	std::optional<unique_id_t> 	_projectId { std::nullopt };
+	using pContainer = std::shared_ptr<GtdContainer<Task>>;
+	pContainer				        _gtdItems {nullptr};
+
+    TaskType						_taskType { TaskType::Parallel };
+	std::optional<unique_id_t>      _projectId { std::nullopt };
 
 public:
-    using gtd_category = task_tag;
     // STATIC FUNCTIONS
     static constexpr
-    TaskType strToTaskType(std::string_view taskTypeStr) noexcept {
+    TaskType strToTaskType( const std::string_view taskTypeStr ) noexcept {
 		TaskType taskType;
 		if (taskTypeStr == "Parallel") {
 			taskType = TaskType::Parallel;
@@ -42,10 +39,20 @@ public:
 	}
 
     // CTORS
-    explicit Task(TaskContainer&,  std::string_view name = "");
+	/*************************************************************************/
+    explicit Task( pContainer, std::string_view name );
+	Task( const Task& );
+	Task( Task&& ) noexcept;
 
 	// DTOR
-    ~Task() final = default;
+    ~Task() noexcept final = default;
+
+	// ASSIGMENT OPERATORS
+	/*************************************************************************/
+	Task&
+	operator=( const Task& );
+	Task&
+	operator=( Task&& );
 
 	// GETTERS
 	/*************************************************************************/

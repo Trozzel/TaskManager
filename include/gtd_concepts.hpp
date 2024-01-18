@@ -407,4 +407,6 @@ template <typename ProjectContainer_t>
 concept IsProjectContainer = std::ranges::range<ProjectContainer_t> &&
 	IsProject<typename ProjectContainer_t::range_value_t>;
 
+// SANDBOX
+/*****************************************************************************/
 #endif //GTD_CONCEPTS_HPP_

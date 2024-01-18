@@ -1,5 +1,3 @@
-#include <stack>
-
 #include "UpdateStack.hpp"
 #include "GtdBase.hpp"
 #include "GtdHelper.hpp"
@@ -15,7 +13,7 @@ UpdateStack::~UpdateStack() = default;
 
 void
 UpdateStack::clear() {
-	_dbUpdateStack = std::stack<stack_elem_t>();
+	_dbUpdateStack = std::stack<id_colname_t>();
 }
 
 void
@@ -35,7 +33,7 @@ UpdateStack::push( unique_id_t uniqueId, std::string_view colName, std::string v
 
 void
 UpdateStack::push( unique_id_t uniqueId, std::string_view colName, bool value) {
-    _dbUpdateStack.emplace(uniqueId, colName, value ? "true" : "false");
+    _dbUpdateStack.emplace(uniqueId, colName, (value) ? "true" : "false");
 }
 
 
@@ -44,43 +42,27 @@ UpdateStack::pop() {
 	_dbUpdateStack.pop();
 }
 
-stack_elem_t&
+id_colname_t&
 UpdateStack::top() {
 	return _dbUpdateStack.top();
 }
 
-std::string
-UpdateStack::compose( const GtdContainer& gtdItems ) {
-    if ( gtdItems.empty() ) {
-        return "WARNING: no items in " + gtdItems.tableName();
-    }
-    std::stringstream ss;
-    ss << fmt::format("UPDATE {} SET ", gtdItems.tableName());
-    while ( !_dbUpdateStack.empty() ) {
-        const auto uniqueId = std::get<0>(_dbUpdateStack.top());
-        const auto& pGtdItem = gtdItems.gtdItemByUniqueId(uniqueId);
-        ss << topColName() << " = " << topValueStr();
-        ss << " WHERE uniqueId = " << std::to_string(uniqueId) << ";";
-        _dbUpdateStack.pop();
-    }
-    return ss.str();
-}
-
-// CLASS UpdateStackManager
-/*****************************************************************************/
-// 1. UpdateStackManager deleter for unique pointer
-USMgr::
-USPtrDeleter::USPtrDeleter(USMgr& usm) : _usMgr(usm) { }
-
-void 
-USMgr::
-USPtrDeleter::operator()(UpdateStack* updateStackPtr) const {
-	_usMgr._pUpdateStack.reset(updateStackPtr);
-}
-
-const USMgr::USPtr_t&
-USMgr::getUpdateStack() const {
-	return std::move(_pUpdateStack);
-}
+//std::string
+//UpdateStack::compose( const GtdContainer& gtdItems ) {
+//    if ( gtdItems.empty() ) {
+//        return "WARNING: no items in " + gtdItems.tableName();
+//    }
+//    auto tableName = gtdItems.tableName();
+//    std::stringstream ss;
+//    ss << fmt::format("UPDATE {} SET ", gtdItems.tableName());
+//    while ( !_dbUpdateStack.empty() ) {
+//        const auto uniqueId = std::get<0>(_dbUpdateStack.top());
+//        const auto& pGtdItem = gtdItems.gtdItemByUniqueId(uniqueId);
+//        ss << topColName() << " = " << topValueStr();
+//        ss << " WHERE uniqueId = " << std::to_string(uniqueId) << ";";
+//        _dbUpdateStack.pop();
+//    }
+//    return ss.str();
+//}
 
 }  // namespace gtd

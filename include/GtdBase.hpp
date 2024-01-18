@@ -3,9 +3,8 @@
 
 #include <chrono>
 #include <ranges>
-#include <type_traits>
 
-#include "fmt/chrono.h" // Needed for timepoint_t to string
+#include <fmt/chrono.h>
 
 #include "GtdHelper.hpp"
 

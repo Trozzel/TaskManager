@@ -8,11 +8,8 @@
 #include <ranges>
 #include <algorithm>
 
+#include "sqlite3ext.h"
 #include "GtdHelper.hpp"
-#include "Context.hpp"
-#include "Folder.hpp"
-#include "Project.hpp"
-#include "Task.hpp"
 #include "UpdateStack.hpp"
 #include "gtd_concepts.hpp"
 
@@ -30,6 +27,8 @@ public:
     using iterator = typename std::vector<Gtd_t>::iterator;
     using const_iterator = typename std::vector<Gtd_t>::const_iterator;
     using size_type = typename std::vector<Gtd_t>::size_type;
+    using reference = typename std::vector<Gtd_t>::reference;
+    using const_reference = typename std::vector<Gtd_t>::const_reference;
 
     // CTORS
     /*************************************************************************/
@@ -38,7 +37,6 @@ public:
         _updateStack(UpdateStack::getInstance()) {}
 
     ~GtdContainer() = default;
-
 
     // STATIC FUNCTIONS
     /*************************************************************************/
@@ -63,6 +61,7 @@ public:
 
     [[nodiscard]] Gtd_t&
     at( const size_t idx ) {
+        assert(idx < _gtdItems.size());
         return _gtdItems.at(idx);
     }
 
@@ -74,6 +73,11 @@ public:
                                     });
     }
 
+    [[nodiscard]] size_type
+    size() const {
+        return _gtdItems.size();
+    }
+
     [[nodiscard]] bool
     empty() const {
         return _gtdItems.empty();
@@ -83,9 +87,9 @@ public:
     getByName( const std::string_view name ) {
         std::vector<Gtd_t> v;
         std::copy_if(_gtdItems.cbegin(), _gtdItems.cend(),
-            std::back_inserter(v), [name](const auto& gtd) {
-                return gtd.name() == name;
-            });
+                     std::back_inserter(v), [name]( const auto& gtd ) {
+                         return gtd.name() == name;
+                     });
         return v;
     }
 
@@ -123,13 +127,25 @@ public:
 
     // CREATE GTD IN PLACE
     /*************************************************************************/
-    Gtd_t&
-    create(const std::shared_ptr<GtdContainer>& sp, const std::string_view name) {
-        return _gtdItems.emplace_back(sp, name);
+    reference
+    create( const std::shared_ptr<GtdContainer>& sp, const std::string_view name ) {
+        _gtdItems.emplace_back(sp, name);
+        return _gtdItems.back();
+    }
+
+    const_reference
+    create( const std::shared_ptr<GtdContainer>& sp, const std::string_view name ) const {
+        _gtdItems.emplace_back(sp, name);
+        return _gtdItems.back();
     }
 
     // VECTOR OPERATIONS
     /*************************************************************************/
+    size_type
+    cap() const {
+        return _gtdItems.capacity();
+    }
+
     iterator
     begin() {
         return _gtdItems.begin();
@@ -160,9 +176,21 @@ public:
         _gtdItems.push_back(std::move(gtdItem));
     }
 
+    reference
+    back() {
+        return _gtdItems.back();
+    }
+
+    const_reference
+    back() const {
+        return _gtdItems.back();
+    }
+
     void
     erase( Gtd_t& gtdItem ) {
-        std::erase(_gtdItems, gtdItem);
+        _gtdItems.erase(
+            std::remove(_gtdItems.begin(), _gtdItems.end(), gtdItem),
+            _gtdItems.end());
     }
 
     //						COMPLETABLE CONTAINER OPERATIONS
@@ -217,6 +245,15 @@ public:
                          return gtd.flagged() == true;
                      });
         return vec;
+    }
+
+    //                          DATABASE OPERATIONS
+    /*************************************************************************/
+    template<typename T = Gtd_t>
+    size_type
+    loadAll(const std::string_view dbPath) {
+        std::string_view tableName = T::table_name;
+
     }
 }; // class GtdContainer
 } // namespace gtd

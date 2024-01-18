@@ -1,6 +1,5 @@
+#include "Task.hpp"
 #include "Project.hpp"
-#include "Completable.hpp"
-#include "GtdBase.hpp"
 #include "GtdHelper.hpp"
 #include "GtdContainer.hpp"
 
@@ -9,37 +8,9 @@ using namespace std;
 namespace gtd {
 // CTORS
 /*****************************************************************************/
-Project::Project( pContainer projects, const std::string_view name ) :
+Project::Project( const sp_Container& projects, const std::string_view name ) :
     Completable(name),
-    _projects(std::move(projects)) {
-    // _projects->push_back(*this);
-}
-
-Project::Project( GtdContainer<Project>* projects, const std::string_view name ) :
-    Completable(name),
-    _projects(projects) {
-    // _projects->push_back(*this);
-}
-
-Project::Project( const Project& other ) :
-    Completable(other),
-    _projects(other._projects),
-    _projectType(other._projectType),
-    _folderId(other._folderId),
-    _taskIds(other._taskIds),
-    _completeWithLast(other._completeWithLast),
-    _reviewSchedule(other._reviewSchedule) {
-}
-
-Project::Project( Project&& other ) noexcept :
-    Completable(std::move(other)),
-    _projects(std::move(other._projects)),
-    _projectType(other._projectType),
-    _folderId(other._folderId),
-    _taskIds(std::move(other._taskIds)),
-    _completeWithLast(other._completeWithLast),
-    _reviewSchedule(other._reviewSchedule) {
-}
+    _projects(projects) {}
 
 // ASSIGNMENT OPERATORS
 /*****************************************************************************/
@@ -57,27 +28,12 @@ Project::operator=( const Project& other ) {
     return *this;
 }
 
-Project&
-Project::operator=( Project&& other ) noexcept {
-    // Does moving Project remove from _projects?
-    if ( this != &other ) {
-        Completable::operator=(std::move(other));
-        _projects         = std::move(other._projects);
-        _projectType      = other._projectType;
-        _folderId         = other._folderId;
-        _taskIds          = std::move(other._taskIds);
-        _completeWithLast = other._completeWithLast;
-        _reviewSchedule   = other._reviewSchedule;
-    }
-    return *this;
-}
-
 // COMPARISON OPERATORS
 /*****************************************************************************/
 bool
 Project::operator==( const Project& other ) const {
     return Completable::operator==(other) &&
-            _projects == other._projects &&
+            //_projects == other._projects &&
             _projectType == other._projectType &&
             _folderId == other._folderId &&
             _taskIds == other._taskIds && // Is this necessary?
@@ -96,7 +52,7 @@ void
 Project::setName( const std::string_view name, const bool update ) {
     Completable::setName(name, update);
     if ( update ) {
-        auto& us = _projects->updateStack();
+        auto& us = _projects.lock()->updateStack();
         if ( this->uniqueId() ) {
             us.push(*this->uniqueId(), "name", this->name());
         }
@@ -107,7 +63,7 @@ void
 Project::setStatus( const std::string_view status, const bool update ) {
     Completable::setStatus(status, update);
     if ( update ) {
-        auto& us = _projects->updateStack();
+        auto& us = _projects.lock()->updateStack();
         if ( this->uniqueId() ) {
             us.push(*this->uniqueId(), "status", statusStr());
         }
@@ -118,7 +74,7 @@ void
 Project::setStatus( const Status status, const bool update ) {
     Completable::setStatus(status, update);
     if ( update ) {
-        auto& us = _projects->updateStack();
+        auto& us = _projects.lock()->updateStack();
         if ( this->uniqueId() ) {
             us.push(*this->uniqueId(), "status", statusStr());
         }
@@ -129,7 +85,7 @@ void
 Project::setParentId( const unique_id_t id, const bool update ) {
     Completable::setParentId(id, update);
     if ( update ) {
-        auto& us = _projects->updateStack();
+        auto& us = _projects.lock()->updateStack();
         if ( this->uniqueId() ) {
             us.push(*this->uniqueId(), "parent", *parentId());
         }
@@ -140,7 +96,7 @@ void
 Project::setNotes( const std::string_view notes, const bool update ) {
     Completable::setNotes(notes, update);
     if ( update ) {
-        auto& us = _projects->updateStack();
+        auto& us = _projects.lock()->updateStack();
         if ( this->uniqueId() ) {
             us.push(*this->uniqueId(), "notes", *this->notes());
         }
@@ -151,7 +107,7 @@ void
 Project::setContextId( const unique_id_t id, const bool update ) {
     Completable::setContextId(id, update);
     if ( update ) {
-        auto& us = _projects->updateStack();
+        auto& us = _projects.lock()->updateStack();
         if ( this->uniqueId() ) {
             us.push(*this->uniqueId(), "context", *contextId());
         }
@@ -162,7 +118,7 @@ void
 Project::setDeferred( const time_point_t deferred, const bool update ) {
     Completable::setDeferred(deferred, update);
     if ( update ) {
-        auto& us = _projects->updateStack();
+        auto& us = _projects.lock()->updateStack();
         if ( this->uniqueId() ) {
             us.push(*this->uniqueId(), "deferred", *deferredStr());
         }
@@ -173,7 +129,7 @@ void
 Project::setDeferred( const std::string_view deferred, const bool update ) {
     Completable::setDeferred(deferred, update);
     if ( update ) {
-        auto& us = _projects->updateStack();
+        auto& us = _projects.lock()->updateStack();
         if ( this->uniqueId() ) {
             us.push(*this->uniqueId(), "deferred", *deferredStr());
         }
@@ -184,7 +140,7 @@ void
 Project::setDue( const time_point_t tp, const bool update ) {
     Completable::setDue(tp, update);
     if ( update ) {
-        auto& us = _projects->updateStack();
+        auto& us = _projects.lock()->updateStack();
         if ( this->uniqueId() ) {
             us.push(*this->uniqueId(), "due", *dueStr());
         }
@@ -195,7 +151,7 @@ void
 Project::setDue( const std::string_view due_str, const bool update ) {
     Completable::setDue(due_str, update);
     if ( update ) {
-        auto& us = _projects->updateStack();
+        auto& us = _projects.lock()->updateStack();
         if ( this->uniqueId() ) {
             us.push(*this->uniqueId(), "due", *dueStr());
         }
@@ -206,7 +162,7 @@ void
 Project::setTaskType( const std::string& taskType, const bool update ) {
     Completable::setTaskType(taskType, update);
     if ( update ) {
-        auto& us = _projects->updateStack();
+        auto& us = _projects.lock()->updateStack();
         if ( this->uniqueId() ) {
             us.push(*this->uniqueId(), "taskType", taskType);
         }
@@ -217,7 +173,7 @@ void
 Project::setIsRepeating( const int isRepeating, const bool update ) {
     Completable::setIsRepeating(isRepeating, update);
     if ( update ) {
-        auto& us = _projects->updateStack();
+        auto& us = _projects.lock()->updateStack();
         if ( this->uniqueId() ) {
             us.push(*this->uniqueId(), "isRepeating", this->isRepeating());
         }
@@ -228,7 +184,7 @@ void
 Project::setFlagged( const int flagged, const bool update ) {
     Completable::setFlagged(flagged, update);
     if ( update ) {
-        auto& us = _projects->updateStack();
+        auto& us = _projects.lock()->updateStack();
         if ( this->uniqueId() ) {
             us.push(*this->uniqueId(), "flagged", this->flagged());
         }
@@ -239,7 +195,7 @@ void
 Project::setRepeatFrom( const RepeatFrom repeatFrom, const bool update ) {
     Completable::setRepeatFrom(repeatFrom, update);
     if ( update ) {
-        auto& us = _projects->updateStack();
+        auto& us = _projects.lock()->updateStack();
         if ( this->uniqueId() ) {
             us.push(*this->uniqueId(), "repeatFrom", repeatFromStr());
         }
@@ -250,7 +206,7 @@ void
 Project::setRepeatFrom( const std::string_view rptFromStr, const bool update ) {
     Completable::setRepeatFrom(rptFromStr, update);
     if ( update ) {
-        auto& us = _projects->updateStack();
+        auto& us = _projects.lock()->updateStack();
         if ( this->uniqueId() ) {
             us.push(*this->uniqueId(), "repeatFrom", repeatFromStr());
         }
@@ -261,7 +217,7 @@ void
 Project::setRepeatSchedule( const std::string_view schedule, const bool update ) {
     Completable::setRepeatSchedule(schedule, update);
     if ( update ) {
-        auto& us = _projects->updateStack();
+        auto& us = _projects.lock()->updateStack();
         if ( this->uniqueId() ) {
             us.push(*this->uniqueId(), "repeatSchedule", repeatSchedule());
         }
@@ -301,7 +257,7 @@ void
 Project::setProjectType( const ProjectType projectType, const bool update ) {
     _projectType = projectType;
     if ( update ) {
-        auto& us = _projects->updateStack();
+        auto& us = _projects.lock()->updateStack();
         us.push(*uniqueId(), "projectType", projectTypeStr(_projectType));
     }
 }
@@ -310,7 +266,7 @@ void
 Project::setProjectType( const std::string_view projectType, const bool update ) {
     _projectType = strToProjectType(projectType);
     if ( update ) {
-        auto& us = _projects->updateStack();
+        auto& us = _projects.lock()->updateStack();
         us.push(*uniqueId(), "projectType", projectTypeStr(_projectType));
     }
 }
@@ -319,7 +275,7 @@ void
 Project::setFolderId( const unique_id_t id, const bool update ) {
     _folderId = id;
     if ( update ) {
-        auto& us = _projects->updateStack();
+        auto& us = _projects.lock()->updateStack();
         us.push(*uniqueId(), "folder", *folderId());
     }
 }
@@ -328,7 +284,7 @@ void
 Project::setCompleteWithLast( const bool completeWithLast, const bool update ) {
     _completeWithLast = completeWithLast;
     if ( update ) {
-        auto& us = _projects->updateStack();
+        auto& us = _projects.lock()->updateStack();
         us.push(*uniqueId(), "completeWithLast", _completeWithLast);
     }
 }
@@ -337,7 +293,7 @@ void
 Project::setReviewSchedule( const std::string_view reviewSchedule, const bool update ) {
     _reviewSchedule = reviewSchedule;
     if ( update ) {
-        auto& us = _projects->updateStack();
+        auto& us = _projects.lock()->updateStack();
         us.push(*uniqueId(), "reviewSchedule", this->reviewSchedule());
     }
 }

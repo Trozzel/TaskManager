@@ -14,15 +14,15 @@ public:
     using gtd_category = context_tag;
 
 private:
-    using pContainer = std::shared_ptr<GtdContainer<Context>>;
-    pContainer _contexts{nullptr};
+    using sp_Container = std::shared_ptr<GtdContainer<Context>>;
+    using wp_Container = std::weak_ptr<GtdContainer<Context>>;
+    wp_Container _contexts;
 
 public:
     // CTORS
     /*************************************************************************/
-    Context( pContainer, std::string_view name );
-    Context( GtdContainer<Context>*, std::string_view name );
-    Context( const Context& ) = default; // !Does not add element to _contexts!
+    Context( const sp_Container&,  std::string_view name );
+    Context( const Context& ) = default;
     Context( Context&& ) noexcept;
 
     ~Context() override = default;
@@ -46,19 +46,19 @@ public:
     // OVERRIDE SETTERS
     /*************************************************************************/
     void
-    setName( std::string_view name, bool update = true ) override;
+    setName( std::string_view name, bool update ) override;
 
     void
-    setStatus( std::string_view status, bool update = true ) override;
+    setStatus( std::string_view status, bool update ) override;
 
     void
-    setStatus( Status status, bool update = true ) override;
+    setStatus( Status status, bool update ) override;
 
     void
-    setParentId( unique_id_t id, bool update = true ) override;
+    setParentId( unique_id_t id, bool update ) override;
 
     void
-    setNotes( std::string_view notes, bool update = true ) override;
+    setNotes( std::string_view notes, bool update ) override;
 };
 } // namespace gtd
 

@@ -20,7 +20,7 @@ protected:
     bool                        _isRepeating{false};
     bool                        _flagged{false};
     RepeatFrom                  _repeatFrom{RepeatFrom::Due};
-    std::string_view            _repeatSchedule{"30 16 * * *"}; // Every day at 4:30pm
+    std::string                 _repeatSchedule{"30 16 * * *"}; // Every day at 4:30pm
 
 public:
     // CTORS

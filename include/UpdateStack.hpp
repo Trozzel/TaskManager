@@ -10,22 +10,22 @@
 #include "GtdHelper.hpp"
 
 namespace gtd {
-using ColName_t = std::string_view;
+using ColName_t = std::string;
 using ValueStr_t = std::string;
-using id_col_val_t = const std::tuple<unique_id_t, ColName_t, ValueStr_t>;
+using id_col_val_t = std::tuple<unique_id_t, ColName_t, ValueStr_t>;
 
 // CLASS UPDATE STACK
 /*****************************************************************************/
-/**
- * Singleton that is shared by all GtdContainers
- * @brief composes UPDATE queries to be sent to the database
- */
 class UpdateStack
 {
 protected:
     std::stack<id_col_val_t> _dbUpdateStack;
 
 public:
+    using value_type = std::stack<id_col_val_t>::value_type;
+    using reference = std::stack<id_col_val_t>::reference;
+    using const_reference = std::stack<id_col_val_t>::const_reference;
+
     UpdateStack() = default;
 
     ~UpdateStack() = default;
@@ -54,7 +54,7 @@ public:
     template <typename String>
     void
     push( unique_id_t uniqueId, std::string_view colName, String value )
-        requires std::convertible_to<String, std::string> || std::constructible_from<String, const char*>{
+        requires std::convertible_to<String, std::string> || std::constructible_from<String, const char*> {
         _dbUpdateStack.emplace(uniqueId, colName, value);
     }
 
@@ -89,7 +89,7 @@ public:
     pop();
 
     [[nodiscard]]
-    id_col_val_t&
+    const_reference
     top() const;
 
     //std::string

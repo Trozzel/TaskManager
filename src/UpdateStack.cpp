@@ -1,5 +1,4 @@
 #include "UpdateStack.hpp"
-#include "GtdBase.hpp"
 #include "GtdHelper.hpp"
 
 namespace gtd {
@@ -17,13 +16,12 @@ UpdateStack::push( const unique_id_t uniqueId, const std::string_view colName, c
     _dbUpdateStack.emplace(uniqueId, colName, (value) ? "true" : "false");
 }
 
-
 void
 UpdateStack::pop() {
 	_dbUpdateStack.pop();
 }
 
-id_col_val_t&
+UpdateStack::const_reference
 UpdateStack::top() const {
 	return _dbUpdateStack.top();
 }

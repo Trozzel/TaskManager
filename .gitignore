@@ -15,3 +15,7 @@ old_stuff
 sql_scripts/create_*
 sql_scripts/temp.db
 src/SQLiteCpp
+
+cmake-build-*
+old_stuff
+

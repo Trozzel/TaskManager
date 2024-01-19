@@ -63,6 +63,7 @@ target_link_libraries(runtime
         ${SQLite3_LIBRARIES}
         sqlite3
         fmt::fmt
+		tomlplusplus::tomlplusplus
         pthread
         dl)
 
@@ -81,9 +82,11 @@ add_executable(tests
 
 target_link_libraries(tests gtest_main
         ${SQLite3_LIBRARIES}
+		tomlplusplus::tomlplusplus
         sqlite3
         fmt::fmt
         pthread
+		tomlplusplus::tomlplusplus
         dl)
 
 add_test(NAME example_test COMMAND tests)
@@ -99,4 +102,3 @@ FILE(CREATE_LINK
         ${CMAKE_SOURCE_DIR}/compile_commands.json
         SYMBOLIC)
 MESSAGE("-- Created symlink: ${CMAKE_SOURCE_DIR}/compile_commands.json --> ${CMAKE_BINARY_DIR}/compile_commands.json")
-

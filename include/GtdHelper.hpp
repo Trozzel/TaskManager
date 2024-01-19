@@ -10,6 +10,7 @@
 #include <string_view>
 
 #include "fmt/core.h"
+#include "toml++/toml.hpp"
 
 // Check for compile time RUNMODE
 #ifndef RUNMODE

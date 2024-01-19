@@ -90,6 +90,12 @@ GtdBase::setStatus( const Status status, const bool update ) {
 	_status = status;
 }
 
+
+void
+GtdBase::setParent( const GtdBase& gtdItem, bool update ) {
+	_o_parentId = gtdItem.uniqueId();
+}
+
 /// \note implementation is handled in derived classes to write to DB upon
 /// update
 void

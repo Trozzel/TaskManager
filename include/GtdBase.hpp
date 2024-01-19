@@ -136,6 +136,11 @@ public:
     [[maybe_unused]]
     virtual void
     setStatus( Status status, bool update );
+    [[maybe_unused]]
+
+    [[maybe_unused]]
+    virtual void
+    setParent( const GtdBase&, bool update );
 
     [[maybe_unused]]
     virtual void

@@ -7,19 +7,29 @@
 
 #include "Context.hpp"
 #include "GtdContainer.hpp"
+#include "GtdHelper.hpp"
 #include "Project.hpp"
 #include "Folder.hpp"
+#include "fmt/base.h"
 
 auto
 main() -> int {
     const auto contexts  = std::make_shared<gtd::GtdContainer<gtd::Context>>();
-    contexts->create(contexts, "c1");
-    contexts->create(contexts, "c2");
-    contexts->create(contexts, "c3");
-    contexts->create(contexts, "c4");
+    auto& context = contexts->create(contexts, "c1");
+    {
+        context = contexts->create(contexts, "c2");
+        context.setName("Boogor", true);
+    }
+
+    {
+        context = contexts->create(contexts, "c4");
+        context.setNotes("These are some notes", true);
+    }
     contexts->create(contexts, "c5");
     contexts->create(contexts, "c6");
     contexts->create(contexts, "c7");
+
+    std::cout << contexts->updateStack().compose(gtd::GtdType::Context) << std::endl;
 
     const auto tasks = std::make_shared<gtd::GtdContainer<gtd::Task>>();
     tasks->create(tasks, "t1");
@@ -34,12 +44,4 @@ main() -> int {
     folders->create(folders, "F1");
     folders->create(folders, "F2");
 
-    std::cout << "Task table is:    " << tasks->tableName() << std::endl;
-
-    const auto flagged = tasks->getFlagged();
-
-    for ( const auto& task : *tasks ) {
-        std::cout << std::boolalpha;
-        std::cout << task.name() << " is " << (task.flagged() ? "" : "not ") << "flagged\n";
-    }
 }

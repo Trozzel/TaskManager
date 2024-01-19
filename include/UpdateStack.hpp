@@ -6,8 +6,10 @@
 #define UPDATESTACK_HPP_
 
 #include <stack>
+#include <type_traits>
 
 #include "GtdHelper.hpp"
+#include "fmt/base.h"
 
 namespace gtd {
 using ColName_t = std::string;
@@ -92,8 +94,8 @@ public:
     const_reference
     top() const;
 
-    //std::string
-    //compose( const GtdContainer<>& );
+    std::string
+    compose( GtdType gtdType );
 }; // class UpdateStack
 } // namespace gtd
 

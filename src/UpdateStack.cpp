@@ -1,5 +1,7 @@
 #include "UpdateStack.hpp"
 #include "GtdHelper.hpp"
+#include "fmt/format.h"
+#include <string>
 
 namespace gtd {
 
@@ -26,22 +28,19 @@ UpdateStack::top() const {
 	return _dbUpdateStack.top();
 }
 
-//std::string
-//UpdateStack::compose( const GtdContainer& gtdItems ) {
-//    if ( gtdItems.empty() ) {
-//        return "WARNING: no items in " + gtdItems.tableName();
-//    }
-//    auto tableName = gtdItems.tableName();
-//    std::stringstream ss;
-//    ss << fmt::format("UPDATE {} SET ", gtdItems.tableName());
-//    while ( !_dbUpdateStack.empty() ) {
-//        const auto uniqueId = std::get<0>(_dbUpdateStack.top());
-//        const auto& pGtdItem = gtdItems.gtdItemByUniqueId(uniqueId);
-//        ss << topColName() << " = " << topValueStr();
-//        ss << " WHERE uniqueId = " << std::to_string(uniqueId) << ";";
-//        _dbUpdateStack.pop();
-//    }
-//    return ss.str();
-//}
+std::string
+UpdateStack::compose(GtdType gtdType)
+{
+    std::string res{};
+    fmt::println("Table name: {}", gtdTypeToTableName(gtdType));
+    while(!_dbUpdateStack.empty()) {
+        res += fmt::format("ID: {}, COLUMN: {}, VALUE: {}\n",
+                std::get<0>(_dbUpdateStack.top()), 
+                std::get<1>(_dbUpdateStack.top()),
+                std::get<2>(_dbUpdateStack.top()));
+        _dbUpdateStack.pop();
+    }
+    return res;
+}
 
 }  // namespace gtd

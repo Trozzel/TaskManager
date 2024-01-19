@@ -40,7 +40,7 @@ public:
 
     // STATIC FUNCTIONS
     /*************************************************************************/
-    [[nodiscard]] static constexpr std::string_view
+    [[nodiscard]] static constexpr std::string
     tableName() {
         return gtdTypeToTableName(Gtd_t::gtd_category::gtd_type);
     }

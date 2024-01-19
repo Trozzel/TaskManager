@@ -6,6 +6,13 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# AUTO ADD DEFINITIONS TO CODE BASED UPON BUILD TYPE
+IF(CMAKE_BUILD_TYPE STREQUAL "Release")
+	ADD_COMPILE_DEFINITIONS(RUNMODE="prod")
+ELSEIF(CMAKE_BUILD_TYPE STREQUAL "Debug")
+	ADD_COMPILE_DEFINITIONS(RUNMODE="dev")
+ENDIF()
+
 # SQLITE C++
 ################################################################################
 include(FetchContent)
@@ -47,7 +54,7 @@ FetchContent_MakeAvailable(SQLiteCpp
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-add_executable(runtime
+add_executable(gtd
         src/GtdHelper.cpp
         src/UpdateStack.cpp
         src/GtdBase.cpp
@@ -59,7 +66,7 @@ add_executable(runtime
         src/main.cpp
 )
 
-target_link_libraries(runtime
+target_link_libraries(gtd
         ${SQLite3_LIBRARIES}
         sqlite3
         fmt::fmt
@@ -82,7 +89,6 @@ add_executable(tests
 
 target_link_libraries(tests gtest_main
         ${SQLite3_LIBRARIES}
-		tomlplusplus::tomlplusplus
         sqlite3
         fmt::fmt
         pthread
@@ -92,13 +98,11 @@ target_link_libraries(tests gtest_main
 add_test(NAME example_test COMMAND tests)
 
 # CREATE SYMBOLIC LINK TO compile_commands.json IN CMAKE_SOURCE_DIR
-IF (EXISTS ${CMAKE_SOURCE_DIR}/compile_commands.json)
-    MESSAGE("-- Removing symlink: ${CMAKE_SOURCE_DIR}/compile_commands.json --> ${CMAKE_BINARY_DIR}/compile_commands.json")
-    FILE(REMOVE ${CMAKE_SOURCE_DIR}/compile_commands.json)
-ENDIF ()
-
-FILE(CREATE_LINK
+IF (NOT EXISTS ${CMAKE_SOURCE_DIR}/compile_commands.json)
+	FILE(CREATE_LINK
         ${CMAKE_BINARY_DIR}/compile_commands.json
         ${CMAKE_SOURCE_DIR}/compile_commands.json
         SYMBOLIC)
-MESSAGE("-- Created symlink: ${CMAKE_SOURCE_DIR}/compile_commands.json --> ${CMAKE_BINARY_DIR}/compile_commands.json")
+    MESSAGE("-- Created symlink: ${CMAKE_SOURCE_DIR}/compile_commands.json --> ${CMAKE_BINARY_DIR}/compile_commands.json")
+ENDIF ()
+

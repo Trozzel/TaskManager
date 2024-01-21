@@ -8,8 +8,11 @@
 #include <ranges>
 #include <algorithm>
 
-#include "sqlite3ext.h"
 #include "GtdHelper.hpp"
+#include "Context.hpp"
+#include "Folder.hpp"
+#include "Task.hpp"
+#include "Project.hpp"
 #include "UpdateStack.hpp"
 #include "gtd_concepts.hpp"
 
@@ -251,9 +254,10 @@ public:
     /*************************************************************************/
     template<typename T = Gtd_t>
     size_type
-    loadAll(const std::string_view dbPath) {
+    loadAll(const std::string_view dbPath)
+        requires std::is_base_of_v<GtdBase, Gtd_t>
+    {
         std::string_view tableName = T::table_name;
-
     }
 }; // class GtdContainer
 } // namespace gtd

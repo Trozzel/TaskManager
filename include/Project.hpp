@@ -100,6 +100,18 @@ public:
     setStatus( std::string_view status, bool update ) override;
 
     void
+    setParent( const GtdBase&, bool update ) override;
+
+    void
+    setParentId( std::optional<unique_id_t> id, bool update ) override;
+
+    void
+    setContextId( std::optional<unique_id_t> id, bool update ) override;
+
+    void
+    setFlagged( bool flagged, bool update ) override;
+
+    void
     setStatus( Status status, bool update ) override;
 
     void
@@ -122,9 +134,6 @@ public:
 
     void
     setDue( std::string_view due_str, bool update ) override;
-
-    void
-    setTaskType( const std::string& taskType, bool update ) override;
 
     void
     setIsRepeating( int isRepeating, bool update ) override;
@@ -152,8 +161,7 @@ public:
     template <typename Iter>
     void
     setTaskIds( Iter begin, Iter end )
-    requires std::is_integral_v<typename Iter::value_type>
-    {
+        requires std::is_integral_v<typename Iter::value_type> {
         _taskIds.clear();
         _taskIds = std::vector<unique_id_t>(begin, end);
     }
@@ -167,8 +175,7 @@ public:
     template <typename Iter>
     void
     appendTaskIds( Iter begin, Iter end )
-        requires std::is_integral_v<typename Iter::value_type>
-    {
+        requires std::is_integral_v<typename Iter::value_type> {
         _taskIds.insert(_taskIds.end(), begin, end);
     }
 

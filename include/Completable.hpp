@@ -109,7 +109,10 @@ public:
     /*************************************************************************/
     [[maybe_unused]]
     virtual void
-    setContextId( unique_id_t contextId, bool update );
+    setContextId( unique_id_t id, bool update );
+
+    virtual void
+    setContextId( std::optional<unique_id_t> id, bool update ) ;
 
     virtual void
     setDeferred( time_point_t deferred, bool update );
@@ -125,10 +128,6 @@ public:
     [[maybe_unused]]
     virtual void
     setDue( std::string_view due_str, bool update );
-
-    [[maybe_unused]]
-    virtual void
-    setTaskType( const std::string& taskType, bool update );
 
     [[maybe_unused]]
     virtual void

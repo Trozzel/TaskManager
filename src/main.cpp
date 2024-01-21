@@ -1,47 +1,58 @@
 #include <memory>
 #include <string>
 #include <iostream>
-
-//#include "Task.cpp"
-#include <sys/stat.h>
+#include <sys/_types/_int64_t.h>
 
 #include "Context.hpp"
+#include "Context.hpp"
 #include "GtdContainer.hpp"
+
+#include "GtdSqlite.hpp"
+
+// SQLITE INITIATE CONTAINER
+/*****************************************************************************/
 #include "GtdHelper.hpp"
-#include "Project.hpp"
-#include "Folder.hpp"
+#include "SQLiteCpp/SQLiteCpp.h"
 #include "fmt/base.h"
 
 auto
 main() -> int {
-    const auto contexts  = std::make_shared<gtd::GtdContainer<gtd::Context>>();
-    auto& context = contexts->create(contexts, "c1");
-    {
-        context = contexts->create(contexts, "c2");
-        context.setName("Boogor", true);
+    // CONTEXTS
+    auto contexts = loadFromDb<gtd::Context>();
+    if ( !contexts ) {
+        fmt::println("Didn't get contexts");
+    }
+    for ( int i = 0; const auto& context : *contexts ) {
+        fmt::println("context[{}]: {}", i++, context.name());
     }
 
-    {
-        context = contexts->create(contexts, "c4");
-        context.setNotes("These are some notes", true);
+	auto& context = contexts->at(3);
+	context.setNotes("These are the notes", true);
+
+	fmt::println("Context update stack:\n{}", contexts->updateStack().compose(gtd::GtdType::Context));
+
+    // FOLDERS
+    auto folders = loadFromDb<gtd::Folder>();
+    if ( !folders ) {
+        fmt::println("Didn't get folders");
     }
-    contexts->create(contexts, "c5");
-    contexts->create(contexts, "c6");
-    contexts->create(contexts, "c7");
+    for ( int i = 0; const auto& folder : *folders ) {
+        fmt::println("folder[{}]: {}", i++, folder.name());
+    }
 
-    std::cout << contexts->updateStack().compose(gtd::GtdType::Context) << std::endl;
+    auto projects = loadFromDb<gtd::Project>();
+    if ( !projects ) {
+        fmt::println("Didn't get projects");
+    }
+    for ( int i = 0; const auto& project : *projects ) {
+        fmt::println("project[{}]: {}", i++, project.name());
+    }
 
-    const auto tasks = std::make_shared<gtd::GtdContainer<gtd::Task>>();
-    tasks->create(tasks, "t1");
-    tasks->create(tasks, "t2");
-    tasks->create(tasks, "t3");
-    tasks->create(tasks, "t4");
-    tasks->create(tasks, "t5");
-    tasks->create(tasks, "t6");
-    tasks->create(tasks, "t7");
-
-    const auto folders = std::make_shared<gtd::GtdContainer<gtd::Folder>>();
-    folders->create(folders, "F1");
-    folders->create(folders, "F2");
-
+    auto tasks = loadFromDb<gtd::Task>();
+    if ( !tasks ) {
+        fmt::println("Didn't get tasks");
+    }
+    for ( int i = 0; const auto& task : *tasks ) {
+        fmt::println("task[{}]: {}", i++, task.name());
+    }
 }

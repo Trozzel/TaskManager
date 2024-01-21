@@ -84,6 +84,17 @@ Folder::setParentId( const unique_id_t id, const bool update ) {
 }
 
 void
+Folder::setParentId( std::optional<unique_id_t> id, bool update ) {
+    GtdBase::setParentId(id, update);
+    if ( update ) {
+        auto& us = _folders.lock()->updateStack();
+        if ( this->uniqueId() ) {
+            us.push(*uniqueId(), "parentId", *this->parentId());
+        }
+    }
+}
+
+void
 Folder::setNotes( const std::string_view notes, const bool update ) {
     GtdBase::setNotes(notes, update);
     if ( update ) {
@@ -93,4 +104,5 @@ Folder::setNotes( const std::string_view notes, const bool update ) {
         }
     }
 }
+
 } // namespace gtd

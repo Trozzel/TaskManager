@@ -16,15 +16,14 @@ ENDIF()
 # SQLITE C++
 ################################################################################
 include(FetchContent)
-FetchContent_Declare(SQLiteCpp
+FetchContent_Declare( SQLiteCpp
         GIT_REPOSITORY https://github.com/SRombauts/SQLiteCpp
         GIT_TAG master
 )
 
 # GOOGLETEST
 ################################################################################
-FetchContent_Declare(
-        googletest
+FetchContent_Declare( googletest
         # Specify the commit you depend on and update it regularly.
         URL https://github.com/google/googletest/archive/5376968f6948923e2411081fd9372e71a59d8e77.zip
         DOWNLOAD_EXTRACT_TIMESTAMP TRUE
@@ -46,7 +45,8 @@ FetchContent_Declare(tomlplusplus
         DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 )
 
-FetchContent_MakeAvailable(SQLiteCpp
+FetchContent_MakeAvailable(
+        SQLiteCpp
         googletest
         fmt
         tomlplusplus
@@ -68,6 +68,7 @@ add_executable(gtd
 
 target_link_libraries(gtd
         ${SQLite3_LIBRARIES}
+        SQLiteCpp
         sqlite3
         fmt::fmt
 		tomlplusplus::tomlplusplus

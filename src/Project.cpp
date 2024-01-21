@@ -71,6 +71,44 @@ Project::setStatus( const std::string_view status, const bool update ) {
 }
 
 void
+Project::setParent( const GtdBase& gtdBase, bool update ) {
+    Completable::setParent(gtdBase, update);
+    if ( update ) {
+        auto& us = _projects.lock()->updateStack();
+        if ( this->uniqueId() ) {
+            us.push(*this->uniqueId(), "parentId", *parentId());
+        }
+    }
+}
+
+void
+Project::setParentId( const std::optional<unique_id_t> id, bool update ) {
+    Completable::setParentId(id, update);
+    if ( update ) {
+        auto& us = _projects.lock()->updateStack();
+        if ( this->uniqueId() ) {
+            us.push(*this->uniqueId(), "parentId", *parentId());
+        }
+    }
+}
+
+void
+Project::setContextId( const std::optional<unique_id_t> id, const bool update ) {
+    Completable::setContextId(id, update);
+    if ( update ) {
+        auto& us = _projects.lock()->updateStack();
+        if ( this->uniqueId() ) {
+            us.push(*this->uniqueId(), "contextId", *contextId());
+        }
+    }
+}
+
+void
+Project::setFlagged( bool flagged, bool update ) {
+    Completable::setFlagged(flagged, update);
+}
+
+void
 Project::setStatus( const Status status, const bool update ) {
     Completable::setStatus(status, update);
     if ( update ) {
@@ -154,17 +192,6 @@ Project::setDue( const std::string_view due_str, const bool update ) {
         auto& us = _projects.lock()->updateStack();
         if ( this->uniqueId() ) {
             us.push(*this->uniqueId(), "due", *dueStr());
-        }
-    }
-}
-
-void
-Project::setTaskType( const std::string& taskType, const bool update ) {
-    Completable::setTaskType(taskType, update);
-    if ( update ) {
-        auto& us = _projects.lock()->updateStack();
-        if ( this->uniqueId() ) {
-            us.push(*this->uniqueId(), "taskType", taskType);
         }
     }
 }
@@ -257,8 +284,10 @@ void
 Project::setProjectType( const ProjectType projectType, const bool update ) {
     _projectType = projectType;
     if ( update ) {
-        auto& us = _projects.lock()->updateStack();
-        us.push(*uniqueId(), "projectType", projectTypeStr(_projectType));
+        if ( this->uniqueId() ) {
+            auto& us = _projects.lock()->updateStack();
+            us.push(*uniqueId(), "projectType", projectTypeStr(_projectType));
+        }
     }
 }
 
@@ -266,8 +295,10 @@ void
 Project::setProjectType( const std::string_view projectType, const bool update ) {
     _projectType = strToProjectType(projectType);
     if ( update ) {
-        auto& us = _projects.lock()->updateStack();
-        us.push(*uniqueId(), "projectType", projectTypeStr(_projectType));
+        if ( this->uniqueId() ) {
+            auto& us = _projects.lock()->updateStack();
+            us.push(*uniqueId(), "projectType", projectTypeStr(_projectType));
+        }
     }
 }
 
@@ -275,8 +306,10 @@ void
 Project::setFolderId( const unique_id_t id, const bool update ) {
     _folderId = id;
     if ( update ) {
-        auto& us = _projects.lock()->updateStack();
-        us.push(*uniqueId(), "folder", *folderId());
+        if ( this->uniqueId() ) {
+            auto& us = _projects.lock()->updateStack();
+            us.push(*uniqueId(), "folder", *folderId());
+        }
     }
 }
 
@@ -284,8 +317,10 @@ void
 Project::setCompleteWithLast( const bool completeWithLast, const bool update ) {
     _completeWithLast = completeWithLast;
     if ( update ) {
-        auto& us = _projects.lock()->updateStack();
-        us.push(*uniqueId(), "completeWithLast", _completeWithLast);
+        if(this->uniqueId()) {
+            auto& us = _projects.lock()->updateStack();
+            us.push(*uniqueId(), "completeWithLast", _completeWithLast);
+        }
     }
 }
 
@@ -293,8 +328,10 @@ void
 Project::setReviewSchedule( const std::string_view reviewSchedule, const bool update ) {
     _reviewSchedule = reviewSchedule;
     if ( update ) {
-        auto& us = _projects.lock()->updateStack();
-        us.push(*uniqueId(), "reviewSchedule", this->reviewSchedule());
+        if(this->uniqueId()) {
+            auto& us = _projects.lock()->updateStack();
+            us.push(*uniqueId(), "reviewSchedule", this->reviewSchedule());
+        }
     }
 }
 

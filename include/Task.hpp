@@ -7,6 +7,8 @@
 
 #include "Completable.hpp"
 #include "GtdHelper.hpp"
+#include <optional>
+#include <string_view>
 
 namespace gtd {
 class Task final : public Completable
@@ -49,6 +51,20 @@ public:
 
     // DTOR
     ~Task() override = default;
+
+    // OVERRIDE FUNCTIONS
+    /*************************************************************************/
+    void
+    setParent( const GtdBase&, bool update ) override;
+
+    void
+    setParentId( std::optional<unique_id_t> id, bool update ) override;
+
+    void
+    setContextId( std::optional<unique_id_t> id, bool update ) override;
+
+    void
+    setFlagged( bool flagged, bool update ) override;
 
     // ASSIGMENT OPERATORS
     /*************************************************************************/

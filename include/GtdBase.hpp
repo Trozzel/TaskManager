@@ -2,19 +2,20 @@
 #define GTDBASE_HPP_
 
 #include <chrono>
+#include <optional>
 #include <ranges>
 
 #include <fmt/chrono.h>
+#include <string_view>
 
 #include "GtdHelper.hpp"
 
 namespace gtd {
-
 // FORWARD DECLARATIONS	
 /*****************************************************************************/
 class GtdBase;
 
-template<typename Gtd_t>
+template <typename Gtd_t>
 class GtdContainer;
 
 /*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*^*/
@@ -23,25 +24,27 @@ class GtdContainer;
 class GtdBase
 {
 public:
-	// Class traits
-	using gtd_category = base_tag; 
+    // Class traits
+    using gtd_category = base_tag;
+
 private:
-	// Hide from inheriting classes
+    // Hide from inheriting classes
 protected:
-    std::string							 _name;
-    std::optional<unique_id_t> 			 _o_uniqueId {std::nullopt};
-    Status                     			 _status {Status::Active};
-    time_point_t               			 _created;
-    time_point_t               			 _modified;
-    std::optional<unique_id_t> 			 _o_parentId {std::nullopt};
-    std::optional<std::string> 			 _o_notes {std::nullopt};
+    std::string                _name;
+    std::optional<unique_id_t> _o_uniqueId{std::nullopt};
+    Status                     _status{Status::Active};
+    time_point_t               _created;
+    time_point_t               _modified;
+    std::optional<unique_id_t> _o_parentId{std::nullopt};
+    std::optional<std::string> _o_notes{std::nullopt};
 
 public:
     // CTORS
     /**************************************************************************/
-	explicit GtdBase( std::string_view name);
-	GtdBase(const GtdBase&) = default;
-	GtdBase(GtdBase&&) noexcept;
+    explicit
+    GtdBase( std::string_view name );
+    GtdBase( const GtdBase& ) = default;
+    GtdBase( GtdBase&& ) noexcept;
     virtual ~GtdBase() noexcept = 0;
 
     GtdBase&
@@ -52,10 +55,10 @@ public:
     // COMPARISON OPERATORS
     /*************************************************************************/
     bool
-    operator==(const GtdBase&) const;
+    operator==( const GtdBase& ) const;
 
     bool
-    operator!=(const GtdBase&) const;
+    operator!=( const GtdBase& ) const;
 
     // GETTERS
     /**************************************************************************/
@@ -117,8 +120,8 @@ public:
     [[nodiscard]]
     std::optional<std::string_view>
     notes() const {
-		return _o_notes;
-	}
+        return _o_notes;
+    }
 
     // SETTERS
     /*************************************************************************/
@@ -126,6 +129,31 @@ public:
     setUniqueId( const unique_id_t id ) noexcept {
         _o_uniqueId = id;
     }
+
+    constexpr void
+    setUniqueId( const std::optional<unique_id_t> id ) noexcept {
+        _o_uniqueId = id;
+    }
+
+	constexpr void
+	setCreated( const time_point_t tp ) noexcept {
+		_created = tp;
+	}
+
+	constexpr void
+	setCreated( const std::string_view tp ) {
+		_created = strToTimePoint(tp);
+	}
+
+	constexpr void
+	setModified( const time_point_t tp ) noexcept {
+		_modified = tp;
+	}
+
+	constexpr void
+	setModified( const std::string_view tp ) noexcept {
+		_modified = strToTimePoint(tp);
+	}
 
     virtual void
     setName( std::string_view name, bool update );
@@ -136,7 +164,6 @@ public:
     [[maybe_unused]]
     virtual void
     setStatus( Status status, bool update );
-    [[maybe_unused]]
 
     [[maybe_unused]]
     virtual void
@@ -146,11 +173,14 @@ public:
     virtual void
     setParentId( unique_id_t id, bool update );
 
+    virtual void
+    setParentId( std::optional<unique_id_t> id, bool update ) ;
+
     [[maybe_unused]]
     virtual void
     setNotes( std::string_view notes, bool update );
-};
 
+};
 } // namespace gtd
 
 std::ostream&

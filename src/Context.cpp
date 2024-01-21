@@ -13,7 +13,7 @@ namespace gtd {
 /*************************************************************************/
 Context::Context( const sp_Container& contexts, const std::string_view name ) :
     GtdBase(name),
-    _contexts(contexts) { }
+    _contexts(contexts) {}
 
 Context::Context( Context&& other ) noexcept:
     GtdBase(std::move(other)) {
@@ -99,6 +99,17 @@ Context::setParentId( const unique_id_t id, const bool update ) {
 }
 
 void
+Context::setParentId( const std::optional<unique_id_t> id, const bool update ) {
+    GtdBase::setParentId(id, update);
+    if ( update ) {
+        auto& us = _contexts.lock()->updateStack();
+        if ( this->uniqueId() ) {
+            us.push(*uniqueId(), "parentId", *parentId());
+        }
+    }
+}
+
+void
 Context::setNotes( const std::string_view notes, const bool update ) {
     GtdBase::setNotes(notes, update);
     if ( update ) {
@@ -108,4 +119,5 @@ Context::setNotes( const std::string_view notes, const bool update ) {
         }
     }
 }
+
 } // namespace gtd

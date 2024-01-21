@@ -6,6 +6,7 @@
 #define CONTEXT_HPP
 
 #include "GtdBase.hpp"
+#include <optional>
 
 namespace gtd {
 class Context final : public GtdBase
@@ -58,7 +59,11 @@ public:
     setParentId( unique_id_t id, bool update ) override;
 
     void
+    setParentId( std::optional<unique_id_t> id, bool update ) override;
+
+    void
     setNotes( std::string_view notes, bool update ) override;
+
 };
 } // namespace gtd
 

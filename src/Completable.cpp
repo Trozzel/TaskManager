@@ -58,15 +58,6 @@ Completable::operator!=( const Completable& other ) const {
     return !operator==(other);
 }
 
-void
-Completable::setContextId( unique_id_t contextId, bool update ) {}
-
-void
-Completable::setTaskType( const std::string& taskType, bool update ) {}
-
-void
-Completable::setRepeatFrom( RepeatFrom repeatFrom, bool update ) {}
-
 // GETTERS
 /*****************************************************************************/
 std::optional<std::string>
@@ -83,6 +74,26 @@ Completable::dueStr() const {
         return timePointToStr(*_o_due);
     }
     return std::nullopt;
+}
+
+void
+Completable::setContextId( unique_id_t id, const bool update ) {
+    _o_contextId = id;
+}
+
+void
+Completable::setContextId( const std::optional<unique_id_t> id, const bool update ) {
+    _o_contextId = id;
+}
+
+void
+Completable::setRepeatFrom( const RepeatFrom repeatFrom, const bool update ) {
+    _repeatFrom = repeatFrom;
+}
+
+void
+Completable::setRepeatFrom( std::string_view rptFromStr, bool update ) {
+    _repeatFrom = strToRepeatFrom(rptFromStr);
 }
 
 // SETTERS
@@ -127,8 +138,4 @@ Completable::setRepeatSchedule( std::string_view schedule, bool update ) {
     _repeatSchedule = schedule;
 }
 
-void
-Completable::setRepeatFrom( std::string_view rptFromStr, bool update ) {
-    _repeatFrom = strToRepeatFrom(rptFromStr);
-}
 } // namespace gtd

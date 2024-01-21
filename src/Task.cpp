@@ -4,6 +4,7 @@
 #include "Task.hpp"
 #include "GtdContainer.hpp"
 #include "UpdateStack.hpp"
+#include <optional>
 
 
 namespace gtd {
@@ -12,6 +13,50 @@ namespace gtd {
 Task::Task( const sp_Container& tasks, const std::string_view name ) :
     Completable(name),
     _tasks(tasks) {}
+
+void
+Task::setParent( const GtdBase& gtdBase, bool update ) {
+    Completable::setParent(gtdBase, update);
+    if ( update ) {
+        if ( this->uniqueId() ) {
+            auto& us = _tasks.lock()->updateStack();
+            us.push(*uniqueId(), "parentId", *this->parentId());
+        }
+    }
+}
+
+void
+Task::setParentId( std::optional<unique_id_t> id, bool update ) {
+    Completable::setParentId(id, update);
+    if ( update ) {
+        if ( this->uniqueId() ) {
+            auto& us = _tasks.lock()->updateStack();
+            us.push(*uniqueId(), "parentId", *this->parentId());
+        }
+    }
+}
+
+void
+Task::setContextId( std::optional<unique_id_t> id, bool update ) {
+    Completable::setContextId(id, update);
+    if ( update ) {
+        if ( this->uniqueId() ) {
+            auto& us = _tasks.lock()->updateStack();
+            us.push(*uniqueId(), "contextId", *this->contextId());
+        }
+    }
+}
+
+void
+Task::setFlagged( bool flagged, bool update ) {
+    Completable::setFlagged(flagged, update);
+    if ( update ) {
+        if ( this->uniqueId() ) {
+            auto& us = _tasks.lock()->updateStack();
+            us.push(*uniqueId(), "contextId", *this->contextId());
+        }
+    }
+}
 
 /*****************************************************************************/
 Task&
@@ -68,9 +113,11 @@ Task::setTaskType( const TaskType taskType, const bool update ) {
 void
 Task::setTaskType( const std::string_view taskType, const bool update ) {
     _taskType = strToTaskType(taskType);
-    if ( (_o_uniqueId) ) {
-        auto& us = _tasks.lock()->updateStack();
-        us.push(*uniqueId(), "taskType", taskTypeString(_taskType));
+    if(update) {
+        if ( _o_uniqueId ) {
+            auto& us = _tasks.lock()->updateStack();
+            us.push(*uniqueId(), "taskType", taskTypeString(_taskType));
+        }
     }
 }
 
@@ -157,7 +204,7 @@ Task::setDue( const time_point_t tp, const bool update ) {
     if ( update ) {
         auto& us = _tasks.lock()->updateStack();
         if ( this->uniqueId() ) {
-            us.push(*this->uniqueId(), "due", *deferredStr());
+            us.push(*this->uniqueId(), "due", *dueStr());
         }
     }
 }
@@ -168,7 +215,7 @@ Task::setDue( const std::string_view due_str, const bool update ) {
     if ( update ) {
         auto& us = _tasks.lock()->updateStack();
         if ( this->uniqueId() ) {
-            us.push(*this->uniqueId(), "due", *deferredStr());
+            us.push(*this->uniqueId(), "due", *dueStr());
         }
     }
 }
@@ -179,7 +226,7 @@ Task::setIsRepeating( const int isRepeating, const bool update ) {
     if ( update ) {
         auto& us = _tasks.lock()->updateStack();
         if ( this->uniqueId() ) {
-            us.push(*this->uniqueId(), "isRepeating", *deferredStr());
+            us.push(*this->uniqueId(), "isRepeating", this->isRepeating());
         }
     }
 }
@@ -190,7 +237,7 @@ Task::setFlagged( const int flagged, const bool update ) {
     if ( update ) {
         auto& us = _tasks.lock()->updateStack();
         if ( this->uniqueId() ) {
-            us.push(*this->uniqueId(), "flagged", *deferredStr());
+            us.push(*this->uniqueId(), "flagged", this->flagged());
         }
     }
 }
@@ -201,7 +248,7 @@ Task::setRepeatFrom( const RepeatFrom repeatFrom, const bool update ) {
     if ( update ) {
         auto& us = _tasks.lock()->updateStack();
         if ( this->uniqueId() ) {
-            us.push(*this->uniqueId(), "repeatFrom", *deferredStr());
+            us.push(*this->uniqueId(), "repeatFrom", repeatFromStr());
         }
     }
 }
@@ -212,7 +259,7 @@ Task::setRepeatFrom( const std::string_view rptFromStr, const bool update ) {
     if ( update ) {
         auto& us = _tasks.lock()->updateStack();
         if ( this->uniqueId() ) {
-            us.push(*this->uniqueId(), "repeatFrom", *deferredStr());
+            us.push(*this->uniqueId(), "repeatFrom", repeatFromStr());
         }
     }
 }
@@ -223,7 +270,7 @@ Task::setRepeatSchedule( const std::string_view schedule, const bool update ) {
     if ( update ) {
         auto& us = _tasks.lock()->updateStack();
         if ( this->uniqueId() ) {
-            us.push(*this->uniqueId(), "repeatSchedule", *deferredStr());
+            us.push(*this->uniqueId(), "repeatSchedule", repeatSchedule());
         }
     }
 }

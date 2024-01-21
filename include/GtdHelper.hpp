@@ -132,22 +132,22 @@ enum class ProjectType
 /// \note: string_view copy ctor is noexcept, thus enabling noexcept for
 ///        string_view returns
 // Status strings
-static constexpr std::string_view s_strActive{"Active"};
-static constexpr std::string_view s_strOnHold{"OnHold"};
-static constexpr std::string_view s_strDropped{"Dropped"};
-static constexpr std::string_view s_strCompleted{"Completed"};
+static constexpr const char* s_strActive{"Active"};
+static constexpr const char* s_strOnHold{"OnHold"};
+static constexpr const char* s_strDropped{"Dropped"};
+static constexpr const char* s_strCompleted{"Completed"};
 
 // Repeat task strings
-static constexpr std::string_view s_strDeferred{"Deferred"};
-static constexpr std::string_view s_strDue{"Due"};
+static constexpr const char* s_strDeferred{"Deferred"};
+static constexpr const char* s_strDue{"Due"};
 
 // Task and Project type strings
-static constexpr std::string_view s_strParallel{"Parallel"};
-static constexpr std::string_view s_strSequential{"Sequential"};
-static constexpr std::string_view s_strSingleActions{"SingleActions"};
+static constexpr const char* s_strParallel{"Parallel"};
+static constexpr const char* s_strSequential{"Sequential"};
+static constexpr const char* s_strSingleActions{"SingleActions"};
 
 // GTD Configuration file
-static constexpr std::string_view confFilePath = "../conf/gtd-conf.toml";
+static constexpr const char* confFilePath = "../conf/gtd-conf.toml";
 
 /// \brief Get the name of the type of the Gtd Items
 /// This is useful for extracting the name of the table to which the item

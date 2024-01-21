@@ -103,6 +103,11 @@ GtdBase::setParentId( const unique_id_t id, const bool update ) {
 	_o_parentId = id;
 }
 
+void
+GtdBase::setParentId( const std::optional<unique_id_t> id, const bool update ) {
+    _o_parentId = id;
+}
+
 /// \note implementation is handled in derived classes to write to DB upon
 /// update
 void

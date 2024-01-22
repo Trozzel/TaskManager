@@ -5,6 +5,7 @@
 #define GTDCONTAINER_HPP_
 
 #include <__ranges/filter_view.h>
+#include <memory>
 #include <ranges>
 #include <algorithm>
 
@@ -21,8 +22,8 @@ template <typename Gtd_t>
 class GtdContainer
 {
 protected:
-    std::vector<Gtd_t> _gtdItems{};
-    UpdateStack&       _updateStack;
+    std::vector<Gtd_t>		  _gtdItems{};
+    UpdateStack<Gtd_t>&       _updateStack;
 
 public:
     using gtd_category = typename Gtd_t::gtd_category;
@@ -37,7 +38,7 @@ public:
     /*************************************************************************/
     explicit
     GtdContainer() :
-        _updateStack(UpdateStack::getInstance()) {}
+        _updateStack(UpdateStack<Gtd_t>::getInstance()) {}
 
     ~GtdContainer() = default;
 
@@ -50,7 +51,7 @@ public:
 
     // GETTERS
     /*************************************************************************/
-    [[nodiscard]] constexpr UpdateStack&
+    [[nodiscard]] constexpr UpdateStack<Gtd_t>&
     updateStack() const {
         return _updateStack;
     };
@@ -71,9 +72,9 @@ public:
     [[nodiscard]] const Gtd_t&
     getItemByUniqueId( const unique_id_t id ) const {
         return std::ranges::find_if(_gtdItems.cbegin(), _gtdItems.cend(),
-                                    [id]( auto&& gtdItem ) {
-                                        return gtdItem.uniqueId() == id;
-                                    });
+				[id]( auto&& gtdItem ) {
+					return gtdItem.uniqueId() == id;
+				});
     }
 
     [[nodiscard]] size_type
@@ -253,11 +254,11 @@ public:
     //                          DATABASE OPERATIONS
     /*************************************************************************/
     template<typename T = Gtd_t>
-    size_type
+    std::shared_ptr<GtdContainer<T>>
     loadAll(const std::string_view dbPath)
-        requires std::is_base_of_v<GtdBase, Gtd_t>
+        requires std::is_base_of_v<GtdBase, T>
     {
-        std::string_view tableName = T::table_name;
+		loadFromDb<T>();
     }
 }; // class GtdContainer
 } // namespace gtd

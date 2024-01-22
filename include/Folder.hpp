@@ -14,6 +14,11 @@ class Folder final : public GtdBase
 public:
     using gtd_category = folder_tag;
 
+	// STATIC FUNCTIONS
+	constexpr const char*
+	tableName() {
+		return "folders";
+	}
 private:
     using sp_Container = std::shared_ptr<GtdContainer<Folder>>;
     using wp_Container = std::weak_ptr<GtdContainer<Folder>>;

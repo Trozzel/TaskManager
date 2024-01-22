@@ -15,7 +15,12 @@ class Task final : public Completable
 {
 public:
     using gtd_category = task_tag;
-
+	
+	// STATIC FUNCTIONS
+	constexpr const char*
+	tableName() {
+		return "tasks";
+	}
 private:
     using sp_Container = std::shared_ptr<GtdContainer<Task>>;
     using wp_Container = std::weak_ptr<GtdContainer<Task>>;

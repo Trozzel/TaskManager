@@ -29,7 +29,7 @@ main() -> int {
 	auto& context = contexts->at(3);
 	context.setNotes("These are the notes", true);
 
-	fmt::println("Context update stack:\n{}", contexts->updateStack().compose(gtd::GtdType::Context));
+	fmt::println("Context update stack:\n{}", contexts->updateStack().compose());
 
     // FOLDERS
     auto folders = loadFromDb<gtd::Folder>();

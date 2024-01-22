@@ -10,6 +10,7 @@
 
 #include "GtdHelper.hpp"
 #include "fmt/base.h"
+#include "gtd_concepts.hpp"
 
 namespace gtd {
 using ColName_t = std::string;
@@ -18,6 +19,7 @@ using id_col_val_t = std::tuple<unique_id_t, ColName_t, ValueStr_t>;
 
 // CLASS UPDATE STACK
 /*****************************************************************************/
+template<cGtd Gtd_t>
 class UpdateStack
 {
 protected:
@@ -44,7 +46,9 @@ public:
     }
 
     void
-    clear();
+    clear() {
+		_dbUpdateStack = std::stack<id_col_val_t>();
+	}
 
     template <typename Int>
     void
@@ -61,7 +65,9 @@ public:
     }
 
     void
-    push( unique_id_t uniqueId, std::string_view colName, bool );
+    push( const unique_id_t id, const std::string_view colName, const bool value ) {
+		_dbUpdateStack.emplace(id, colName, (value) ? "true" : "false");
+	}
 
     [[nodiscard]]
     constexpr size_t
@@ -88,14 +94,30 @@ public:
     }
 
     void
-    pop();
+    pop() {
+		_dbUpdateStack.pop();
+	}
 
     [[nodiscard]]
     const_reference
-    top() const;
+    top() const {
+		return _dbUpdateStack.top();
+	}
 
     std::string
-    compose( GtdType gtdType );
+    compose( )
+	{
+		std::string res{};
+		fmt::println("Table name: {}", gtdTypeToTableName(Gtd_t::gtd_category::gtd_type));
+		while(!_dbUpdateStack.empty()) {
+			res += fmt::format("ID: {}, COLUMN: {}, VALUE: {}\n",
+					std::get<0>(_dbUpdateStack.top()), 
+					std::get<1>(_dbUpdateStack.top()),
+						std::get<2>(_dbUpdateStack.top()));
+			_dbUpdateStack.pop();
+		}
+		return res;
+	}
 }; // class UpdateStack
 } // namespace gtd
 

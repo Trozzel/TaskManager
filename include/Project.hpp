@@ -13,6 +13,11 @@ class Project final : public Completable
 public:
     using gtd_category = project_tag;
 
+	// STATIC FUNCTIONS
+	constexpr const char*
+	tableName() {
+		return "projects";
+	}
 private:
     using sp_Container = std::shared_ptr<GtdContainer<Project>>;
     using wp_Container = std::weak_ptr<GtdContainer<Project>>;
@@ -25,14 +30,6 @@ private:
     std::string                _reviewSchedule = {"0 0 * * 0"}; // 12a every Sunday
 
 public:
-    // STATIC FUNCTIONS
-    /*************************************************************************/
-    constexpr static
-    std::string_view
-    tableName() noexcept {
-        return "projects";
-    }
-
     [[nodiscard]]
     static constexpr ProjectType
     strToProjectType( const std::string_view projectTypeStr ) noexcept {

@@ -14,6 +14,11 @@ class Context final : public GtdBase
 public:
     using gtd_category = context_tag;
 
+	// STATIC FUNCTIONS
+	constexpr const char*
+	tableName() {
+		return "contexts";
+	}
 private:
     using sp_Container = std::shared_ptr<GtdContainer<Context>>;
     using wp_Container = std::weak_ptr<GtdContainer<Context>>;

@@ -56,7 +56,6 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 add_executable(gtd
         src/GtdHelper.cpp
-        src/UpdateStack.cpp
         src/GtdBase.cpp
         src/Context.cpp
         src/Folder.cpp
@@ -80,7 +79,6 @@ add_executable(tests
         src/GtdBase.cpp
         src/Completable.cpp
         src/GtdHelper.cpp
-        src/UpdateStack.cpp
         src/Task.cpp
         src/Project.cpp
         src/Context.cpp

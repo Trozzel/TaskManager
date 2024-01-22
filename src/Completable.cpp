@@ -9,7 +9,7 @@ namespace gtd {
 // CTORS
 /*****************************************************************************/
 Completable::Completable( const std::string_view name ) :
-    GtdBase(name) {}
+GtdBase(name) {}
 
 Completable::Completable( Completable&& other ) noexcept :
     GtdBase(std::move(other)),

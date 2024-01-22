@@ -27,8 +27,6 @@ public:
     // Class traits
     using gtd_category = base_tag;
 
-private:
-    // Hide from inheriting classes
 protected:
     std::string                _name;
     std::optional<unique_id_t> _o_uniqueId{std::nullopt};

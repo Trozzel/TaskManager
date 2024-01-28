@@ -3,23 +3,20 @@
 #include <iostream>
 #include <sys/_types/_int64_t.h>
 
-#include "Context.hpp"
-#include "Context.hpp"
 #include "GtdContainer.hpp"
-
-#include "GtdSqlite.hpp"
-
-// SQLITE INITIATE CONTAINER
-/*****************************************************************************/
 #include "GtdHelper.hpp"
-#include "SQLiteCpp/SQLiteCpp.h"
 #include "fmt/base.h"
 
 auto
 main() -> int {
     // CONTEXTS
-    auto contexts = loadFromDb<gtd::Context>();
-    if ( !contexts ) {
+	auto c1 = gtd::Context(nullptr, "name");
+    auto& contexts = gtd::GtdContainer<gtd::Context>::initFromDb();
+	fmt::println("contexts: {}", contexts.use_count());
+	contexts->attach(c1);
+	fmt::println("contexts: {}\n\n", contexts.use_count());
+	
+    if ( contexts->empty() ) {
         fmt::println("Didn't get contexts");
     }
     for ( int i = 0; const auto& context : *contexts ) {
@@ -28,31 +25,40 @@ main() -> int {
 
 	auto& context = contexts->at(3);
 	context.setNotes("These are the notes", true);
+	context.setStatus(gtd::Status::Dropped, true);
 
 	fmt::println("Context update stack:\n{}", contexts->updateStack().compose());
 
     // FOLDERS
-    auto folders = loadFromDb<gtd::Folder>();
-    if ( !folders ) {
+    auto& folders = gtd::GtdContainer<gtd::Folder>::initFromDb();
+    if ( folders->empty() ) {
         fmt::println("Didn't get folders");
     }
     for ( int i = 0; const auto& folder : *folders ) {
         fmt::println("folder[{}]: {}", i++, folder.name());
     }
 
-    auto projects = loadFromDb<gtd::Project>();
-    if ( !projects ) {
+	// PROJECTS
+    auto projects = std::move(gtd::GtdContainer<gtd::Project>::initFromDb());
+    if ( projects->empty() ) {
         fmt::println("Didn't get projects");
     }
     for ( int i = 0; const auto& project : *projects ) {
         fmt::println("project[{}]: {}", i++, project.name());
     }
 
-    auto tasks = loadFromDb<gtd::Task>();
-    if ( !tasks ) {
+	// TASKS
+    auto& tasks = gtd::GtdContainer<gtd::Task>::initFromDb();
+    if ( tasks->empty() ) {
         fmt::println("Didn't get tasks");
     }
     for ( int i = 0; const auto& task : *tasks ) {
         fmt::println("task[{}]: {}", i++, task.name());
     }
+
+	// PRINT USE COUNTS
+	fmt::println("contexts use count: {}", contexts.use_count());
+	fmt::println("folders use count: {}", folders.use_count());
+	fmt::println("projects use count: {}", projects.use_count());
+	fmt::println("tasks use count: {}", tasks.use_count());
 }

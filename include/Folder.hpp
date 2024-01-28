@@ -9,13 +9,17 @@
 #include <optional>
 
 namespace gtd {
+
+template<typename Gtd_t>
+class GtdContainer;
+
 class Folder final : public GtdBase
 {
 public:
     using gtd_category = folder_tag;
 
 	// STATIC FUNCTIONS
-	constexpr const char*
+	static constexpr const char*
 	tableName() {
 		return "folders";
 	}
@@ -27,8 +31,8 @@ private:
 public:
     // CTORS
     /*************************************************************************/
-    explicit
-    Folder( const sp_Container&, std::string_view name );
+    explicit Folder( const sp_Container&, std::string_view name = "" );
+    explicit Folder( wp_Container, std::string_view name = "" );
     Folder( const Folder& ) = default; // !Does not add element to _folders!
 
     ~Folder() override = default;
@@ -45,6 +49,14 @@ public:
 
     bool
     operator!=( const Folder& ) const;
+
+	// GETTERS
+	/*************************************************************************/
+	wp_Container
+	container();
+
+	const wp_Container
+	container() const;
 
     // OVERRIDE SETTERS
     /*************************************************************************/
@@ -65,6 +77,15 @@ public:
 
     void
     setNotes( std::string_view notes, bool update ) override;
+
+	// CONTEXT SETTERS
+	/*************************************************************************/
+	void
+	setContainer( sp_Container& container );
+	
+	void
+	setContainer( wp_Container container );
+	
 
 };
 } // namespace gtd

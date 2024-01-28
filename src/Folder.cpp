@@ -4,7 +4,9 @@
 
 #include "Folder.hpp"
 
+#include "GtdBase.hpp"
 #include "GtdContainer.hpp"
+#include "Project.hpp"
 
 namespace gtd {
 // CTORS
@@ -12,6 +14,10 @@ namespace gtd {
 Folder::Folder( const sp_Container& folders, const std::string_view name ) :
     GtdBase(name),
     _folders(folders) {}
+
+Folder::Folder( const wp_Container folders, const std::string_view name ) :
+	GtdBase(name),
+	_folders(folders) {}
 
 // ASSIGMENT OPERATORS
 /*****************************************************************************/
@@ -35,6 +41,18 @@ Folder::operator==( const Folder& other ) const {
 bool
 Folder::operator!=( const Folder& other ) const {
     return GtdBase::operator!=(other) ;
+}
+
+// GETTERS
+/*************************************************************************/
+Folder::wp_Container
+Folder::container() {
+	return _folders;
+}
+
+const Folder::wp_Container
+Folder::container() const {
+	return _folders;
 }
 
 // OVERRIDE SETTERS
@@ -103,6 +121,16 @@ Folder::setNotes( const std::string_view notes, const bool update ) {
             us.push(*uniqueId(), "notes", *this->notes());
         }
     }
+}
+
+void
+Folder::setContainer( const wp_Container container ) {
+	_folders = container;
+}
+
+void
+Folder::setContainer( sp_Container& container ) {
+	_folders = container;
 }
 
 } // namespace gtd

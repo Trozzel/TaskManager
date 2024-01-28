@@ -76,22 +76,23 @@ target_link_libraries(gtd
 
 # Now simply link against gtest or gtest_main as needed. Eg
 add_executable(tests
-        src/GtdBase.cpp
-        src/Completable.cpp
         src/GtdHelper.cpp
-        src/Task.cpp
-        src/Project.cpp
+        src/GtdBase.cpp
         src/Context.cpp
         src/Folder.cpp
+        src/Completable.cpp
+        src/Task.cpp
+        src/Project.cpp
         src/tests.cpp
 )
 
 target_link_libraries(tests gtest_main
         ${SQLite3_LIBRARIES}
+		SQLiteCpp
         sqlite3
         fmt::fmt
-        pthread
 		tomlplusplus::tomlplusplus
+        pthread
         dl)
 
 add_test(NAME example_test COMMAND tests)

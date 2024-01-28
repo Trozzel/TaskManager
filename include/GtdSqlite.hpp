@@ -2,14 +2,20 @@
 #define GTDSQLITE_HPP_
 
 #include "SQLiteCpp/SQLiteCpp.h"
-#include "GtdContainer.hpp"
+#include "GtdHelper.hpp"
+#include "gtd_concepts.hpp"
+#include <memory>
 
 // LOAD ITEMS FROM DATABASE
 /*****************************************************************************/
-template <cGtdBase Gtd_t>
-std::shared_ptr<gtd::GtdContainer<Gtd_t>>
-loadFromDb() {
-    auto gtdItems = std::make_shared<gtd::GtdContainer<Gtd_t>>();
+namespace gtd {
+template<typename Gtd_t>
+class GtdContainer;
+
+
+template <cGtd Gtd_t>
+void
+loadFromDb(std::shared_ptr<GtdContainer<Gtd_t>>& gtdItems) {
     try {
         auto               db        = SQLite::Database(gtd::getDbConnPath());
         const gtd::GtdType gtdType   = Gtd_t::gtd_category::gtd_type;
@@ -81,8 +87,107 @@ loadFromDb() {
         fmt::print(stderr, "{}\n", e.what());
         throw std::runtime_error(e.what());
     }
-
-    return gtdItems;
 }
+template<cGtd Gtd_t>
+std::string
+getInsertStr(const Gtd_t& gtdItem) {
+	// Get table name
+	static constexpr auto table = Gtd_t::gtd_category::table_name;
+	
+	// Close statement for gtd::Context and gtd::Folder
+	if constexpr (cContext<Gtd_t> || cFolder<Gtd_t>) {
+		// Base Insert statement. queryStmt is updated based upon Gtd_t class
+		return fmt::format(
+				"INSERT INTO {table} (name, parentId, status, notes) "\
+				"VALUES (\"{name}\", {parentId}, \"{status}\", {notes})", 
+				fmt::arg("table", table), 
+				fmt::arg("name", gtdItem.name()), 
+				fmt::arg("parentId", (gtdItem.parentId() ? 
+					std::to_string(gtdItem.parentId().value()) : "NULL")),
+				fmt::arg("status", gtdItem.statusStr()), 
+				fmt::arg("notes", (gtdItem.notes() ? 
+					'"' + std::string(*gtdItem.notes()) + '"' : "NULL")));
+	}
+	// Create SELECT statement for gtd::Task
+	else if constexpr (cTask<Gtd_t>) {
+		return fmt::format(
+				"INSERT INTO {table} (name, parentId, status, notes, contextId, " \
+							"projectId, flagged, deferred, due, isRepeating, "\
+							"repeatFrom, repeatSchedule) "\
+				"VALUES (\"{name}\", {parentId}, \"{status}\", {notes}, "\
+							"{contextId}, {projectId}, {flagged}, {deferred}, "\
+							"{due}, {isRepeating}, \"{repeatFrom}\", \"{repeatSchedule}\")",
+				fmt::arg("table", table), 
+				fmt::arg("name", gtdItem.name()), 
+				fmt::arg("parentId", (gtdItem.parentId() ? 
+					std::to_string(gtdItem.parentId().value()) : "NULL")),
+				fmt::arg("status", gtdItem.statusStr()),
+				fmt::arg("notes", (gtdItem.notes() ? 
+					'"' + std::string(*gtdItem.notes()) + '"' : "NULL")),
+				fmt::arg("contextId", (gtdItem.contextId() ? 
+						std::to_string(*gtdItem.contextId()) : "NULL")),
+				fmt::arg("projectId", (gtdItem.projectId() ?
+						std::to_string(*gtdItem.contextId()) : "NULL")),
+				fmt::arg("flagged", gtdItem.flagged()),
+				fmt::arg("deferred", (gtdItem.deferredStr() ? 
+						'"' + *gtdItem.deferredStr() + '"' : "NULL")),
+				fmt::arg("due", (gtdItem.dueStr() ?
+						'"' + *gtdItem.dueStr() + '"' : "NULL")),
+				fmt::arg("isRepeating", gtdItem.isRepeating()),
+				fmt::arg("repeatFrom", gtdItem.repeatFromStr()),
+				fmt::arg("repeatSchedule", gtdItem.repeatSchedule()));
+	}
+	else if constexpr (cProject<Gtd_t>) {
+		return fmt::format(
+				"INSERT INTO {table} (name, parentId, status, notes, contextId, "\
+							"folderId, flagged, deferred, due, isRepeating, "\
+							"repeatFrom, repeatSchedule, completeWithLast, "\
+							"reviewSchedule) "\
+				"VALUES (\"{name}\", {parentId}, \"{status}\", {notes}, "\
+						"{contextId}, {folderId}, {flagged}, {deferred}, "\
+						"{due}, {isRepeating}, \"{repeatFrom}\", \"{repeatSchedule}\", "\
+						"{completeWithLast}, \"{reviewSchedule}\")",
+				fmt::arg("table", table),
+				fmt::arg("name", gtdItem.name()),
+				fmt::arg("parentId", (gtdItem.parentId() ? 
+					std::to_string(gtdItem.parentId().value()) : "NULL")),
+				fmt::arg("status", gtdItem.statusStr()),
+				fmt::arg("notes", (gtdItem.notes() ? 
+					'"' + std::string(*gtdItem.notes()) + '"' : "NULL")),
+				fmt::arg("contextId", (gtdItem.contextId() ?
+					std::to_string(*gtdItem.contextId()) : "NULL")),
+				fmt::arg("folderId", (gtdItem.folderId() ? 
+					std::to_string(*gtdItem.folderId()) : "NULL")),
+				fmt::arg("flagged", gtdItem.flagged()),
+				fmt::arg("deferred", (gtdItem.deferredStr() ? 
+						'"' + *gtdItem.deferredStr() + '"' : "NULL")),
+				fmt::arg("due", (gtdItem.dueStr() ?
+						'"' + *gtdItem.dueStr() + '"' : "NULL")),
+				fmt::arg("isRepeating", gtdItem.isRepeating()),
+				fmt::arg("repeatFrom", gtdItem.repeatFromStr()),
+				fmt::arg("repeatSchedule", gtdItem.repeatSchedule()),
+				fmt::arg("completeWithLast", gtdItem.completeWithLast()),
+				fmt::arg("reviewSchedule", gtdItem.reviewSchedule()));
+	}
+	else {
+		throw std::runtime_error("Not a valid Gtd type");
+	}
+}
+
+template<cGtd Gtd_t>
+unique_id_t
+insertRecord( Gtd_t& gtdItem ) {
+	try {
+		// Initiate db connections
+		SQLite::Database db(getDbConnPath(), SQLite::OPEN_READWRITE);
+		db.exec(getInsertStr<Gtd_t>(gtdItem));
+		return db.getLastInsertRowid();
+	} catch (std::exception& e) {
+		std::cerr << "Error: " << e.what() << std::endl;
+		throw(std::runtime_error(fmt::format("Error inserting {}", gtdItem.name())));
+	}
+}
+
+} // namespace gtd
 
 #endif // GTDSQLITE_HPP_

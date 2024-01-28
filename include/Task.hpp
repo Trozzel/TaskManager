@@ -11,13 +11,17 @@
 #include <string_view>
 
 namespace gtd {
+
+template<typename Gtd_t>
+class GtdContainer;
+
 class Task final : public Completable
 {
 public:
     using gtd_category = task_tag;
 	
 	// STATIC FUNCTIONS
-	constexpr const char*
+	static constexpr const char*
 	tableName() {
 		return "tasks";
 	}
@@ -50,12 +54,25 @@ public:
 
     // CTORS
     /*************************************************************************/
-    explicit
-    Task( const sp_Container&, std::string_view name = "" );
+    explicit Task( const sp_Container&, std::string_view name = "" );
+    explicit Task( wp_Container, std::string_view name = "" );
     Task( const Task& ) = default;
 
     // DTOR
     ~Task() override = default;
+
+    // ASSIGMENT OPERATORS
+    /*************************************************************************/
+    Task&
+    operator=( const Task& );
+
+    // COMPARISON OPERATORS
+    /*************************************************************************/
+    bool
+    operator==( const Task& ) const;
+
+    bool
+    operator!=( const Task& ) const;
 
     // OVERRIDE FUNCTIONS
     /*************************************************************************/
@@ -71,19 +88,6 @@ public:
     void
     setFlagged( bool flagged, bool update ) override;
 
-    // ASSIGMENT OPERATORS
-    /*************************************************************************/
-    Task&
-    operator=( const Task& );
-
-    // COMPARISON OPERATORS
-    /*************************************************************************/
-    bool
-    operator==( const Task& ) const;
-
-    bool
-    operator!=( const Task& ) const;
-
     // GETTERS
     /*************************************************************************/
     [[nodiscard]] [[maybe_unused]]
@@ -98,20 +102,13 @@ public:
         return _taskType;
     }
 
-    // SETTERS
-    /*************************************************************************/
-    // 1. NON-VIRTUAL Task METHODS
-    /*************************************************************************/
-    void
-    setProjectId( unique_id_t projectId, bool update );
+	wp_Container
+	container();
 
-    void
-    setTaskType( std::string_view taskType, bool update );
+	const wp_Container
+	container() const;
 
-    void
-    setTaskType( TaskType taskType, bool update );
-
-    // 2. OVERRIDE METHODS: Must update UpdateStack
+    // OVERRIDE METHODS: Must update UpdateStack
     /*************************************************************************/
     void
     setStatus( std::string_view status, bool update ) override;
@@ -154,6 +151,24 @@ public:
 
     void
     setRepeatSchedule( std::string_view schedule, bool update ) override;
+	
+    // NON-VIRTUAL Task METHODS
+    /*************************************************************************/
+    void
+    setProjectId( unique_id_t projectId, bool update );
+
+    void
+    setTaskType( std::string_view taskType, bool update );
+
+    void
+    setTaskType( TaskType taskType, bool update );
+
+	void
+	setContainer( sp_Container container );
+	
+	void
+	setContainer( wp_Container container );
+	
 };
 } // namespace gtd
 

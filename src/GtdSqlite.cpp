@@ -1,15 +1,14 @@
-#ifndef GTDSQLITE_HPP_
-#define GTDSQLITE_HPP_
-
-#include "SQLiteCpp/SQLiteCpp.h"
+#include "GtdSqlite.hpp"
 #include "gtd_concepts.hpp"
 
 // LOAD ITEMS FROM DATABASE
 /*****************************************************************************/
-template <cGtdBase Gtd_t>
-std::shared_ptr<gtd::GtdContainer<Gtd_t>>
+namespace gtd {
+
+template <cGtd Gtd_t>
+std::vector<Gtd_t>
 loadFromDb() {
-    auto gtdItems = std::make_shared<gtd::GtdContainer<Gtd_t>>();
+    auto gtdItems = gtd::GtdContainer<Gtd_t>();
     try {
         auto               db        = SQLite::Database(gtd::getDbConnPath());
         const gtd::GtdType gtdType   = Gtd_t::gtd_category::gtd_type;
@@ -21,7 +20,7 @@ loadFromDb() {
         while ( query.executeStep() ) {
             int colnum = 0;
             // NOTE: gtdItem invalidated after reallocation
-            Gtd_t& gtdItem = gtdItems->create(gtdItems, "");
+            Gtd_t& gtdItem = gtdItems.create(gtdItems, "");
             gtdItem.setUniqueId(query.getColumn(colnum++).getInt64());
             gtdItem.setName(query.getColumn(colnum++).getString(), dontUpdate);
             if ( !query.isColumnNull(colnum) ) {
@@ -85,4 +84,5 @@ loadFromDb() {
     return gtdItems;
 }
 
+} // namespace gtd
 #endif // GTDSQLITE_HPP_

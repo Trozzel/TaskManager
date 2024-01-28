@@ -12,6 +12,10 @@ Project::Project( const sp_Container& projects, const std::string_view name ) :
     Completable(name),
     _projects(projects) {}
 
+Project::Project( const wp_Container projects, const std::string_view name ) :
+	Completable(name),
+	_projects(projects) {}
+
 // ASSIGNMENT OPERATORS
 /*****************************************************************************/
 Project&
@@ -44,6 +48,18 @@ Project::operator==( const Project& other ) const {
 bool
 Project::operator!=( const Project& other ) const {
     return !operator==(other);
+}
+
+// GETTERS
+/*************************************************************************/
+Project::wp_Container
+Project::container() {
+	return _projects;
+}
+
+const Project::wp_Container
+Project::container() const {
+	return _projects;
 }
 
 // OVERRIDE SETTERS
@@ -333,6 +349,16 @@ Project::setReviewSchedule( const std::string_view reviewSchedule, const bool up
             us.push(*uniqueId(), "reviewSchedule", this->reviewSchedule());
         }
     }
+}
+
+void
+Project::setContainer( const wp_Container container ) {
+	_projects = container;
+}
+
+void
+Project::setContainer( const sp_Container container ) {
+	_projects = container;
 }
 
 //std::ostream&

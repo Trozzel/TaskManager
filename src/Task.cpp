@@ -3,6 +3,7 @@
 //
 #include "Task.hpp"
 #include "GtdContainer.hpp"
+#include "GtdHelper.hpp"
 #include "UpdateStack.hpp"
 #include <optional>
 
@@ -14,6 +15,51 @@ Task::Task( const sp_Container& tasks, const std::string_view name ) :
     Completable(name),
     _tasks(tasks) {}
 
+Task::Task( const wp_Container tasks, const std::string_view name  ) : 
+	Completable(name),
+	_tasks(tasks) {}
+
+// ASSIGMENT OPERATORS
+/*****************************************************************************/
+Task&
+Task::operator=( const Task& other ) {
+    if ( &other != this ) {
+        Completable::operator=(other);
+        _tasks       = other._tasks;
+        _taskType    = other._taskType;
+        _o_projectId = other._o_projectId;
+    }
+    return *this;
+}
+
+// COMPARISON OPERATORS
+/*****************************************************************************/
+bool
+Task::operator==( const Task& other ) const {
+    return Completable::operator==(other) &&
+            _taskType == other._taskType &&
+            _o_projectId == other._o_projectId;
+}
+
+bool
+Task::operator!=( const Task& other ) const {
+    return !operator==(other);
+}
+
+// GETTERS
+/*************************************************************************/
+Task::wp_Container
+Task::container() {
+	return _tasks;
+}
+
+const Task::wp_Container
+Task::container() const {
+	return _tasks;
+}
+
+// SETTERS - OVERRIDE
+/*****************************************************************************/
 void
 Task::setParent( const GtdBase& gtdBase, bool update ) {
     Completable::setParent(gtdBase, update);
@@ -58,36 +104,6 @@ Task::setFlagged( bool flagged, bool update ) {
     }
 }
 
-/*****************************************************************************/
-Task&
-Task::operator=( const Task& other ) {
-    if ( &other != this ) {
-        Completable::operator=(other);
-        _tasks       = other._tasks;
-        _taskType    = other._taskType;
-        _o_projectId = other._o_projectId;
-    }
-    return *this;
-}
-
-// COMPARISON OPERATORS
-/*****************************************************************************/
-bool
-Task::operator==( const Task& other ) const {
-    return Completable::operator==(other) &&
-            _taskType == other._taskType &&
-            _o_projectId == other._o_projectId;
-}
-
-bool
-Task::operator!=( const Task& other ) const {
-    return !operator==(other);
-}
-
-// SETTERS
-/*****************************************************************************/
-// 1. NON-VIRTUAL Task METHODS
-/*****************************************************************************/
 void
 Task::setProjectId( const unique_id_t projectId, const bool update ) {
     _o_projectId = projectId;
@@ -242,6 +258,7 @@ Task::setFlagged( const int flagged, const bool update ) {
     }
 }
 
+// SETTERS - Task
 void
 Task::setRepeatFrom( const RepeatFrom repeatFrom, const bool update ) {
     Completable::setRepeatFrom(repeatFrom, update);
@@ -273,6 +290,16 @@ Task::setRepeatSchedule( const std::string_view schedule, const bool update ) {
             us.push(*this->uniqueId(), "repeatSchedule", repeatSchedule());
         }
     }
+}
+
+void
+Task::setContainer( const wp_Container container ) {
+	_tasks = container;
+}
+
+void
+Task::setContainer( const sp_Container container ) {
+	_tasks= container;
 }
 
 

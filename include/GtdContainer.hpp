@@ -12,13 +12,15 @@
 #include "GtdHelper.hpp"
 #include "Context.hpp"
 #include "Folder.hpp"
+#include "GtdSqlite.hpp"
 #include "Task.hpp"
 #include "Project.hpp"
 #include "UpdateStack.hpp"
+#include "fmt/base.h"
 #include "gtd_concepts.hpp"
 
 namespace gtd {
-template <typename Gtd_t>
+template <typename Gtd_t> // TODO: why not able to use concept, cGtd?
 class GtdContainer
 {
 protected:
@@ -26,12 +28,12 @@ protected:
     UpdateStack<Gtd_t>&       _updateStack;
 
 public:
-    using gtd_category = typename Gtd_t::gtd_category;
-    using value_type = typename std::vector<Gtd_t>::value_type;
-    using iterator = typename std::vector<Gtd_t>::iterator;
-    using const_iterator = typename std::vector<Gtd_t>::const_iterator;
-    using size_type = typename std::vector<Gtd_t>::size_type;
-    using reference = typename std::vector<Gtd_t>::reference;
+    using gtd_category    = typename Gtd_t::gtd_category;
+    using value_type      = typename std::vector<Gtd_t>::value_type;
+    using iterator        = typename std::vector<Gtd_t>::iterator;
+    using const_iterator  = typename std::vector<Gtd_t>::const_iterator;
+    using size_type       = typename std::vector<Gtd_t>::size_type;
+    using reference       = typename std::vector<Gtd_t>::reference;
     using const_reference = typename std::vector<Gtd_t>::const_reference;
 
     // CTORS
@@ -39,6 +41,9 @@ public:
     explicit
     GtdContainer() :
         _updateStack(UpdateStack<Gtd_t>::getInstance()) {}
+
+	GtdContainer( const GtdContainer& ) = delete;
+	GtdContainer& operator=( const GtdContainer& ) = delete;
 
     ~GtdContainer() = default;
 
@@ -49,6 +54,19 @@ public:
         return gtdTypeToTableName(Gtd_t::gtd_category::gtd_type);
     }
 
+	// INITIATE CONTAINER FROM DATABASE
+    static std::shared_ptr<GtdContainer>&
+    initFromDb() 
+    {
+		static bool firstCall = true;
+		static auto cont = std::make_shared<GtdContainer>();
+		if ( firstCall ) {
+			loadFromDb(cont);
+			firstCall = false;
+		}
+		return cont;
+    }
+	//
     // GETTERS
     /*************************************************************************/
     [[nodiscard]] constexpr UpdateStack<Gtd_t>&
@@ -69,14 +87,6 @@ public:
         return _gtdItems.at(idx);
     }
 
-    [[nodiscard]] const Gtd_t&
-    getItemByUniqueId( const unique_id_t id ) const {
-        return std::ranges::find_if(_gtdItems.cbegin(), _gtdItems.cend(),
-				[id]( auto&& gtdItem ) {
-					return gtdItem.uniqueId() == id;
-				});
-    }
-
     [[nodiscard]] size_type
     size() const {
         return _gtdItems.size();
@@ -87,65 +97,7 @@ public:
         return _gtdItems.empty();
     }
 
-    [[nodiscard]] std::vector<Gtd_t>
-    getByName( const std::string_view name ) {
-        std::vector<Gtd_t> v;
-        std::copy_if(_gtdItems.cbegin(), _gtdItems.cend(),
-                     std::back_inserter(v), [name]( const auto& gtd ) {
-                         return gtd.name() == name;
-                     });
-        return v;
-    }
-
-    [[nodiscard]] std::ranges::range auto&&
-    getBeforeCreated( const time_point_t tp ) const {
-        return _gtdItems |
-                std::views::filter([tp]( auto&& gtdItem ) {
-                    return gtdItem->created() < tp;
-                });
-    }
-
-    [[nodiscard]] std::ranges::range auto&&
-    getBeforeCreated( const Gtd_t& other ) const {
-        return _gtdItems |
-                std::views::filter([&other]( auto&& gtdItem ) {
-                    return other->created() < gtdItem.created();
-                });
-    }
-
-    [[nodiscard]] std::ranges::range auto&&
-    getAfterCreated( const time_point_t tp ) const {
-        return _gtdItems |
-                std::views::filter([tp]( auto&& gtdItem ) {
-                    return gtdItem.created() > tp;
-                });
-    }
-
-    [[nodiscard]] std::ranges::range auto&&
-    getAfterCreated( const Gtd_t& other ) const {
-        return _gtdItems |
-                std::views::filter([&other]( auto&& gtdItem ) {
-                    return gtdItem.created() > other.created();
-                });
-    }
-
-    // CREATE GTD IN PLACE
-    /*************************************************************************/
-    reference
-    create( const std::shared_ptr<GtdContainer>& sp, const std::string_view name ) {
-        _gtdItems.emplace_back(sp, name);
-        return _gtdItems.back();
-    }
-
-    const_reference
-    create( const std::shared_ptr<GtdContainer>& sp, const std::string_view name ) const {
-        _gtdItems.emplace_back(sp, name);
-        return _gtdItems.back();
-    }
-
-    // VECTOR OPERATIONS
-    /*************************************************************************/
-    size_type
+	size_type
     cap() const {
         return _gtdItems.capacity();
     }
@@ -197,6 +149,85 @@ public:
             _gtdItems.end());
     }
 
+	// CONTAINER SEARCH OPERATIONS
+	/*************************************************************************/
+    [[nodiscard]] std::vector<Gtd_t>
+    getByName( const std::string_view name ) {
+        std::vector<Gtd_t> v;
+        std::copy_if(_gtdItems.cbegin(), _gtdItems.cend(),
+                     std::back_inserter(v), [name]( const auto& gtd ) {
+                         return gtd.name() == name;
+                     });
+        return v;
+    }
+
+    [[nodiscard]] const Gtd_t&
+    getItemByUniqueId( const unique_id_t id ) const {
+        return std::ranges::find_if(_gtdItems.cbegin(), _gtdItems.cend(),
+				[id]( auto&& gtdItem ) {
+					return gtdItem.uniqueId() == id;
+				});
+    }
+
+    [[nodiscard]] std::ranges::range auto&&
+    getBeforeCreated( const time_point_t tp ) const {
+        return _gtdItems |
+                std::views::filter([tp]( auto&& gtdItem ) {
+                    return gtdItem->created() < tp;
+                });
+    }
+
+    [[nodiscard]] std::ranges::range auto&&
+    getBeforeCreated( const Gtd_t& other ) const {
+        return _gtdItems |
+                std::views::filter([&other]( auto&& gtdItem ) {
+                    return other->created() < gtdItem.created();
+                });
+    }
+
+    [[nodiscard]] std::ranges::range auto&&
+    getAfterCreated( const time_point_t tp ) const {
+        return _gtdItems |
+                std::views::filter([tp]( auto&& gtdItem ) {
+                    return gtdItem.created() > tp;
+                });
+    }
+
+    [[nodiscard]] std::ranges::range auto&&
+    getAfterCreated( const Gtd_t& other ) const {
+        return _gtdItems |
+                std::views::filter([&other]( auto&& gtdItem ) {
+                    return gtdItem.created() > other.created();
+                });
+    }
+
+    // ADD GtdItem TO CONTAINER
+    /*************************************************************************/
+    reference
+    create( const std::shared_ptr<GtdContainer>& sp, const std::string_view name ) {
+        _gtdItems.emplace_back(sp, name);
+        return _gtdItems.back();
+    }
+
+    const_reference
+    create( const std::shared_ptr<GtdContainer>& sp, const std::string_view name ) const {
+        _gtdItems.emplace_back(sp, name);
+        return _gtdItems.back();
+    }
+
+	void
+	attach( Gtd_t& gtdItem ) {
+		assert(!_gtdItems.empty());
+		gtdItem.setContainer(_gtdItems.at(0).container());
+		if(!gtdItem.uniqueId() /*optional<unique_id_t>*/)  {
+			// insertRecord inserts into database and returns uniqueId
+			gtdItem.setUniqueId(insertRecord(gtdItem));
+			_gtdItems.push_back(gtdItem);
+		}
+		fmt::println("Inserted: {} with UID: {}", gtdItem.name(), *gtdItem.uniqueId());
+	}
+
+    
     //						COMPLETABLE CONTAINER OPERATIONS
     /*************************************************************************/
     template <typename Completable_t = Gtd_t>
@@ -241,8 +272,7 @@ public:
 
     template <typename Completable_t = Gtd_t>
     [[nodiscard]] std::vector<Completable_t>
-    getFlagged() const
-        requires cCompletable<Completable_t> {
+    getFlagged() const requires cCompletable<Completable_t> {
         std::vector<Gtd_t> vec;
         std::copy_if(_gtdItems.cbegin(), _gtdItems.cend(),
                      std::back_inserter(vec), []( const auto& gtd ) {
@@ -251,16 +281,8 @@ public:
         return vec;
     }
 
-    //                          DATABASE OPERATIONS
-    /*************************************************************************/
-    template<typename T = Gtd_t>
-    std::shared_ptr<GtdContainer<T>>
-    loadAll(const std::string_view dbPath)
-        requires std::is_base_of_v<GtdBase, T>
-    {
-		loadFromDb<T>();
-    }
 }; // class GtdContainer
+
 } // namespace gtd
 
 #endif //GTDCONTAINER_HPP_

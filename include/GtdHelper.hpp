@@ -5,6 +5,7 @@
 #ifndef GTD_GTDHELPER_HPP_
 #define GTD_GTDHELPER_HPP_
 
+#include <cstdio>
 #include <iostream>
 #include <string>
 #include <string_view>
@@ -22,7 +23,7 @@ using time_point_t = std::chrono::time_point<std::chrono::system_clock>;
 using unique_id_t = uint64_t;
 
 namespace gtd {
-//
+// FORWARD DECLARATIONS OF CLASSES
 class GtdBase;
 class Context;
 class Folder;
@@ -173,16 +174,15 @@ gtdTypeToTableName( const GtdType gtdType ) noexcept {
 /// \brief Get the filename of the database to use from config file
 static std::string
 getDbConnPath() {
-    static bool        firstRun = true;
+    static bool firstRun = true;
     static std::string tableName;
     if ( firstRun ) {
         auto config = toml::parse_file(confFilePath);
         if ( config.empty() ) {
-            std::cerr << "Error opening config file\n";
+			fmt::print(stderr, "Error opening file, '{}'\n", confFilePath);
         }
         const auto op_tableName =
-                config["database"][fmt::format("{}_db", RUNMODE)]
-                .value<std::string_view>();  // -> std::optional<std::string_view>
+                config["database"][fmt::format("{}_db", RUNMODE)].value<std::string_view>();  // -> std::optional<std::string_view>
         if ( op_tableName.has_value() ) {
             tableName = op_tableName.value();
         }

@@ -8,13 +8,18 @@
 #include "GtdHelper.hpp"
 
 namespace gtd {
+
+template<typename Gtd_t>
+class GtdContainer;
+
 class Project final : public Completable
 {
+
 public:
     using gtd_category = project_tag;
 
 	// STATIC FUNCTIONS
-	constexpr const char*
+	static constexpr const char*
 	tableName() {
 		return "projects";
 	}
@@ -38,9 +43,8 @@ public:
 
     // CTORS
     /**************************************************************************/
-    // DEFAULT
-    explicit
-    Project( const sp_Container&, std::string_view name = "" );
+    explicit Project( const sp_Container&, std::string_view name = "" );
+    explicit Project( wp_Container, std::string_view name = "" );
 
     Project( const Project& ) = default;
 
@@ -84,6 +88,12 @@ public:
     reviewSchedule() const noexcept {
         return _reviewSchedule;
     }
+
+	wp_Container
+	container();
+
+	const wp_Container
+	container() const;
 
     // SETTERS
     /*************************************************************************/
@@ -193,6 +203,13 @@ public:
 
     void
     setReviewSchedule( std::string_view reviewSchedule, bool update );
+
+	void
+	setContainer( sp_Container container );
+	
+	void
+	setContainer( wp_Container container );
+	
 };
 
 //							HELPER FUNCTIONS

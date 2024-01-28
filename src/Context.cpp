@@ -15,6 +15,10 @@ Context::Context( const sp_Container& contexts, const std::string_view name ) :
     GtdBase(name),
     _contexts(contexts) {}
 
+Context::Context( const wp_Container contexts, const std::string_view name ) : 
+	GtdBase(name),
+	_contexts(contexts) {}
+
 Context::Context( Context&& other ) noexcept:
     GtdBase(std::move(other)) {
     _contexts = other._contexts;
@@ -50,6 +54,18 @@ Context::operator==( const Context& other ) const {
 bool
 Context::operator!=( const Context& other ) const {
     return GtdBase::operator!=(other);
+}
+
+// GETTERS
+/*************************************************************************/
+Context::wp_Container
+Context::container() {
+	return _contexts;
+}
+
+const Context::wp_Container
+Context::container() const {
+	return _contexts;
 }
 
 // OVERRIDE SETTERS
@@ -118,6 +134,18 @@ Context::setNotes( const std::string_view notes, const bool update ) {
             us.push(*uniqueId(), "notes", *this->notes());
         }
     }
+}
+
+// CONTEXT SETTERS
+/*****************************************************************************/
+void
+Context::setContainer( sp_Container& container ) {
+	_contexts = container;
+}
+
+void
+Context::setContainer( const wp_Container container ) {
+	_contexts = container;
 }
 
 } // namespace gtd

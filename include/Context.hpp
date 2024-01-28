@@ -7,15 +7,20 @@
 
 #include "GtdBase.hpp"
 #include <optional>
+#include <string_view>
 
 namespace gtd {
+
+template<typename Gtd_t>
+class GtdContainer;
+
 class Context final : public GtdBase
 {
 public:
     using gtd_category = context_tag;
 
 	// STATIC FUNCTIONS
-	constexpr const char*
+	static constexpr const char*
 	tableName() {
 		return "contexts";
 	}
@@ -27,7 +32,8 @@ private:
 public:
     // CTORS
     /*************************************************************************/
-    Context( const sp_Container&,  std::string_view name );
+    explicit Context( const sp_Container&, std::string_view name = "" );
+	explicit Context( wp_Container, std::string_view name = "" );
     Context( const Context& ) = default;
     Context( Context&& ) noexcept;
 
@@ -49,6 +55,14 @@ public:
     bool
     operator!=( const Context& ) const;
 
+	// GETTERS
+	/*************************************************************************/
+	wp_Container
+	container();
+
+	const wp_Container
+	container() const;
+
     // OVERRIDE SETTERS
     /*************************************************************************/
     void
@@ -69,6 +83,14 @@ public:
     void
     setNotes( std::string_view notes, bool update ) override;
 
+	// CONTEXT SETTERS
+	/************************************************************************/
+	void
+	setContainer( sp_Container& container );
+	
+	void
+	setContainer( wp_Container container );
+	
 };
 } // namespace gtd
 

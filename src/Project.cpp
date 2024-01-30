@@ -120,6 +120,17 @@ Project::setContextId( const std::optional<unique_id_t> id, const bool update ) 
 }
 
 void
+Project::setContext( const Context& context, const bool update ) {
+    Completable::setContext(context, update);
+    if ( update ) {
+        auto& us = _projects.lock()->updateStack();
+        if ( this->uniqueId() ) {
+            us.push(*this->uniqueId(), "contextId", *contextId());
+        }
+    }
+}
+
+void
 Project::setFlagged( bool flagged, bool update ) {
     Completable::setFlagged(flagged, update);
 }

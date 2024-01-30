@@ -11,8 +11,18 @@ UpdateStack::clear() {
 }
 
 void
-UpdateStack::push( const unique_id_t uniqueId, const std::string_view colName, const bool value) {
-    _dbUpdateStack.emplace(uniqueId, colName, (value) ? "true" : "false");
+UpdateStack::push( const unique_id_t id, const std::string_view colName, const bool value ) {
+	_dbUpdateStack.emplace(id, colName, (value) ? "true" : "false");
+}
+
+constexpr ColName_t
+UpdateStack::topColName() const {
+	return std::get<1>(_dbUpdateStack.top());
+}
+
+constexpr const ValueStr_t&
+UpdateStack::topValueStr() const {
+	return std::get<2>(_dbUpdateStack.top());
 }
 
 void

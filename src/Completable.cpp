@@ -2,6 +2,7 @@
 // Created by George Ford on 1/28/22.
 //
 #include "Completable.hpp"
+#include "Context.hpp"
 #include "GtdBase.hpp"
 #include "GtdContainer.hpp"
 
@@ -84,6 +85,11 @@ Completable::setContextId( unique_id_t id, const bool update ) {
 void
 Completable::setContextId( const std::optional<unique_id_t> id, const bool update ) {
     _o_contextId = id;
+}
+
+void
+Completable::setContext( const Context& context, bool update ) {
+	_o_contextId = context.uniqueId();
 }
 
 void

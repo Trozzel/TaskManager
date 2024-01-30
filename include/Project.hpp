@@ -115,6 +115,9 @@ public:
     void
     setContextId( std::optional<unique_id_t> id, bool update ) override;
 
+	void
+	setContext( const Context& context, bool update ) override;
+
     void
     setFlagged( bool flagged, bool update ) override;
 

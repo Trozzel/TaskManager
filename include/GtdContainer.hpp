@@ -4,7 +4,10 @@
 #ifndef GTDCONTAINER_HPP_
 #define GTDCONTAINER_HPP_
 
+#include <__ranges/concepts.h>
 #include <__ranges/filter_view.h>
+#include <_ctype.h>
+#include <functional>
 #include <memory>
 #include <ranges>
 #include <algorithm>
@@ -66,7 +69,7 @@ public:
 		}
 		return cont;
     }
-	//
+	
     // GETTERS
     /*************************************************************************/
     [[nodiscard]] constexpr UpdateStack<Gtd_t>&
@@ -143,62 +146,78 @@ public:
     }
 
     void
-    erase( Gtd_t& gtdItem ) {
-        _gtdItems.erase(
-            std::remove(_gtdItems.begin(), _gtdItems.end(), gtdItem),
-            _gtdItems.end());
+    removeItem( Gtd_t& gtdItem ) {
+		// 1. REMOVE FROM DATABASE
+		auto numRemoved = removeRecord(gtdItem);
+		// 2. REMOVE FROM CONTAINER
+		if (numRemoved > 0) /* should be == 1 */{
+			_gtdItems.erase(
+				std::find(_gtdItems.begin(), _gtdItems.end(), gtdItem),
+				_gtdItems.end());
+		}
     }
 
 	// CONTAINER SEARCH OPERATIONS
 	/*************************************************************************/
     [[nodiscard]] std::vector<Gtd_t>
-    getByName( const std::string_view name ) {
+    getByName( std::string name, bool ignoreCase = false ) {
+		std::string scopeName = std::move(name);
+
+		// 1. INITIALIZE COMPARITOR
+		std::function<bool(const Gtd_t&)> comp = [&scopeName](const Gtd_t& other) {
+			return std::string_view(scopeName) == other.name();
+		};
+		// 2. SET ALL STRINGS tolower IF `ignoreCase`
+		if(ignoreCase) {
+			// 1. Set name from passed object to lower
+			std::transform(scopeName.begin(), scopeName.end(), scopeName.begin(),
+					::tolower);
+			// 2. Copy name from container and set copy to lower
+			comp = [&scopeName] (const Gtd_t& other) {
+				std::string tmpName { other.name() }; // Implicit conversion from string_view to string
+				std::transform(tmpName.begin(), tmpName.end(), tmpName.begin(), ::tolower);
+				return tmpName == scopeName;
+			};
+		}
         std::vector<Gtd_t> v;
-        std::copy_if(_gtdItems.cbegin(), _gtdItems.cend(),
-                     std::back_inserter(v), [name]( const auto& gtd ) {
-                         return gtd.name() == name;
-                     });
+        std::copy_if(_gtdItems.cbegin(), _gtdItems.cend(), std::back_inserter(v), comp);
         return v;
     }
 
-    [[nodiscard]] const Gtd_t&
-    getItemByUniqueId( const unique_id_t id ) const {
+    [[nodiscard]] const auto&
+    getByUniqueId( const unique_id_t id ) const {
         return std::ranges::find_if(_gtdItems.cbegin(), _gtdItems.cend(),
 				[id]( auto&& gtdItem ) {
 					return gtdItem.uniqueId() == id;
 				});
     }
 
-    [[nodiscard]] std::ranges::range auto&&
+    [[nodiscard]] std::ranges::range auto
     getBeforeCreated( const time_point_t tp ) const {
-        return _gtdItems |
-                std::views::filter([tp]( auto&& gtdItem ) {
-                    return gtdItem->created() < tp;
-                });
+		return _gtdItems |
+			std::views::filter([tp](auto&& gtdItem) {
+					return gtdItem.created() < tp;
+					});
     }
 
-    [[nodiscard]] std::ranges::range auto&&
-    getBeforeCreated( const Gtd_t& other ) const {
-        return _gtdItems |
-                std::views::filter([&other]( auto&& gtdItem ) {
-                    return other->created() < gtdItem.created();
-                });
+    [[nodiscard]] std::vector<Gtd_t>
+    getBeforeCreated( const std::string_view createdStr ) const {
+		auto created = strToTimePoint(createdStr);
+		return getBeforeCreated(created);
     }
 
-    [[nodiscard]] std::ranges::range auto&&
+    [[nodiscard]] std::ranges::range auto
     getAfterCreated( const time_point_t tp ) const {
-        return _gtdItems |
-                std::views::filter([tp]( auto&& gtdItem ) {
-                    return gtdItem.created() > tp;
-                });
+		return _gtdItems |
+			std::views::filter([tp](auto&& gtdItem) {
+				return gtdItem.created() > tp;
+			});
     }
 
-    [[nodiscard]] std::ranges::range auto&&
-    getAfterCreated( const Gtd_t& other ) const {
-        return _gtdItems |
-                std::views::filter([&other]( auto&& gtdItem ) {
-                    return gtdItem.created() > other.created();
-                });
+    [[nodiscard]] std::ranges::range auto
+    getAfterCreated( const std::string_view createdStr ) const {
+		auto created = strToTimePoint(createdStr);
+		return getAfterCreated(created);
     }
 
     // ADD GtdItem TO CONTAINER
@@ -224,16 +243,21 @@ public:
 			gtdItem.setUniqueId(insertRecord(gtdItem));
 			_gtdItems.push_back(gtdItem);
 		}
-		fmt::println("Inserted: {} with UID: {}", gtdItem.name(), *gtdItem.uniqueId());
 	}
 
+	// SEND UPDATES TO DATABASE
+	size_t
+	updateDb() {
+		return _updateStack.update();
+	}
     
     //						COMPLETABLE CONTAINER OPERATIONS
     /*************************************************************************/
     template <typename Completable_t = Gtd_t>
-    [[nodiscard]] std::vector<Completable_t>
+    [[nodiscard]] std::ranges::range auto
     getWithContextId( const unique_id_t id ) const
-        requires cCompletable<Completable_t> {
+        requires cCompletable<Completable_t> 
+	{
         return _gtdItems |
                 std::views::filter([id]( auto&& completable ) {
                     return *completable.contextId() == id;
@@ -241,9 +265,21 @@ public:
     }
 
     template <typename Completable_t = Gtd_t>
-    [[nodiscard]] std::vector<Completable_t>
+    [[nodiscard]] std::ranges::range auto
+    getWithContext( const Context& context ) const
+        requires cCompletable<Completable_t> 
+	{
+        return _gtdItems |
+                std::views::filter([&context]( auto&& completable ) {
+                    return *completable.contextId() == *context.uniqueId();
+                });
+    }
+
+    template <typename Completable_t = Gtd_t>
+    [[nodiscard]] std::ranges::range auto
     getAfterDeferredInclusive( const time_point_t tp ) const
-        requires cCompletable<Completable_t> {
+        requires cCompletable<Completable_t> 
+	{
         return _gtdItems |
                 std::views::filter([tp]( auto&& completable ) {
                     return *completable.deferred() > tp;
@@ -252,8 +288,18 @@ public:
 
     template <typename Completable_t = Gtd_t>
     [[nodiscard]] std::vector<Completable_t>
+    getAfterDeferredInclusive( const std::string_view tpStr ) const
+        requires cCompletable<Completable_t> 
+	{
+		auto tp = strToTimePoint(tpStr);
+		getAfterDeferredInclusive(tp);
+    }
+
+    template <typename Completable_t = Gtd_t>
+    [[nodiscard]] std::ranges::range auto
     getBeforeDeferredInclusive( const time_point_t tp ) const
-        requires cCompletable<Completable_t> {
+        requires cCompletable<Completable_t> 
+	{
         return _gtdItems |
                 std::views::filter([tp]( auto&& completable ) {
                     return *completable.deferred() < tp;
@@ -263,7 +309,8 @@ public:
     template <typename Completable_t = Gtd_t>
     [[nodiscard]] std::vector<Completable_t>
     getAfterDueInclusive( const time_point_t tp ) const
-        requires cCompletable<Completable_t> {
+        requires cCompletable<Completable_t> 
+	{
         return _gtdItems |
                 std::views::filter([tp]( auto&& completable ) {
                     return *completable.due() > tp;
@@ -272,14 +319,26 @@ public:
 
     template <typename Completable_t = Gtd_t>
     [[nodiscard]] std::vector<Completable_t>
-    getFlagged() const requires cCompletable<Completable_t> {
-        std::vector<Gtd_t> vec;
-        std::copy_if(_gtdItems.cbegin(), _gtdItems.cend(),
-                     std::back_inserter(vec), []( const auto& gtd ) {
-                         return gtd.flagged() == true;
-                     });
-        return vec;
+    getFlagged() const 
+		requires cCompletable<Completable_t> 
+	{
+		return _gtdItems |
+			std::views::filter([](auto&& gtdItem){
+					return gtdItem.flagged() == true;
+					});
     }
+
+	// TASK CONTAINER OPERATIONS
+	template<typename Task_t = Gtd_t>
+	[[nodiscard]] std::vector<Task_t>
+	getTasksByProject(const Project& project) 
+		requires cTask<Task_t>
+	{
+		return _gtdItems |
+			std::views::filter([&project](auto&& task) { 
+					return *task.projectId() == *project.uniqueId();
+					});
+	}
 
 }; // class GtdContainer
 

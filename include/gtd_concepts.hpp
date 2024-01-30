@@ -8,11 +8,6 @@
 #include <type_traits>
 
 #include "GtdHelper.hpp"
-//#include "GtdBase.hpp"
-//#include "Context.hpp"
-//#include "Folder.hpp"
-//#include "Project.hpp"
-//#include "Task.hpp"
 
 template <typename Gtd_t>
 concept cGtdBase = std::is_base_of_v<gtd::GtdBase, Gtd_t>;

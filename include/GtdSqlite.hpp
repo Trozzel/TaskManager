@@ -1,8 +1,12 @@
 #ifndef GTDSQLITE_HPP_
 #define GTDSQLITE_HPP_
 
+#include "SQLiteCpp/Database.h"
+#include "SQLiteCpp/Exception.h"
 #include "SQLiteCpp/SQLiteCpp.h"
 #include "GtdHelper.hpp"
+#include "SQLiteCpp/Statement.h"
+#include "fmt/base.h"
 #include "gtd_concepts.hpp"
 #include <memory>
 
@@ -127,7 +131,7 @@ getInsertStr(const Gtd_t& gtdItem) {
 				fmt::arg("contextId", (gtdItem.contextId() ? 
 						std::to_string(*gtdItem.contextId()) : "NULL")),
 				fmt::arg("projectId", (gtdItem.projectId() ?
-						std::to_string(*gtdItem.contextId()) : "NULL")),
+						std::to_string(*gtdItem.projectId()) : "NULL")),
 				fmt::arg("flagged", gtdItem.flagged()),
 				fmt::arg("deferred", (gtdItem.deferredStr() ? 
 						'"' + *gtdItem.deferredStr() + '"' : "NULL")),
@@ -185,6 +189,31 @@ insertRecord( Gtd_t& gtdItem ) {
 	} catch (std::exception& e) {
 		std::cerr << "Error: " << e.what() << std::endl;
 		throw(std::runtime_error(fmt::format("Error inserting {}", gtdItem.name())));
+	}
+}
+
+template<cGtd Gtd_t>
+int
+removeRecord( const Gtd_t& gtdItem ) {
+	if (!gtdItem.uniqueId()) {
+		fmt::println("WARNING: no uniqueId for {}", gtdItem.name());
+		return 0;
+	}
+	try {
+		auto db = SQLite::Database(getDbConnPath(), SQLite::OPEN_READWRITE);
+		auto qry = SQLite::Statement(db, fmt::format("DELETE FROM {} WHERE uniqueId = {}",
+					Gtd_t::gtd_category::table_name, *gtdItem.uniqueId()));
+		int numRemoved = qry.exec();
+		if(numRemoved == 0) {
+			fmt::println("WARNING: record, '{}', uniqueId: {}, was not deleted",
+					gtdItem.name(), *gtdItem.uniqueId());
+		}
+		return numRemoved;
+	}
+	catch (SQLite::Exception& e) {
+		fmt::println(stderr, "Error removing element, {}, uniqueId: {}", 
+				gtdItem.name(), *gtdItem.uniqueId());
+		throw SQLite::Exception(e.what());
 	}
 }
 

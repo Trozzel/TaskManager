@@ -5,6 +5,7 @@
 #ifndef COMPLETABLE_HPP_
 #define COMPLETABLE_HPP_
 
+#include "Context.hpp"
 #include "GtdBase.hpp"
 
 namespace gtd {
@@ -113,6 +114,9 @@ public:
 
     virtual void
     setContextId( std::optional<unique_id_t> id, bool update ) ;
+
+	virtual void
+	setContext( const Context& context, bool update );
 
     virtual void
     setDeferred( time_point_t deferred, bool update );

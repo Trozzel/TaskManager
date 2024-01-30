@@ -94,6 +94,17 @@ Task::setContextId( std::optional<unique_id_t> id, bool update ) {
 }
 
 void
+Task::setContext( const Context& context, bool update ) {
+    Completable::setContext(context, update);
+    if ( update ) {
+        if ( this->uniqueId() ) {
+            auto& us = _tasks.lock()->updateStack();
+            us.push(*uniqueId(), "contextId", *this->contextId());
+        }
+    }
+}
+
+void
 Task::setFlagged( bool flagged, bool update ) {
     Completable::setFlagged(flagged, update);
     if ( update ) {
@@ -107,6 +118,17 @@ Task::setFlagged( bool flagged, bool update ) {
 void
 Task::setProjectId( const unique_id_t projectId, const bool update ) {
     _o_projectId = projectId;
+    if ( update ) {
+        if ( _o_uniqueId ) {
+            auto& us = _tasks.lock()->updateStack();
+            us.push(*uniqueId(), "projectId", *this->projectId());
+        }
+    }
+}
+
+void
+Task::setProject( const Project& project, const bool update ) {
+    _o_projectId = *project.uniqueId();
     if ( update ) {
         if ( _o_uniqueId ) {
             auto& us = _tasks.lock()->updateStack();
